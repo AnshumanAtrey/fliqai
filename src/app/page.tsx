@@ -1,4 +1,3 @@
-import Navbar from "../sections/Navbar";
 import HeroSection from "../sections/HeroSection";
 import FeaturesSection from "../sections/FeaturesSection";
 import BentoFeaturesSection from "../sections/BentoFeaturesSection";

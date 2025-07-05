@@ -3,7 +3,7 @@ export default function PricingPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4">
       <h1 className="text-5xl md:text-6xl font-bold text-center mb-6">Choose the Right Plan for You</h1>
       <p className="text-lg text-center text-lime-900 mb-8 max-w-2xl">
-        Discover flexible pricing options designed to fit your needs and help you get the most out of FliqAI's powerful features.
+        Discover flexible pricing options designed to fit your needs and help you get the most out of FliqAI&apos;s powerful features.
       </p>
       <a
         href="#"
