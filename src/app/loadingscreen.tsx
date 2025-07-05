@@ -14,13 +14,11 @@ export default function LoadingScreen() {
     return () => clearTimeout(timer);
   }, []);
 
-  if (!isVisible) return null;
-
   return (
     <motion.div
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
+      animate={{ opacity: isVisible ? 1 : 0 }}
+      transition={{ duration: 2, ease: "easeInOut" }}
       className="fixed inset-0 bg-black z-[9999] flex items-center justify-center"
     >
       <div className="text-center">
