@@ -23,21 +23,16 @@ export default function LoadingScreen() {
     >
       <div className="text-center">
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          className="text-xl md:text-2xl font-medium text-stone-300 mb-2"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: isVisible ? 1 : 0 }}
+          transition={{ duration: 1.2, ease: "easeInOut" }}
         >
-          Fliq AI
-        </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 1.2, ease: "easeOut" }}
-          className="text-xs md:text-sm text-stone-500"
-        >
-          Road To Your Dream Collage
+          <div className="text-xl md:text-2xl font-medium text-stone-300 mb-2">
+            Fliq AI
+          </div>
+          <div className="text-xs md:text-sm text-stone-500">
+            Road To Your Dream Collage
+          </div>
         </motion.div>
       </div>
     </motion.div>

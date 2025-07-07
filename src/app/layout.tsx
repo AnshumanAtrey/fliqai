@@ -1,6 +1,4 @@
 import "./globals.css";
-import Navbar from "../sections/Navbar";
-import LoadingScreen from "./loadingscreen";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -21,8 +19,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet" />
       </head>
       <body className="antialiased">
-        <LoadingScreen />
-        <Navbar />
+        {/* <LoadingScreen /> */}
         {children}
       </body>
     </html>
