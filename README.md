@@ -1,98 +1,83 @@
-# FliqAI - College Recommendation AI
+_ Installation Steps Followed :
+atrey@Anshumans-MacBook-Air fliqai % npx create-next-app@latest . --typescript --eslint      
+Need to install the following packages:
+create-next-app@15.5.0
+Ok to proceed? (y) y
 
-FliqAI is a modern Next.js app that helps students get personalized college roadmaps after AI analysis of their profile and college data, increasing their chances of admission.
+✔ Would you like to use Tailwind CSS? … No / Yes
+✔ Would you like your code inside a `src/` directory? … No / Yes
+✔ Would you like to use App Router? (recommended) … No / Yes
+✔ Would you like to use Turbopack? (recommended) … No / Yes
+✔ Would you like to customize the import alias (`@/*` by default)? … No / Yes
+✔ What import alias would you like configured? … @/*
+Creating a new Next.js app in /Users/atrey/Desktop/code/fliqai.
 
-## 📁 Project Structure (Simple Overview)
+Using npm.
 
-- **/src/app/**
-  - Contains all your main pages (e.g. `/about`, `/features`, `/pricing`, etc.)
-  - Each page is a folder with a `page.tsx` file for its content.
-  - The `layout.tsx` file is the root layout for all pages (adds Navbar, global styles, etc.).
+Initializing project with template: app-tw 
 
-- **/src/sections/**
-  - All reusable UI sections/components (Hero, Features, Footer, etc.) go here.
-  - You can import any section into any page for easy reuse.
-  - To add a new section, just make a new file in this folder and import it where needed.
 
-- **/src/components/**
-  - (Optional) For small, reusable UI elements (buttons, cards, etc.)
+Installing dependencies:
+- react
+- react-dom
+- next
 
-- **/src/app/globals.css**
-  - Global styles for the whole app (colors, fonts, resets, etc.).
-  - You can add custom CSS here if needed.
+Installing devDependencies:
+- typescript
+- @types/node
+- @types/react
+- @types/react-dom
+- @tailwindcss/postcss
+- tailwindcss
+- eslint
+- eslint-config-next
+- @eslint/eslintrc
 
-## 🧑‍💻 How to Work With This Project
 
-- **Add/Edit Pages:**
-  - Create a new folder in `/src/app/` (e.g. `/src/app/new-page/`) and add a `page.tsx` file.
-  - Import any section from `/src/sections/` to build your page.
+added 336 packages, and audited 337 packages in 57s
 
-- **Add/Edit Sections:**
-  - Make a new file in `/src/sections/` (e.g. `NewSection.tsx`).
-  - Export your React component and import it into any page.
-  - This keeps your code clean and reusable!
+137 packages are looking for funding
+  run `npm fund` for details
 
-- **Global Layout:**
-  - The `layout.tsx` in `/src/app/` wraps all pages (adds Navbar, etc.).
-  - Navbar is always visible on every page.
+found 0 vulnerabilities
+Success! Created fliqai at /Users/atrey/Desktop/code/fliqai
 
-- **Styling:**
-  - Uses Tailwind CSS for fast, utility-first styling.
-  - Add custom styles in `globals.css` if needed.
+atrey@Anshumans-MacBook-Air fliqai % npm install tailwindcss @tailwindcss/postcss postcss
 
-## 💡 Best Practices
+up to date, audited 337 packages in 1s
 
-- **Icons:**
-  - Use [Heroicons](https://heroicons.com/) (built into Tailwind) for simple icons.
-  - For animated icons, use [Lordicon](https://lordicon.com/).
-- **Sections:**
-  - Always put big, reusable UI blocks in `/src/sections/`.
-  - This makes it easy for any developer to build or update pages by mixing and matching sections.
+137 packages are looking for funding
+  run `npm fund` for details
 
-## 🚀 Why This Structure?
-- Super easy for any developer to understand and extend.
-- No hard work needed to add new pages or sections—just copy, paste, and import!
-- Keeps code organized, clean, and scalable for future features.
+found 0 vulnerabilities
+atrey@Anshumans-MacBook-Air fliqai % 
 
----
 
-**FliqAI** is a college recommendation system for students, providing personalized roadmaps and increasing their chances of getting into their dream college through AI analysis of student and college profiles.
 
-## Getting Started
+Tailwind theme setup and layout setup :
 
-First, run the development server:
+font used is a free google font called Outfit. Paragraph text have a 18px size, with 150% line height. 
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+headings have three hierarchies - h1 at 48px, h2 at 32px, and h3 at 24px, all bold. Size can be viewed through clicking layer on the figma design file
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+almost all spacing and padding values use increments of 8px - so 8px, 16px, 24px and so on. 
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+hex codes of all colors listed to the right
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+all icons used are from the phosphor icon set, which is free and open source. Available at https://phosphoricons.com/
 
-## Learn More
+The border and shadow effect on boxes and cards is implementable via CSS. Add a stroke of 1px, and a drop shadow of x=4, and y=4, with blur set to 0. Set color to #000 at 100% opacity 
 
-To learn more about Next.js, take a look at the following resources:
+Badges and the likes can be exported through figma. Select the layer, click export and select 2x. Export as png or svg depending on if they are vector or raster (im happy to email assets as well if it would be easier)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Light Theme Colors
+#FFFBF1 - Light Theme Background Color
+#FFFFFF - Secondary BG Color
+#FF9269- Accent Color  (Both themes)
+#5D5237 - Paragraph text color for light theme (Not headings)
+Dark Theme Colors
+#0F0D0E - Background Color
+#231F20 - Secondary background color for UI Cards 
+#353132 - Tertiary background color
+#FFFBF1 - Use for text and strokes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
----
-
-**Built by [atrey.dev](https://atrey.dev)**
