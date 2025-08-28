@@ -63,6 +63,7 @@ export default function DiscoverStudents() {
       document.body.style.backgroundSize = 'auto';
       document.body.style.backgroundColor = theme === 'dark' ? '#0F0D0E' : '#FFFBF1';
     }
+    // {theme === "dark"}
   }, [theme]);
 
   const bgColor = theme === 'dark' ? 'bg-[#0F0D0E]' : 'bg-[#FFFBF1]';
@@ -149,10 +150,51 @@ export default function DiscoverStudents() {
       <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className={`text-4xl font-bold mb-4 ${textColor}`}>
-            Get the inside <span className="underline decoration-[#FF9269]">scoop</span>
+          <h1 style={{
+            color: '#000',
+            textAlign: 'center',
+            fontFamily: 'Outfit',
+            fontSize: '48px',
+            fontStyle: 'normal',
+            fontWeight: 700,
+            lineHeight: 'normal',
+            marginBottom: '16px'
+          }}>
+            Get in the <span className="relative inline-block">scoop
+              <svg 
+                className="absolute -bottom-2 left-0 animate-pulse" 
+                width="166" 
+                height="13" 
+                viewBox="0 0 166 13" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+                style={{
+                  width: '166px',
+                  height: '13px',
+                  flexShrink: 0
+                }}
+              >
+                <path 
+                  d="M2 11C55.3333 2.33333 162 -2.8 164 11" 
+                  stroke="#FF9169" 
+                  strokeWidth="3" 
+                  strokeLinecap="round"
+                  fill="#FF9169"
+                />
+              </svg>
+            </span>
           </h1>
-          <p className={`text-lg ${textColor} max-w-2xl mx-auto`}>
+          <p style={{
+            color: '#000',
+            textAlign: 'center',
+            fontFamily: 'Outfit',
+            fontSize: '18px',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            lineHeight: '160%',
+            maxWidth: '600px',
+            margin: '0 auto'
+          }}>
             Want to know what a winning uni application looks like? These students nailed it, 
             and now it&apos;s your turn. Dive in and learn from the best.
           </p>
@@ -161,42 +203,68 @@ export default function DiscoverStudents() {
         {/* Search and Filters */}
         <div className="mb-8">
           {/* Search Bar */}
-          <div className="relative mb-4">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <div className="text-[#FF9269]">
-                {SearchIcon}
+          <div className="relative mb-6 w-[1094px] h-20 mx-auto">
+            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10">
+              <div className="w-[73px] h-[73px] shrink-0 flex items-center justify-center border border-black bg-[#FF9169]">
+                <svg width="26.028" height="26.028" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2" className="w-[26.028px] h-[26.028px] shrink-0">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
               </div>
             </div>
             <input
               type="text"
               placeholder="Search by name, university, or another keyword"
-              className={`w-full pl-12 pr-4 py-4 ${theme === 'dark' ? 'bg-[#231F20] text-[#FFFBF1]' : 'bg-white text-[#5D5237]'} border border-black focus:outline-none focus:ring-2 focus:ring-[#FF9269]`}
+              className="w-full h-20 shrink-0 border border-black bg-[#FFFBF1] pl-[90px] pr-5 outline-none font-outfit text-lg font-medium leading-normal"
+              style={{ 
+                boxShadow: '4px 4px 0 0 #000',
+                fontSize: '18px',
+                color: '#000000'
+              }}
             />
           </div>
 
           {/* Filter and Sort Buttons */}
-          <div className="flex gap-4 mb-6">
-            <button className={`flex items-center gap-2 px-4 py-2 ${textColor} border border-black card hover:opacity-90 transition-opacity`}>
-              {FilterIcon}
-              <span>Filter</span>
+          <div className="flex gap-6 mb-6 w-[1094px] mx-auto justify-start">
+            <button className="flex py-3 px-4 justify-center items-center gap-2 border border-black bg-[#FFFBF1] cursor-pointer" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+              <svg width="25.997" height="24" viewBox="0 0 24 24" className="w-[25.997px] h-6 shrink-0 fill-black">
+                <path d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
+              </svg>
+              <span className="text-black font-outfit text-lg font-medium leading-normal">Filter</span>
             </button>
-            <button className={`flex items-center gap-2 px-4 py-2 ${textColor} border border-black card hover:opacity-90 transition-opacity`}>
-              <span>Sort</span>
+            <button className="flex py-3 px-4 justify-center items-center gap-2 border border-black bg-[#FFFBF1] cursor-pointer" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+              <svg width="25.997" height="24" viewBox="0 0 24 24" className="w-[25.997px] h-6 shrink-0 fill-black">
+                <path d="M3 6h18M7 12h10m-7 6h4" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              </svg>
+              <span className="text-black font-outfit text-lg font-medium leading-normal">Sort</span>
             </button>
           </div>
 
           {/* Results Info */}
-          <div className="flex justify-between items-center mb-6">
-            <span className={`text-sm ${textColor}`}>
-              Showing 500+ students - Page 1 of 19
-            </span>
-            <div className="flex gap-2">
-              <button className="w-8 h-8 bg-[#FF9269] text-white flex items-center justify-center font-bold">
-                1
-              </button>
-              <button className={`w-8 h-8 ${cardBg} ${textColor} border border-black flex items-center justify-center hover:bg-[#FF9269] hover:text-white transition-colors`}>
-                2
-              </button>
+          <div className="flex justify-end items-center mb-6 w-[1094px] mx-auto">
+            <div className="flex items-center gap-4">
+              <span style={{
+                color: '#000',
+                fontFamily: 'Outfit',
+                fontSize: '16px',
+                fontStyle: 'normal',
+                fontWeight: 400,
+                lineHeight: '150%'
+              }}>
+                Showing 500+ students - Page 1 of 19
+              </span>
+              <div className="flex items-center gap-2">
+                <button className="inline-flex py-[9px] px-3 items-center gap-[10px] border border-black bg-[#FF9169]" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="6" height="11" viewBox="0 0 6 11" fill="none" className="w-[6px] h-[11px] aspect-[6/11]">
+                    <path d="M5.85349 10.146C5.89994 10.1925 5.93678 10.2476 5.96192 10.3083C5.98706 10.369 6 10.4341 6 10.4997C6 10.5654 5.98706 10.6305 5.96192 10.6912C5.93678 10.7519 5.89994 10.807 5.85349 10.8535C5.80704 10.8999 5.75189 10.9368 5.6912 10.9619C5.63051 10.9871 5.56547 11 5.49978 11C5.43409 11 5.36904 10.9871 5.30835 10.9619C5.24766 10.9368 5.19252 10.8999 5.14607 10.8535L0.146627 5.85373C0.100144 5.8073 0.0632687 5.75216 0.0381093 5.69146C0.01295 5.63076 0 5.5657 0 5.5C0 5.4343 0.01295 5.36924 0.0381093 5.30854C0.0632687 5.24784 0.100144 5.1927 0.146627 5.14627L5.14607 0.146521C5.23988 0.052705 5.36711 -2.61535e-09 5.49978 0C5.63244 2.61535e-09 5.75968 0.052705 5.85349 0.146521C5.9473 0.240336 6 0.367577 6 0.500253C6 0.632928 5.9473 0.760169 5.85349 0.853985L1.20713 5.5L5.85349 10.146Z" fill="#000"/>
+                  </svg>
+                </button>
+                <button className="inline-flex py-[9px] px-3 items-center gap-[10px] border border-black bg-[#FF9169]" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="7" height="11" viewBox="0 0 7 11" fill="none" className="w-[6px] h-[11px] aspect-[6/11]">
+                    <path d="M6.36314 5.85373L1.3637 10.8535C1.31725 10.8999 1.2621 10.9368 1.20141 10.9619C1.14072 10.9871 1.07568 11 1.00999 11C0.944298 11 0.879251 10.9871 0.818561 10.9619C0.757871 10.9368 0.702727 10.8999 0.656277 10.8535C0.609827 10.807 0.572981 10.7519 0.547843 10.6912C0.522704 10.6305 0.509766 10.5654 0.509766 10.4997C0.509766 10.4341 0.522704 10.369 0.547843 10.3083C0.572981 10.2476 0.609827 10.1925 0.656277 10.146L5.30263 5.5L0.656277 0.853985C0.562467 0.760169 0.509766 0.632928 0.509766 0.500253C0.509766 0.367577 0.562467 0.240336 0.656277 0.146521C0.750087 0.052705 0.877321 9.88508e-10 1.00999 0C1.14265 -9.88508e-10 1.26989 0.052705 1.3637 0.146521L6.36314 5.14627C6.40962 5.1927 6.4465 5.24784 6.47166 5.30854C6.49682 5.36924 6.50977 5.4343 6.50977 5.5C6.50977 5.5657 6.49682 5.63076 6.47166 5.69146C6.4465 5.75216 6.40962 5.8073 6.36314 5.85373Z" fill="#000"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -204,29 +272,39 @@ export default function DiscoverStudents() {
         {/* Student Cards */}
         <div className="space-y-6">
           {students.map((student, index) => (
-            <div key={student.id} className={`${cardBg} border border-black card p-6 relative`}>
+            <div 
+              key={student.id} 
+              className="w-[1094px] h-[391px] shrink-0 border border-black bg-[#FFFBF1] p-6 relative mx-auto cursor-pointer hover:shadow-lg transition-shadow" 
+              style={{ boxShadow: '4px 4px 0 0 #000' }}
+              onClick={() => window.location.href = '/student-profile'}
+            >
               {/* Sticker Overlay */}
               {student.hasSticker && student.sticker && (
-                <div className="absolute top-4 right-4 z-10">
+                <div className="absolute bottom-2 -right-16 z-10" style={{
+                  width: '200px',
+                  height: '200px',
+                  transform: 'rotate(7.08deg)',
+                  filter: 'drop-shadow(1.6px 1.6px 0 #000)'
+                }}>
                   <Image
                     src={student.sticker}
                     alt="Achievement Sticker"
-                    width={80}
-                    height={80}
-                    className="drop-shadow-lg"
+                    width={200}
+                    height={200}
+                    className="w-full h-full object-contain"
                   />
                 </div>
               )}
 
               <div className="flex gap-6">
                 {/* Profile Image */}
-                <div className="flex-shrink-0">
-                  <div className="w-16 h-16 rounded-full overflow-hidden border border-black">
+                <div className="flex-shrink-0 -mt-2">
+                  <div className="w-20 h-20 shrink-0 aspect-square rounded-[80px] border border-black overflow-hidden" style={{ background: 'url(/Ellipse\ 2.png) lightgray 50% / cover no-repeat, #D9D9D9' }}>
                     <Image
-                      src={student.profileImage}
+                      src="/Ellipse 2.png"
                       alt={student.name}
-                      width={64}
-                      height={64}
+                      width={80}
+                      height={80}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -236,67 +314,205 @@ export default function DiscoverStudents() {
                 <div className="flex-1">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className={`text-xl font-bold ${textColor} mb-1`}>
+                      <h3 style={{
+                        color: '#000',
+                        fontFamily: 'Outfit',
+                        fontSize: '24px',
+                        fontStyle: 'normal',
+                        fontWeight: 700,
+                        lineHeight: 'normal',
+                        marginBottom: '8px'
+                      }}>
                         {student.name}
                       </h3>
-                      <p className={`text-sm ${textColor} opacity-80 mb-3`}>
-                        {student.stats}
+                      <p className="w-[663px]" style={{
+                        color: '#5D5237',
+                        fontFamily: 'Outfit',
+                        fontSize: '18px',
+                        fontStyle: 'normal',
+                        fontWeight: 400,
+                        lineHeight: '150%',
+                        marginBottom: '12px'
+                      }}>
+                        {student.stats.replace('GLAs', 'Q&As')}
                       </p>
+                      {/* Divider line below stats */}
+                      <div className="w-full h-px bg-black mb-3"></div>
                     </div>
-                    <button 
-                      className="px-4 py-2 bg-[#FF9269] text-black font-medium hover:opacity-90 transition-opacity"
-                      style={{border: '1px solid #000'}}
-                    >
-                      View {student.name.split(' ')[0]}&apos;s Profile
+                    <button className="flex w-[234px] py-3 px-[10px] justify-center items-center gap-[10px] border border-black bg-[#FF9169]" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                      <span style={{
+                        color: '#000',
+                        fontFamily: 'Outfit',
+                        fontSize: '16px',
+                        fontStyle: 'normal',
+                        fontWeight: 500,
+                        lineHeight: 'normal'
+                      }}>
+                        View {student.name.split(' ')[0]}&apos;s Profile
+                      </span>
                     </button>
                   </div>
 
-                  <p className={`${textColor} mb-4 text-sm leading-relaxed`}>
-                    {student.description}
-                  </p>
-
-                  <div className="flex justify-between">
-                    {/* Left Side - Colleges */}
-                    <div>
-                      <p className={`text-xs ${textColor} opacity-70 mb-2`}>Accepted to</p>
-                      <div className="flex gap-2 items-center mb-4">
-                        {student.colleges.map((college, idx) => (
-                          <div key={idx} className="w-8 h-8 bg-white rounded border border-black flex items-center justify-center">
+                  <div className="flex">
+                    {/* Left Side - Description */}
+                    <div className="flex-1 pr-8">
+                      <p style={{
+                        color: '#000',
+                        fontFamily: 'Outfit',
+                        fontSize: '18px',
+                        fontStyle: 'normal',
+                        fontWeight: 400,
+                        lineHeight: '150%',
+                        marginBottom: '16px',
+                        textAlign: 'left'
+                      }}>
+                        {student.description}
+                      </p>
+                      
+                      {/* Colleges Section */}
+                      <div>
+                        <p style={{
+                          color: '#5D5237',
+                          fontFamily: 'Outfit',
+                          fontSize: '14px',
+                          fontWeight: 400,
+                          marginBottom: '8px'
+                        }}>Accepted to</p>
+                        <div className="inline-flex items-center gap-2 mb-4">
+                          {/* First Logo */}
+                          <div className="w-[50px] h-[50px] aspect-square bg-white border border-black flex items-center justify-center">
                             <Image
-                              src={college}
-                              alt="College"
-                              width={24}
-                              height={24}
+                              src="/mit.png"
+                              alt="MIT"
+                              width={40}
+                              height={40}
                               className="object-contain"
                             />
                           </div>
-                        ))}
-                        <span className={`text-xs ${textColor} opacity-70 ml-2`}>+5 more</span>
+                          {/* Harvard Logo - SVG */}
+                          <div className="w-[41.468px] h-[49.521px] shrink-0 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="42" height="50" viewBox="0 0 42 50" fill="none">
+                              <path d="M0.318604 0.266602H41.787V15.9748C41.787 23.1633 39.1287 38.4455 21.2123 49.7874C21.2123 49.7874 1.80721 41.6404 0.318604 15.9748V0.266602Z" fill="#A51C30"/>
+                            </svg>
+                          </div>
+                          {/* Third Logo */}
+                          <div className="w-[50px] h-[50px] aspect-square" style={{ background: 'url(/college.png) lightgray 50% / contain no-repeat' }}></div>
+                          {/* Fourth Logo */}
+                          <div className="w-[142px] h-20 shrink-0 aspect-[71/40] flex items-center justify-center" style={{ opacity: 0.8 }}>
+                            <Image
+                              src="/bath.png"
+                              alt="Bath"
+                              width={142}
+                              height={80}
+                              className="object-contain"
+                            />
+                          </div>
+                          <span style={{
+                            color: '#5D5237',
+                            fontFamily: 'Outfit',
+                            fontSize: '18px',
+                            fontStyle: 'normal',
+                            fontWeight: 400,
+                            lineHeight: '150%',
+                            marginLeft: '8px'
+                          }}>+5 more</span>
+                        </div>
                       </div>
                     </div>
-
-                    {/* Right Side - Stats */}
-                    <div className="text-right">
-                      <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                    
+                    
+                    {/* Right Side - Background Info */}
+                    <div className="flex-1">
+                      <div className="space-y-1 text-left">
                         <div>
-                          <p className={`text-xs ${textColor} opacity-70`}>Background:</p>
-                          <p className={`${textColor} font-medium`}>{student.background}</p>
+                          <span style={{
+                            color: '#000',
+                            fontFamily: 'Outfit',
+                            fontSize: '18px',
+                            fontStyle: 'normal',
+                            fontWeight: 700,
+                            lineHeight: '150%'
+                          }}>Background: </span>
+                          <span style={{
+                            color: '#000',
+                            fontFamily: 'Outfit',
+                            fontSize: '18px',
+                            fontStyle: 'normal',
+                            fontWeight: 400,
+                            lineHeight: '150%'
+                          }}>African American male student from USA</span>
                         </div>
                         <div>
-                          <p className={`text-xs ${textColor} opacity-70`}>Academic Interests:</p>
-                          <p className={`${textColor} font-medium`}>{student.interests}</p>
+                          <span style={{
+                            color: '#000',
+                            fontFamily: 'Outfit',
+                            fontSize: '18px',
+                            fontStyle: 'normal',
+                            fontWeight: 700,
+                            lineHeight: '150%'
+                          }}>Academic Interests: </span>
+                          <span style={{
+                            color: '#000',
+                            fontFamily: 'Outfit',
+                            fontSize: '18px',
+                            fontStyle: 'normal',
+                            fontWeight: 400,
+                            lineHeight: '150%'
+                          }}>{student.interests}</span>
                         </div>
                         <div>
-                          <p className={`text-xs ${textColor} opacity-70`}>SAT:</p>
-                          <p className={`${textColor} font-medium`}>{student.sat}</p>
+                          <span style={{
+                            color: '#000',
+                            fontFamily: 'Outfit',
+                            fontSize: '18px',
+                            fontStyle: 'normal',
+                            fontWeight: 700,
+                            lineHeight: '150%'
+                          }}>SAT: </span>
+                          <span style={{
+                            color: '#000',
+                            fontFamily: 'Outfit',
+                            fontSize: '18px',
+                            fontStyle: 'normal',
+                            fontWeight: 400,
+                            lineHeight: '150%'
+                          }}>{student.sat}</span>
                         </div>
                         <div>
-                          <p className={`text-xs ${textColor} opacity-70`}>GPA (W):</p>
-                          <p className={`${textColor} font-medium`}>{student.gpa}</p>
+                          <span style={{
+                            color: '#000',
+                            fontFamily: 'Outfit',
+                            fontSize: '18px',
+                            fontStyle: 'normal',
+                            fontWeight: 700,
+                            lineHeight: '150%'
+                          }}>GPA (W): </span>
+                          <span style={{
+                            color: '#000',
+                            fontFamily: 'Outfit',
+                            fontSize: '18px',
+                            fontStyle: 'normal',
+                            fontWeight: 400,
+                            lineHeight: '150%'
+                          }}>{student.gpa}</span>
                         </div>
                         <div>
-                          <p className={`text-xs ${textColor} opacity-70`}>GPA (UW):</p>
-                          <p className={`${textColor} font-medium`}>{student.uwGpa}</p>
+                          <span style={{
+                            color: '#000',
+                            fontFamily: 'Outfit',
+                            fontSize: '18px',
+                            fontStyle: 'normal',
+                            fontWeight: 700,
+                            lineHeight: '150%'
+                          }}>GPA (UW): </span>
+                          <span style={{
+                            color: '#000',
+                            fontFamily: 'Outfit',
+                            fontSize: '18px',
+                            fontStyle: 'normal',
+                            fontWeight: 400,
+                            lineHeight: '150%'
+                          }}>{student.uwGpa}</span>
                         </div>
                       </div>
                     </div>
@@ -309,16 +525,24 @@ export default function DiscoverStudents() {
 
         {/* Pagination */}
         <div className="flex justify-center items-center mt-8 gap-4">
-          <span className={`text-sm ${textColor}`}>Page 1 of 19</span>
+          <span style={{
+            color: '#000',
+            fontFamily: 'Outfit',
+            fontSize: '16px',
+            fontStyle: 'normal',
+            fontWeight: 400,
+            lineHeight: '150%'
+          }}>Page 1 of 19</span>
           <div className="flex gap-2">
-            <button className={`w-8 h-8 ${cardBg} ${textColor} border border-black flex items-center justify-center hover:bg-[#FF9269] hover:text-white transition-colors`}>
-              {LeftArrowIcon}
+            <button className="inline-flex py-[9px] px-3 items-center gap-[10px] border border-black bg-[#FF9169]" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="6" height="11" viewBox="0 0 6 11" fill="none" className="w-[6px] h-[11px] aspect-[6/11]">
+                <path d="M5.85349 10.146C5.89994 10.1925 5.93678 10.2476 5.96192 10.3083C5.98706 10.369 6 10.4341 6 10.4997C6 10.5654 5.98706 10.6305 5.96192 10.6912C5.93678 10.7519 5.89994 10.807 5.85349 10.8535C5.80704 10.8999 5.75189 10.9368 5.6912 10.9619C5.63051 10.9871 5.56547 11 5.49978 11C5.43409 11 5.36904 10.9871 5.30835 10.9619C5.24766 10.9368 5.19252 10.8999 5.14607 10.8535L0.146627 5.85373C0.100144 5.8073 0.0632687 5.75216 0.0381093 5.69146C0.01295 5.63076 0 5.5657 0 5.5C0 5.4343 0.01295 5.36924 0.0381093 5.30854C0.0632687 5.24784 0.100144 5.1927 0.146627 5.14627L5.14607 0.146521C5.23988 0.052705 5.36711 -2.61535e-09 5.49978 0C5.63244 2.61535e-09 5.75968 0.052705 5.85349 0.146521C5.9473 0.240336 6 0.367577 6 0.500253C6 0.632928 5.9473 0.760169 5.85349 0.853985L1.20713 5.5L5.85349 10.146Z" fill="#000"/>
+              </svg>
             </button>
-            <button className="w-8 h-8 bg-[#FF9269] text-white flex items-center justify-center font-bold">
-              1
-            </button>
-            <button className={`w-8 h-8 ${cardBg} ${textColor} border border-black flex items-center justify-center hover:bg-[#FF9269] hover:text-white transition-colors`}>
-              {RightArrowIcon}
+            <button className="inline-flex py-[9px] px-3 items-center gap-[10px] border border-black bg-[#FF9169]" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="7" height="11" viewBox="0 0 7 11" fill="none" className="w-[6px] h-[11px] aspect-[6/11]">
+                <path d="M6.36314 5.85373L1.3637 10.8535C1.31725 10.8999 1.2621 10.9368 1.20141 10.9619C1.14072 10.9871 1.07568 11 1.00999 11C0.944298 11 0.879251 10.9871 0.818561 10.9619C0.757871 10.9368 0.702727 10.8999 0.656277 10.8535C0.609827 10.807 0.572981 10.7519 0.547843 10.6912C0.522704 10.6305 0.509766 10.5654 0.509766 10.4997C0.509766 10.4341 0.522704 10.369 0.547843 10.3083C0.572981 10.2476 0.609827 10.1925 0.656277 10.146L5.30263 5.5L0.656277 0.853985C0.562467 0.760169 0.509766 0.632928 0.509766 0.500253C0.509766 0.367577 0.562467 0.240336 0.656277 0.146521C0.750087 0.052705 0.877321 9.88508e-10 1.00999 0C1.14265 -9.88508e-10 1.26989 0.052705 1.3637 0.146521L6.36314 5.14627C6.40962 5.1927 6.4465 5.24784 6.47166 5.30854C6.49682 5.36924 6.50977 5.4343 6.50977 5.5C6.50977 5.5657 6.49682 5.63076 6.47166 5.69146C6.4465 5.75216 6.40962 5.8073 6.36314 5.85373Z" fill="#000"/>
+              </svg>
             </button>
           </div>
         </div>

@@ -20,7 +20,7 @@ export default function Header() {
   }, [theme]);
 
   // Theme color classes
-  const headerBg = theme === 'dark' ? 'bg-[#231F20]' : 'bg-[#FFFFFF]';
+  const headerBg = theme === 'dark' ? 'bg-[#231F20]' : 'bg-[#FFFBF1]';
   const textColor = theme === 'dark' ? 'text-[#FFFBF1]' : 'text-[#5D5237]';
 
   return (
@@ -38,7 +38,7 @@ export default function Header() {
         </div>
 
         {/* Navigation Links */}
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav className="hidden md:flex items-center space-x-12">
           <Link href="/essay-builder" className={`${textColor} hover:opacity-70 transition-opacity`}>
             Essay Builder
           </Link>
@@ -48,17 +48,22 @@ export default function Header() {
           <Link href="/discover-students" className={`${textColor} hover:opacity-70 transition-opacity`}>
             Discover Students
           </Link>
+          <Link href="/subscription" className={`${textColor} hover:opacity-70 transition-opacity`}>
+            Subscription
+          </Link>
         </nav>
 
         {/* Right Side - Subscribe Button and Profile */}
         <div className="flex items-center space-x-4">
           {/* Subscribe Button */}
-          <button 
-            className={`px-4 py-2 ${textColor} font-medium card hover:opacity-90 transition-opacity`}
-            style={{background: 'rgb(var(--accent))'}}
-          >
-            Subscribe to Fliq+
-          </button>
+          <Link href="/subscription">
+            <button 
+              className={`px-4 py-2 ${textColor} font-medium card hover:opacity-90 transition-opacity`}
+              style={{background: 'rgb(var(--accent))'}}
+            >
+              Subscribe to Fliq+
+            </button>
+          </Link>
 
           {/* Profile Image */}
           <div className="w-10 h-10 rounded-full overflow-hidden border border-black">

@@ -89,7 +89,7 @@ export default function Login() {
           
           <form className="w-full space-y-4" onSubmit={(e) => {
             e.preventDefault();
-            router.push('/discover_student');
+            router.push('/discover_students');
           }}>
             <div className="space-y-4">
               <label className={`block text-[14px] font-outfit font-medium leading-5 ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>
