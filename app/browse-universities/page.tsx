@@ -170,7 +170,7 @@ export default function BrowseUniversities() {
           </div>
         </div>
 
-        {/* University Cards */}
+        {/* University cards  */}
         <div className="space-y-6">
           {universities.map((university) => (
             <div key={university.id} className="w-[1094px] h-[395px] flex-shrink-0 border border-black bg-[#FFFBF1] relative mx-auto" style={{ boxShadow: '4px 4px 0 0 #000' }}>

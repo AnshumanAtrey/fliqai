@@ -17,6 +17,7 @@
 
   body {
     @apply bg-light-bg text-light-text font-outfit;
+    overscroll-behavior: none;
   }
 
   h1 {
