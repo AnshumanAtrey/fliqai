@@ -2,22 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Apply overscroll behavior to both html and body */
+html, body {
+  overscroll-behavior: none !important;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 @layer base {
   :root {
+    /* Light theme colors */
     --light-bg: 255, 251, 241;
     --light-secondary: 255, 255, 255;
-    --accent: 255, 146, 105;
+    --light-accent: 255, 146, 105;
     --light-text: 93, 82, 55;
     
+    /* Dark theme colors */
     --dark-bg: 15, 13, 14;
     --dark-secondary: 35, 31, 32;
-    --dark-tertiary: 53, 49, 50;
+    --dark-accent: 255, 146, 105; /* Same accent color for both themes */
     --dark-text: 255, 251, 241;
+
+    /* Theme variables - light by default */
+    --background: var(--light-bg);
+    --foreground: var(--light-text);
+    --card: var(--light-secondary);
+    --accent: var(--light-accent);
+    --border: 0, 0, 0; /* Black border for light mode */
+    --shadow: 0, 0, 0; /* Black shadow for light mode */
   }
 
+  .dark {
+    --background: var(--dark-bg);
+    --foreground: var(--dark-text);
+    --card: var(--dark-secondary);
+    --accent: var(--dark-accent);
+    --border: 255, 255, 255; /* White border for dark mode */
+    --shadow: 255, 255, 255; /* White shadow for dark mode */
+  }
+  
   body {
-    @apply bg-light-bg text-light-text font-outfit;
-    overscroll-behavior: none;
+    overscroll-behavior: none !important;
+    --dot-bg: rgb(var(--background));
+    --dot-color: rgba(var(--foreground), 0.1);
+    --dot-size: 1px;
+    --dot-space: 22px;
+    background:
+      linear-gradient(90deg, var(--dot-bg) calc(var(--dot-space) - var(--dot-size)), transparent 1%) center / var(--dot-space) var(--dot-space),
+      linear-gradient(var(--dot-bg) calc(var(--dot-space) - var(--dot-size)), transparent 1%) center / var(--dot-space) var(--dot-space),
+      var(--dot-color);
+    @apply bg-[rgb(var(--background))] text-[rgb(var(--foreground))] font-outfit transition-all duration-200 ease-in-out;
+  }
+
+  /* Smooth transitions for theme changes */
+  *, *::before, *::after {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
   }
 
   h1 {
@@ -41,16 +82,4 @@
   }
 }
 
-@layer utilities {
-  .bg-pattern {
-    background-image: url('/bg.svg');
-    background-repeat: repeat;
-    background-size: auto;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    @apply bg-dark-bg text-dark-text;
-  }
-}
+/* Remove the prefers-color-scheme media query as we're handling it with the .dark class */

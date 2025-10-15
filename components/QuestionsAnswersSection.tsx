@@ -44,9 +44,9 @@ const QuestionsAnswersSection = () => {
   };
 
   return (
-    <div className="mt-16 mb-16 border-2 border-black">
-      <div className="bg-white p-6 w-full">
-        <h2 className="text-3xl font-bold text-black mb-12 font-outfit">Questions & Answers</h2>
+    <div className="mt-16 mb-16 border border-black dark:border-dark-text">
+      <div className="bg-white dark:bg-dark-tertiary p-6 w-full">
+        <h2 className="text-3xl font-bold text-black dark:text-white mb-12 font-outfit">Questions & Answers</h2>
         
         <div className="space-y-2 text-black">
           {visibleQAs.map((item) => (

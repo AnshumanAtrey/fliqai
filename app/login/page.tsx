@@ -2,7 +2,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
+import { DotPatternBackground } from "../component/DotPatternBackground";
+import { useAuth } from "../../lib/hooks/useAuth";
+import { withGuestOnly } from '@/lib/hooks/useGuestOnly';
 import { useState, useEffect } from "react";
 
 const MoonIcon = (
@@ -17,8 +19,14 @@ const SunIcon = (
   </svg>
 );
 
-export default function Login() {
+function Login() {
   const router = useRouter();
+  const { signIn, loading, error, user } = useAuth();
+  
+  // Form state
+  const [email, setEmail] = useState('simonesharma@gmail.com');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // theme: 'light' | 'dark'
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -27,6 +35,19 @@ export default function Login() {
     }
     return 'light';
   });
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user && !loading) {
+      const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
+      if (redirectUrl) {
+        sessionStorage.removeItem('redirectAfterLogin');
+        router.push(redirectUrl);
+      } else {
+        router.push('/discover-students');
+      }
+    }
+  }, [user, loading, router]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -46,13 +67,45 @@ export default function Login() {
     }
   }, [theme]);
 
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      // Check if authentication is configured
+      if (error && error.includes('not configured')) {
+        // Development mode - bypass authentication
+        console.log('Development mode: Bypassing authentication');
+        const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
+        if (redirectUrl) {
+          sessionStorage.removeItem('redirectAfterLogin');
+          router.push(redirectUrl);
+        } else {
+          router.push('/discover-students');
+        }
+        return;
+      }
+
+      await signIn(email, password);
+      // Redirect will happen via useEffect when user state changes
+    } catch (err) {
+      // Error is handled by the auth context and displayed via error state
+      console.error('Login failed:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Theme color classes for login card
   const cardBg = theme === 'dark' ? 'bg-[#231F20]' : 'bg-[#FFFFFF]';
   const cardText = theme === 'dark' ? 'text-[#FFFBF1]' : 'text-[#5D5237]';
-  const lightTextColor = theme === 'dark' ? 'text-[#FFFBF1]' : 'text-[rgb(93,82,55)]';
 
   return (
+    <DotPatternBackground>
     <div className="min-h-screen flex flex-col items-center justify-center p-24 relative">
+      
       {/* Theme Toggle Button */}
       <button
         aria-label="Toggle theme"
@@ -78,27 +131,47 @@ export default function Login() {
       <div className={`max-w-xl w-full ${cardBg} p-12 ${cardText}`} style={{border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000', boxShadow: '4px 4px 0px 0px #000'}}> 
         <div className="flex flex-col items-center gap-6">
           <div className="text-center w-full mb-4">
-            <h2 className={`text-[32px] font-bold mb-8 mt-2 font-outfit leading-normal ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>Create an account</h2>
+            <h2 className={`text-[32px] font-bold mb-8 mt-2 font-outfit leading-normal ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>Welcome back</h2>
             <p className={`text-[18px] font-outfit font-normal leading-normal text-center ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-[#5D5237]'}`}>
-              Already have an account?{" "}
-              <Link href="/login" className="hover:underline text-[#EF622F] font-outfit text-[18px] font-medium leading-normal">
-                Log in
+              Don't have an account?{" "}
+              <Link href="/signup" className="hover:underline text-[#EF622F] font-outfit text-[18px] font-medium leading-normal">
+                Sign up
               </Link>
             </p>
           </div>
           
-          <form className="w-full space-y-4" onSubmit={(e) => {
-            e.preventDefault();
-            router.push('/discover_students');
-          }}>
+          {/* Error Display */}
+          {error && (
+            <div className={`w-full p-4 mb-4 border rounded ${
+              error.includes('not configured') 
+                ? 'text-blue-600 bg-blue-50 border-blue-200' 
+                : 'text-red-600 bg-red-50 border-red-200'
+            }`}>
+              {error.includes('not configured') ? (
+                <div>
+                  <p className="font-medium">Development Mode</p>
+                  <p className="text-sm mt-1">
+                    Firebase authentication is not configured. Click &quot;Sign in&quot; to continue in development mode.
+                  </p>
+                </div>
+              ) : (
+                error
+              )}
+            </div>
+          )}
+
+          <form className="w-full space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <label className={`block text-[14px] font-outfit font-medium leading-5 ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>
                 Email
                 <input 
                   type="email" 
-                  className={`w-full mt-1 p-4 ${cardText}`} style={{background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000'}}
+                  className={`w-full mt-1 p-4 ${cardText}`} 
+                  style={{background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000'}}
                   placeholder="simonesharma@gmail.com"
-                  defaultValue="simonesharma@gmail.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isSubmitting || loading}
                   required
                 />
               </label>
@@ -107,8 +180,12 @@ export default function Login() {
                 Password
                 <input 
                   type="password" 
-                  className={`w-full mt-1 p-4 ${cardText}`} style={{background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000'}}
+                  className={`w-full mt-1 p-4 ${cardText}`} 
+                  style={{background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000'}}
                   placeholder="••••••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isSubmitting || loading}
                   required
                 />
               </label>
@@ -116,10 +193,18 @@ export default function Login() {
             
             <button 
               type="submit" 
-              className="w-full py-4 text-black text-[16px] font-outfit font-medium leading-normal hover:opacity-90 transition-opacity"
+              className="w-full py-4 text-black text-[16px] font-outfit font-medium leading-normal hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
               style={{background:'rgb(var(--accent))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000'}}
+              disabled={isSubmitting || loading}
             >
-              Create your account
+              {isSubmitting || loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
+                  Signing in...
+                </div>
+              ) : (
+                'Sign in to your account'
+              )}
             </button>
             
             <div className="flex items-center my-6">
@@ -173,5 +258,8 @@ export default function Login() {
         </div>
       </div>
     </div>
+    </DotPatternBackground>
   );
 }
+
+export default withGuestOnly(Login);

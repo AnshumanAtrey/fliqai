@@ -2,12 +2,12 @@ import React from 'react';
 
 const ExamTimeline: React.FC = () => {
   return (
-    <div className="mt-16 mb-16 border-2 border-black">
-      <div className="bg-white p-6 w-full">
-        <h2 className="text-3xl font-bold text-black mb-12 font-outfit">Exam Timeline</h2>
+    <div className="mt-16 mb-16 border border-black dark:border-dark-text">
+      <div className="bg-white dark:bg-dark-tertiary p-6 w-full">
+        <h2 className="text-3xl font-bold text-black dark:text-white mb-12 font-outfit">Exam Timeline</h2>
         
         {/* SVG Container - Add your SVG here */}
-        <div className="w-full h-[177px] bg-gray-100 flex items-center justify-center border border-gray-300">
+        <div className="w-full h-[177px] flex items-center justify-center">
           {/* Replace this div with your actual SVG */}
           <svg width="1209" height="177" viewBox="0 0 1209 177" fill="none" xmlns="http://www.w3.org/2000/svg">
 <line x1="31.5" y1="109.5" x2="1177.5" y2="109.5" stroke="black"/>

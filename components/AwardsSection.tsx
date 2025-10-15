@@ -9,8 +9,8 @@ const AwardsSection = () => {
       icon: <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M42.4744 10.577L24.4744 4.57699C24.1665 4.47434 23.8335 4.47434 23.5256 4.57699L5.52562 10.577C5.22695 10.6766 4.96717 10.8676 4.78309 11.123C4.59902 11.3784 4.49998 11.6853 4.5 12.0001V27.0001C4.5 27.3979 4.65804 27.7795 4.93934 28.0608C5.22064 28.3421 5.60218 28.5001 6 28.5001C6.39782 28.5001 6.77936 28.3421 7.06066 28.0608C7.34196 27.7795 7.5 27.3979 7.5 27.0001V14.0814L13.7981 16.1795C12.1248 18.8829 11.5927 22.1398 12.3186 25.2352C13.0446 28.3306 14.9692 31.0113 17.67 32.6889C14.295 34.0126 11.3775 36.407 9.24375 39.6807C9.13278 39.8457 9.0557 40.031 9.01699 40.226C8.97828 40.421 8.97871 40.6217 9.01826 40.8165C9.05782 41.0113 9.1357 41.1964 9.24738 41.3608C9.35906 41.5253 9.50231 41.6659 9.66882 41.7745C9.83532 41.8831 10.0217 41.9575 10.2173 41.9934C10.4128 42.0293 10.6135 42.026 10.8077 41.9837C11.0019 41.9413 11.1858 41.8608 11.3487 41.7468C11.5115 41.6328 11.65 41.4875 11.7563 41.3195C14.5819 36.9845 19.0444 34.5001 24 34.5001C28.9556 34.5001 33.4181 36.9845 36.2438 41.3195C36.4638 41.6465 36.8036 41.8737 37.1898 41.9522C37.5761 42.0306 37.9776 41.9538 38.3077 41.7385C38.6378 41.5232 38.8699 41.1866 38.9539 40.8016C39.0378 40.4165 38.9668 40.0139 38.7562 39.6807C36.6225 36.407 33.6937 34.0126 30.33 32.6889C33.0282 31.0114 34.951 28.3324 35.6768 25.2393C36.4027 22.1462 35.8722 18.8915 34.2019 16.1889L42.4744 13.4326C42.7731 13.3331 43.033 13.1421 43.2171 12.8867C43.4012 12.6313 43.5003 12.3244 43.5003 12.0095C43.5003 11.6946 43.4012 11.3877 43.2171 11.1323C43.033 10.8769 42.7731 10.6859 42.4744 10.5864V10.577ZM33 22.5001C33.0004 23.923 32.6634 25.3256 32.0168 26.5931C31.3701 27.8605 30.4322 28.9565 29.2799 29.7912C28.1276 30.6259 26.7938 31.1756 25.388 31.395C23.9821 31.6144 22.5443 31.4974 21.1925 31.0536C19.8406 30.6097 18.6133 29.8516 17.6111 28.8416C16.609 27.8315 15.8606 26.5983 15.4273 25.243C14.9941 23.8877 14.8884 22.449 15.1188 21.0449C15.3493 19.6409 15.9094 18.3114 16.7531 17.1657L23.5256 19.4157C23.8335 19.5184 24.1665 19.5184 24.4744 19.4157L31.2469 17.1657C32.3865 18.7107 33.0009 20.5803 33 22.5001ZM24 16.4195L10.7437 12.0001L24 7.58074L37.2562 12.0001L24 16.4195Z" fill="black"/>
       </svg>,
-      recognizes: 'Innovative student-led research tackling real-world challenges.',
-      studentAction: 'Conducted a year-long study on digital classrooms vs. traditional learning. Partnered with a university mentor, collected survey data from 500 students.',
+      recognizes: 'Students who demonstrate measurable community impact.',
+      studentAction: 'Founded \'Tech for All\', a nonprofit providing free coding classes to underprivileged studentsFounded a math-mentorship program pairing high achievers with struggling peers. Over 60 underclassmen improved test scores in one semester.ized with the President\'s Volunteer Service Gold Award and featured in local media',
       outcome: 'Project was featured in local press, leading to a city grant + recommendation letters that strengthened her college apps.',
       bgColor: 'bg-[#FFF3ED]'
     },
@@ -33,17 +33,17 @@ const AwardsSection = () => {
       <path d="M31.4388 18.0002C36.0607 11.5108 38.4176 4.80396 35.1401 1.52646C31.8626 -1.75104 25.1557 0.605836 18.6663 5.22771C12.177 0.605836 5.4701 -1.75104 2.1926 1.52646C-1.0849 4.80396 1.27197 11.5108 5.89385 18.0002C1.27197 24.4896 -1.0849 31.1965 2.1926 34.474C3.24822 35.5296 4.65822 36.0002 6.30072 36.0002C9.76572 36.0002 14.2657 33.9058 18.6757 30.7727C23.067 33.9058 27.567 36.0002 31.0413 36.0002C32.6838 36.0002 34.0957 35.5277 35.1495 34.474C38.4176 31.1965 36.0607 24.4896 31.4388 18.0002ZM33.0195 3.64709C34.452 5.07959 33.4845 9.72209 29.547 15.5121C28.3013 13.9701 26.9751 12.4949 25.5738 11.0927C24.1715 9.6934 22.6964 8.36905 21.1545 7.12521C26.9445 3.18771 31.587 2.21271 33.0195 3.64709ZM27.7207 18.0002C26.3939 19.6786 24.9689 21.2771 23.4532 22.7871C21.9432 24.3028 20.3448 25.7278 18.6663 27.0546C16.9879 25.7278 15.3895 24.3028 13.8795 22.7871C12.3638 21.2771 10.9388 19.6786 9.61197 18.0002C12.2739 14.6458 15.3119 11.6078 18.6663 8.94584C20.3448 10.2726 21.9432 11.6976 23.4532 13.2133C24.9689 14.7234 26.3939 16.3218 27.7207 18.0002ZM4.31322 3.64709C4.72572 3.23271 5.40635 3.01896 6.30447 3.01896C8.52072 3.01896 12.0588 4.31271 16.1763 7.12521C14.6359 8.37007 13.1614 9.69436 11.7588 11.0927C10.3595 12.495 9.03519 13.9702 7.79135 15.5121C3.85385 9.72209 2.88072 5.07959 4.31322 3.64709ZM4.31322 32.3533C2.88072 30.9208 3.85385 26.2783 7.79135 20.4883C9.03701 22.0304 10.3632 23.5055 11.7645 24.9077C13.1659 26.3059 14.6391 27.6302 16.1782 28.8752C10.3882 32.8127 5.74572 33.7877 4.31322 32.3533ZM33.0195 32.3533C31.587 33.7877 26.9445 32.8183 21.1545 28.8808C22.6956 27.6342 24.1708 26.308 25.5738 24.9077C26.9732 23.5054 28.2975 22.0302 29.5413 20.4883C33.4788 26.2783 34.452 30.9208 33.0195 32.3533ZM20.9163 18.0002C20.9163 18.4452 20.7844 18.8802 20.5372 19.2502C20.2899 19.6203 19.9385 19.9086 19.5274 20.0789C19.1163 20.2492 18.6639 20.2938 18.2274 20.207C17.7909 20.1202 17.39 19.9059 17.0754 19.5912C16.7607 19.2765 16.5464 18.8756 16.4596 18.4392C16.3728 18.0027 16.4173 17.5503 16.5876 17.1392C16.7579 16.728 17.0463 16.3766 17.4163 16.1294C17.7863 15.8822 18.2213 15.7502 18.6663 15.7502C19.2631 15.7502 19.8354 15.9873 20.2573 16.4092C20.6793 16.8312 20.9163 17.4035 20.9163 18.0002Z" fill="black"/>
       </svg>
       ,
-      recognizes: 'Top student-led solutions to pressing issues.',
-      studentAction: 'Built a solar-powered irrigation prototype reducing water use in gardens by 25%. Pitched with a team of 4 at the national fair.',
-      outcome: 'Won 1st place among 1,200 entries. The recognition got her an invite to a State Innovators Conference, exposing her to mentors and early internship offers.',
+      recognizes: 'Students who demonstrate measurable community impact.',
+      studentAction: 'Founded \'Tech for All\', a nonprofit providing free coding classes to underprivileged studentsFounded a math-mentorship program pairing high achievers with struggling peers. Over 60 underclassmen improved test scores in one semester.ized with the President\'s Volunteer Service Gold Award and featured in local media',
+      outcome: 'Project was featured in local press, leading to a city grant + recommendation letters that strengthened her college apps.',
       bgColor: 'bg-[#FFC3A9]'
     }
   ];
 
   return (
     <div className="mt-16 mb-16">
-      <div className="bg-white border-2 border-black p-6  w-full h-[780px] overflow-hidden ">
-        <h2 className="text-3xl font-bold text-black mb-10 font-outfit ">Awards</h2>
+      <div className="bg-white dark:bg-dark-tertiary border border-black dark:border-dark-text p-6  w-full h-[780px] overflow-hidden ">
+        <h2 className="text-3xl font-bold text-black dark:text-white mb-10 font-outfit ">Awards</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-black w-full h-[85%]  ">
         {awards.map((award) => (
@@ -60,17 +60,17 @@ const AwardsSection = () => {
             
             <div className="space-y-6">
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider mb-2 font-outfit">RECOGNIZES</h4>
+                <h4 className="text-sm font-bold uppercase tracking-wider mb-2 font-outfit">RECOGNIZES</h4>
                 <p className="text-base leading-relaxed">{award.recognizes}</p>
               </div>
               
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider mb-2 font-outfit">WHAT STUDENT DID</h4>
+                <h4 className="text-sm font-bold uppercase tracking-wider mb-2 font-outfit">WHAT STUDENT DID</h4>
                 <p className="text-base leading-relaxed">{award.studentAction}</p>
               </div>
               
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider mb-2 font-outfit">OUTCOME</h4>
+                <h4 className="text-sm font-bold uppercase tracking-wider mb-2 font-outfit">OUTCOME</h4>
                 <p className="text-base leading-relaxed">{award.outcome}</p>
               </div>
             </div>

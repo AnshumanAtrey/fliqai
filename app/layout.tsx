@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${outfit.variable} font-outfit antialiased`}>
+      <body className={`${outfit.variable} font-outfit antialiased min-h-screen`}>
         <ClientLayout>
           {children}
         </ClientLayout>
