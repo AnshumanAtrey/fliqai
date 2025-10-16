@@ -137,6 +137,29 @@ function DiscoverStudentsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Filter states
+  const [showGPAFilter, setShowGPAFilter] = useState(false);
+  const [showSATFilter, setShowSATFilter] = useState(false);
+  const [showMajorFilter, setShowMajorFilter] = useState(false);
+  const [showBackgroundFilter, setShowBackgroundFilter] = useState(false);
+  const [showCountriesFilter, setShowCountriesFilter] = useState(false);
+  const [showBudgetFilter, setShowBudgetFilter] = useState(false);
+  const [showSortFilter, setShowSortFilter] = useState(false);
+
+  // Filter values
+  const [filters, setFilters] = useState({
+    gpaMin: 2.5,
+    gpaMax: 3.5,
+    satMin: 1200,
+    satMax: 1600,
+    majors: [] as string[],
+    backgrounds: [] as string[],
+    countries: [] as string[],
+    budgetMin: 0,
+    budgetMax: 100000,
+    sortBy: 'highest_gpa' as 'most_essays' | 'highest_sat' | 'highest_gpa' | 'most_universities'
+  });
+
   // Fetch students data from backend
   const fetchStudentsData = async () => {
     if (!user) {
@@ -192,6 +215,58 @@ function DiscoverStudentsPage() {
   useEffect(() => {
     fetchStudentsData();
   }, [user, currentPage]);
+
+  // Trigger search when filters change
+  const applyFilters = () => {
+    setCurrentPage(1);
+    fetchStudentsData();
+  };
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setFilters({
+      gpaMin: 2.5,
+      gpaMax: 3.5,
+      satMin: 1200,
+      satMax: 1600,
+      majors: [],
+      backgrounds: [],
+      countries: [],
+      budgetMin: 0,
+      budgetMax: 100000,
+      sortBy: 'highest_gpa'
+    });
+    setSearchQuery('');
+    setCurrentPage(1);
+    fetchStudentsData();
+  };
+
+  // Filter handlers
+  const handleGPAChange = (min: number, max: number) => {
+    setFilters({ ...filters, gpaMin: min, gpaMax: max });
+  };
+
+  const handleMajorToggle = (major: string) => {
+    const newMajors = filters.majors.includes(major)
+      ? filters.majors.filter(m => m !== major)
+      : [...filters.majors, major];
+    setFilters({ ...filters, majors: newMajors });
+  };
+
+  const handleBackgroundToggle = (background: string) => {
+    setFilters({ ...filters, backgrounds: [background] }); // Single selection
+  };
+
+  const handleCountryToggle = (country: string) => {
+    const newCountries = filters.countries.includes(country)
+      ? filters.countries.filter(c => c !== country)
+      : [...filters.countries, country];
+    setFilters({ ...filters, countries: newCountries });
+  };
+
+  const handleSortChange = (sort: string) => {
+    setFilters({ ...filters, sortBy: sort as any });
+  };
 
 
 
@@ -316,18 +391,414 @@ function DiscoverStudentsPage() {
             </div>
 
             {/* Filter and Sort Buttons */}
-            <div className="flex gap-6 mb-6 w-[1094px] mx-auto justify-start">
-              <button className="flex py-3 px-4 justify-center items-center gap-2 border border-light-text dark:border-dark-text bg-light-secondary dark:bg-dark-secondary cursor-pointer" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                <svg width="25.997" height="24" viewBox="0 0 24 24" className="w-[25.997px] h-6 shrink-0 fill-black dark:fill-white">
-                  <path d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
-                </svg>
-                <span className="text-light-text dark:text-dark-text font-outfit text-lg font-medium leading-normal">Filter</span>
-              </button>
-              <button className="flex py-3 px-4 justify-center items-center gap-2 border border-light-text dark:border-dark-text bg-light-secondary dark:bg-dark-secondary cursor-pointer" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                <svg width="25.997" height="24" viewBox="0 0 24 24" className="w-[25.997px] h-6 shrink-0 fill-black dark:fill-white">
-                  <path d="M3 6h18M7 12h10m-7 6h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" className="dark:stroke-white" />
-                </svg>
-                <span className="text-light-text dark:text-dark-text font-outfit text-lg font-medium leading-normal">Sort</span>
+            <div className="flex gap-3 mb-6 w-[1094px] mx-auto justify-start flex-wrap relative">
+              {/* GPA Filter */}
+              <div className="relative">
+                <button 
+                  onClick={() => {
+                    setShowGPAFilter(!showGPAFilter);
+                    setShowSATFilter(false);
+                    setShowMajorFilter(false);
+                    setShowBackgroundFilter(false);
+                    setShowCountriesFilter(false);
+                    setShowBudgetFilter(false);
+                    setShowSortFilter(false);
+                  }}
+                  className={`flex py-3 px-4 justify-center items-center gap-2 border border-black ${filters.gpaMin !== 2.5 || filters.gpaMax !== 3.5 ? 'bg-accent' : 'bg-light-secondary dark:bg-dark-secondary'} cursor-pointer`} 
+                  style={{ boxShadow: '2px 2px 0 0 #000' }}
+                >
+                  <span className="text-black font-outfit text-base font-medium">
+                    GPA {filters.gpaMin !== 2.5 || filters.gpaMax !== 3.5 ? `(${filters.gpaMin}-${filters.gpaMax})` : ''}
+                  </span>
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                    <path d="M1 1L6 6L11 1" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </button>
+
+                {/* GPA Filter Modal - Positioned relative to button */}
+                {showGPAFilter && (
+                  <div className="absolute top-full left-0 mt-2 bg-light-bg dark:bg-dark-secondary border border-black p-6 z-50 w-80" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-outfit font-semibold text-lg text-black">GPA Range</h3>
+                      <button onClick={() => setShowGPAFilter(false)} className="w-8 h-8 flex items-center justify-center bg-accent border border-black">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <path d="M12 4L4 12M4 4L12 12" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    <div className="mb-6">
+                      <div className="flex justify-between mb-2">
+                        <span className="font-outfit text-sm text-black">{filters.gpaMin}GPA</span>
+                        <span className="font-outfit text-sm text-black">{filters.gpaMax}GPA</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="2.5"
+                        max="4.0"
+                        step="0.1"
+                        value={filters.gpaMin}
+                        onChange={(e) => handleGPAChange(parseFloat(e.target.value), filters.gpaMax)}
+                        className="w-full accent-[#FF9269]"
+                      />
+                      <input
+                        type="range"
+                        min="2.5"
+                        max="4.0"
+                        step="0.1"
+                        value={filters.gpaMax}
+                        onChange={(e) => handleGPAChange(filters.gpaMin, parseFloat(e.target.value))}
+                        className="w-full accent-[#FF9269] mt-2"
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={clearAllFilters}
+                        className="flex-1 py-2 border border-black bg-light-secondary font-outfit font-medium"
+                      >
+                        Reset
+                      </button>
+                      <button
+                        onClick={() => { applyFilters(); setShowGPAFilter(false); }}
+                        className="flex-1 py-2 border border-black bg-accent font-outfit font-semibold"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* SAT Filter */}
+              <div className="relative">
+                <button 
+                  onClick={() => {
+                    setShowSATFilter(!showSATFilter);
+                    setShowGPAFilter(false);
+                    setShowMajorFilter(false);
+                    setShowBackgroundFilter(false);
+                    setShowCountriesFilter(false);
+                    setShowBudgetFilter(false);
+                    setShowSortFilter(false);
+                  }}
+                  className={`flex py-3 px-4 justify-center items-center gap-2 border border-black ${filters.satMin !== 1200 || filters.satMax !== 1600 ? 'bg-accent' : 'bg-light-secondary dark:bg-dark-secondary'} cursor-pointer`}
+                  style={{ boxShadow: '2px 2px 0 0 #000' }}
+                >
+                  <span className="text-black font-outfit text-base font-medium">SAT</span>
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                    <path d="M1 1L6 6L11 1" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              {/* Major Filter */}
+              <div className="relative">
+                <button 
+                  onClick={() => {
+                    setShowMajorFilter(!showMajorFilter);
+                    setShowGPAFilter(false);
+                    setShowSATFilter(false);
+                    setShowBackgroundFilter(false);
+                    setShowCountriesFilter(false);
+                    setShowBudgetFilter(false);
+                    setShowSortFilter(false);
+                  }}
+                  className={`flex py-3 px-4 justify-center items-center gap-2 border border-black ${filters.majors.length > 0 ? 'bg-accent' : 'bg-light-secondary dark:bg-dark-secondary'} cursor-pointer`}
+                  style={{ boxShadow: '2px 2px 0 0 #000' }}
+                >
+                  <span className="text-black font-outfit text-base font-medium">
+                    Major {filters.majors.length > 0 ? `(${filters.majors.length} selected)` : ''}
+                  </span>
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                    <path d="M1 1L6 6L11 1" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </button>
+
+                {/* Major Filter Modal */}
+                {showMajorFilter && (
+                  <div className="absolute top-full left-0 mt-2 bg-light-bg dark:bg-dark-secondary border border-black p-6 z-50 w-96 max-h-96 overflow-y-auto" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-outfit font-semibold text-lg text-black">Select Majors</h3>
+                      <button onClick={() => setShowMajorFilter(false)} className="w-8 h-8 flex items-center justify-center bg-accent border border-black">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <path d="M12 4L4 12M4 4L12 12" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="space-y-2 mb-4">
+                      {['Computer Science', 'Engineering', 'Business', 'Biology', 'Chemistry', 'Physics', 'Mathematics', 'Economics', 'Political Science', 'Psychology', 'Environmental Science', 'Art', 'Music', 'Literature', 'History'].map((major) => (
+                        <label key={major} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={filters.majors.includes(major)}
+                            onChange={() => handleMajorToggle(major)}
+                            className="w-5 h-5 accent-[#FF9269]"
+                          />
+                          <span className="font-outfit text-sm text-black">{major}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={clearAllFilters}
+                        className="flex-1 py-2 border border-black bg-light-secondary font-outfit font-medium"
+                      >
+                        Reset
+                      </button>
+                      <button
+                        onClick={() => { applyFilters(); setShowMajorFilter(false); }}
+                        className="flex-1 py-2 border border-black bg-accent font-outfit font-semibold"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Background Filter */}
+              <div className="relative">
+                <button 
+                  onClick={() => {
+                    setShowBackgroundFilter(!showBackgroundFilter);
+                    setShowGPAFilter(false);
+                    setShowSATFilter(false);
+                    setShowMajorFilter(false);
+                    setShowCountriesFilter(false);
+                    setShowBudgetFilter(false);
+                    setShowSortFilter(false);
+                  }}
+                  className={`flex py-3 px-4 justify-center items-center gap-2 border border-black ${filters.backgrounds.length > 0 ? 'bg-accent' : 'bg-light-secondary dark:bg-dark-secondary'} cursor-pointer`}
+                  style={{ boxShadow: '2px 2px 0 0 #000' }}
+                >
+                  <span className="text-black font-outfit text-base font-medium">
+                    Background {filters.backgrounds.length > 0 ? `(${filters.backgrounds[0]})` : ''}
+                  </span>
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                    <path d="M1 1L6 6L11 1" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </button>
+
+                {/* Background Filter Modal */}
+                {showBackgroundFilter && (
+                  <div className="absolute top-full left-0 mt-2 bg-light-bg dark:bg-dark-secondary border border-black p-6 z-50 w-80" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-outfit font-semibold text-lg text-black">Select Background</h3>
+                      <button onClick={() => setShowBackgroundFilter(false)} className="w-8 h-8 flex items-center justify-center bg-accent border border-black">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <path d="M12 4L4 12M4 4L12 12" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="space-y-2 mb-4">
+                      {['African American', 'Hispanic', 'Asian American', 'Caucasian', 'Native American', 'Pacific Islander', 'International'].map((background) => (
+                        <label key={background} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="background"
+                            checked={filters.backgrounds.includes(background)}
+                            onChange={() => handleBackgroundToggle(background)}
+                            className="w-5 h-5 accent-[#FF9269]"
+                          />
+                          <span className="font-outfit text-sm text-black">{background}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={clearAllFilters}
+                        className="flex-1 py-2 border border-black bg-light-secondary font-outfit font-medium"
+                      >
+                        Reset
+                      </button>
+                      <button
+                        onClick={() => { applyFilters(); setShowBackgroundFilter(false); }}
+                        className="flex-1 py-2 border border-black bg-accent font-outfit font-semibold"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Countries Filter */}
+              <div className="relative">
+                <button 
+                  onClick={() => {
+                    setShowCountriesFilter(!showCountriesFilter);
+                    setShowGPAFilter(false);
+                    setShowSATFilter(false);
+                    setShowMajorFilter(false);
+                    setShowBackgroundFilter(false);
+                    setShowBudgetFilter(false);
+                    setShowSortFilter(false);
+                  }}
+                  className={`flex py-3 px-4 justify-center items-center gap-2 border border-black ${filters.countries.length > 0 ? 'bg-accent' : 'bg-light-secondary dark:bg-dark-secondary'} cursor-pointer`}
+                  style={{ boxShadow: '2px 2px 0 0 #000' }}
+                >
+                  <span className="text-black font-outfit text-base font-medium">Countries</span>
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                    <path d="M1 1L6 6L11 1" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </button>
+
+                {/* Countries Filter Modal */}
+                {showCountriesFilter && (
+                  <div className="absolute top-full left-0 mt-2 bg-light-bg dark:bg-dark-secondary border border-black p-6 z-50 w-80" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-outfit font-semibold text-lg text-black">Select Countries</h3>
+                      <button onClick={() => setShowCountriesFilter(false)} className="w-8 h-8 flex items-center justify-center bg-accent border border-black">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <path d="M12 4L4 12M4 4L12 12" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      </button>
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="Search countries"
+                      className="w-full p-2 border border-black mb-4 font-outfit"
+                    />
+
+                    <div className="space-y-2 mb-4">
+                      {[{name: 'United Kingdom', flag: '🇬🇧'}, {name: 'United States', flag: '🇺🇸'}, {name: 'Australia', flag: '🇦🇺'}, {name: 'India', flag: '🇮🇳'}, {name: 'Spain', flag: '🇪🇸'}, {name: 'Canada', flag: '🇨🇦'}].map((country) => (
+                        <label key={country.name} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={filters.countries.includes(country.name)}
+                            onChange={() => handleCountryToggle(country.name)}
+                            className="w-5 h-5 accent-[#FF9269]"
+                          />
+                          <span className="text-xl">{country.flag}</span>
+                          <span className="font-outfit text-sm text-black">{country.name}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={clearAllFilters}
+                        className="flex-1 py-2 border border-black bg-light-secondary font-outfit font-medium"
+                      >
+                        Reset
+                      </button>
+                      <button
+                        onClick={() => { applyFilters(); setShowCountriesFilter(false); }}
+                        className="flex-1 py-2 border border-black bg-accent font-outfit font-semibold"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Budget Filter */}
+              <div className="relative">
+                <button 
+                  onClick={() => {
+                    setShowBudgetFilter(!showBudgetFilter);
+                    setShowGPAFilter(false);
+                    setShowSATFilter(false);
+                    setShowMajorFilter(false);
+                    setShowBackgroundFilter(false);
+                    setShowCountriesFilter(false);
+                    setShowSortFilter(false);
+                  }}
+                  className="flex py-3 px-4 justify-center items-center gap-2 border border-black bg-light-secondary dark:bg-dark-secondary cursor-pointer"
+                  style={{ boxShadow: '2px 2px 0 0 #000' }}
+                >
+                  <span className="text-black font-outfit text-base font-medium">Budget</span>
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                    <path d="M1 1L6 6L11 1" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              {/* Sort Filter */}
+              <div className="relative">
+                <button 
+                  onClick={() => {
+                    setShowSortFilter(!showSortFilter);
+                    setShowGPAFilter(false);
+                    setShowSATFilter(false);
+                    setShowMajorFilter(false);
+                    setShowBackgroundFilter(false);
+                    setShowCountriesFilter(false);
+                    setShowBudgetFilter(false);
+                  }}
+                  className="flex py-3 px-4 justify-center items-center gap-2 border border-black bg-light-secondary dark:bg-dark-secondary cursor-pointer"
+                  style={{ boxShadow: '2px 2px 0 0 #000' }}
+                >
+                  <span className="text-black font-outfit text-base font-medium">Sort</span>
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                    <path d="M1 1L6 6L11 1" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                </button>
+
+                {/* Sort Filter Modal */}
+                {showSortFilter && (
+                  <div className="absolute top-full left-0 mt-2 bg-light-bg dark:bg-dark-secondary border border-black p-6 z-50 w-80" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-outfit font-semibold text-lg text-black">Sort by</h3>
+                      <button onClick={() => setShowSortFilter(false)} className="w-8 h-8 flex items-center justify-center bg-accent border border-black">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <path d="M12 4L4 12M4 4L12 12" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="space-y-2 mb-4">
+                      {[
+                        { value: 'most_essays', label: 'Most essays' },
+                        { value: 'highest_sat', label: 'Highest SAT' },
+                        { value: 'highest_gpa', label: 'Highest GPA' },
+                        { value: 'most_universities', label: 'Number of universities admitted to' }
+                      ].map((option) => (
+                        <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="sort"
+                            checked={filters.sortBy === option.value}
+                            onChange={() => handleSortChange(option.value)}
+                            className="w-5 h-5 accent-[#FF9269]"
+                          />
+                          <span className="font-outfit text-sm text-black">{option.label}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={clearAllFilters}
+                        className="flex-1 py-2 border border-black bg-light-secondary font-outfit font-medium"
+                      >
+                        Reset
+                      </button>
+                      <button
+                        onClick={() => { applyFilters(); setShowSortFilter(false); }}
+                        className="flex-1 py-2 border border-black bg-accent font-outfit font-semibold"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Clear Filters */}
+              <button 
+                onClick={clearAllFilters}
+                className="flex py-3 px-4 justify-center items-center gap-2 border border-black bg-light-secondary dark:bg-dark-secondary cursor-pointer hover:bg-gray-200"
+                style={{ boxShadow: '2px 2px 0 0 #000' }}
+              >
+                <span className="text-black font-outfit text-base font-medium underline">Clear Filters</span>
               </button>
             </div>
 
@@ -528,6 +999,7 @@ function DiscoverStudentsPage() {
             </div>
           </div>
         </div>
+
       </DotPatternBackground>
     </div>
   );

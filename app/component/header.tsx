@@ -74,13 +74,19 @@ export default function Header() {
               href="/profile"
               className="relative w-[42px] h-[42px] overflow-hidden border border-black flex-shrink-0 bg-accent shadow-[2px_2px_0_0_rgba(0,0,0,0.8)]"
             >
-              <Image
-                src="/profile-pic-1.jpg"
-                alt="Profile"
-                fill
-                className="object-cover"
-                sizes="42px"
-              />
+              {user.photoURL ? (
+                <Image
+                  src={user.photoURL}
+                  alt="Profile"
+                  fill
+                  className="object-cover"
+                  sizes="42px"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-[#FF9269] text-white text-lg font-bold">
+                  {user.displayName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
+                </div>
+              )}
             </Link>
           )}
 

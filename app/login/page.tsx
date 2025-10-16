@@ -21,12 +21,13 @@ const SunIcon = (
 
 function Login() {
   const router = useRouter();
-  const { signIn, loading, error, user } = useAuth();
+  const { signIn, signInWithGoogle, loading, error, user } = useAuth();
   
   // Form state
   const [email, setEmail] = useState('simonesharma@gmail.com');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSignIn, setIsGoogleSignIn] = useState(false);
   
   // theme: 'light' | 'dark'
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -95,6 +96,21 @@ function Login() {
       console.error('Login failed:', err);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Handle Google sign-in
+  const handleGoogleSignIn = async () => {
+    if (isGoogleSignIn || loading) return;
+
+    setIsGoogleSignIn(true);
+    try {
+      await signInWithGoogle();
+      // Redirect will happen via useEffect when user state changes
+    } catch (err) {
+      console.error('Google sign-in failed:', err);
+    } finally {
+      setIsGoogleSignIn(false);
     }
   };
 
@@ -217,15 +233,26 @@ function Login() {
             <div className="space-y-3">
               <button 
                 type="button"
-                className={`w-full py-4 px-4 flex items-center justify-center gap-3 transition-colors ${cardText}`} style={{background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000'}}
+                onClick={handleGoogleSignIn}
+                disabled={isGoogleSignIn || loading}
+                className={`w-full py-4 px-4 flex items-center justify-center gap-3 transition-colors hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed ${cardText}`} style={{background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000'}}
               >
-                <Image 
-                  src="/google.png" 
-                  alt="Google" 
-                  width={20} 
-                  height={20} 
-                />
-                <span className={`text-[16px] font-outfit font-medium leading-normal ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>Sign up with Google</span>
+                {isGoogleSignIn ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+                    <span className={`text-[16px] font-outfit font-medium leading-normal ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>Signing in...</span>
+                  </>
+                ) : (
+                  <>
+                    <Image 
+                      src="/google.png" 
+                      alt="Google" 
+                      width={20} 
+                      height={20} 
+                    />
+                    <span className={`text-[16px] font-outfit font-medium leading-normal ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>Sign up with Google</span>
+                  </>
+                )}
               </button>
 
               <button 

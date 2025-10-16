@@ -17,5 +17,5 @@ const EssayBuilderPage = () => {
 
 export default withAuthProtection(EssayBuilderPage, {
   requireAuth: true,
-  requireProfile: true
+  requireProfile: false
 });

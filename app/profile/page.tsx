@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Header from '../component/header';
 import { DotPatternBackground } from '../component/DotPatternBackground';
 import { auth } from '../firebase/config';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { withAuthProtection } from '@/lib/hooks/useAuthProtection';
 import { useRouter } from 'next/navigation';
 
@@ -103,6 +103,39 @@ function ProfilePage() {
     setShowPreferencesModal(false);
     // Redirect to onboarding
     router.push('/onboarding');
+  };
+
+  // Handle sign out
+  const handleSignOut = async () => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        // Get Firebase ID token
+        const idToken = await user.getIdToken();
+        
+        // Call backend signout endpoint to revoke refresh tokens
+        try {
+          await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com'}/api/auth/signout`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${idToken}`,
+              'Content-Type': 'application/json',
+            },
+          });
+        } catch (error) {
+          console.log('Backend signout call failed, continuing with Firebase signout:', error);
+        }
+      }
+      
+      // Sign out from Firebase
+      await signOut(auth);
+      
+      // Redirect to home page
+      router.push('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      alert('Failed to sign out. Please try again.');
+    }
   };
 
   // Listen for authentication state changes
@@ -568,7 +601,11 @@ function ProfilePage() {
                       </div>
                       
                       <div className="flex justify-center gap-4">
-                        <button className="px-6 py-3 bg-light-bg dark:bg-dark-bg border border-light-text dark:border-dark-text text-light-text dark:text-dark-text hover:bg-[#FF9269] hover:text-white transition-colors font-outfit font-medium" style={{ boxShadow: '2px 2px 0 0 rgba(0,0,0,0.8)' }}>
+                        <button 
+                          onClick={handleSignOut}
+                          className="px-6 py-3 bg-light-bg dark:bg-dark-bg border border-light-text dark:border-dark-text text-light-text dark:text-dark-text hover:bg-[#FF9269] hover:text-white transition-colors font-outfit font-medium" 
+                          style={{ boxShadow: '2px 2px 0 0 rgba(0,0,0,0.8)' }}
+                        >
                           Log Out
                         </button>
                         <button className="px-6 py-3 bg-[#FF9269] border border-light-text dark:border-dark-text text-white hover:bg-[#ff7b4d] transition-colors font-outfit font-medium" style={{ boxShadow: '2px 2px 0 0 rgba(0,0,0,0.8)' }}>

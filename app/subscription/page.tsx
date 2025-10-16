@@ -42,6 +42,12 @@ function SubscriptionPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successData, setSuccessData] = useState<any>(null);
   const [plans, setPlans] = useState<PaymentPlan[]>([]);
+  const [showQuestionnaireModal, setShowQuestionnaireModal] = useState(false);
+  const [questionnaireData, setQuestionnaireData] = useState({
+    colleges: '1',
+    deadline: 'In several months'
+  });
+  const [recommendedPlan, setRecommendedPlan] = useState<PaymentPlan | null>(null);
 
   // Default plans (fallback) - matching backend structure
   const defaultPlans: PaymentPlan[] = [
@@ -144,6 +150,16 @@ function SubscriptionPage() {
   const handlePaymentCancel = () => {
     setShowPaymentForm(false);
     setSelectedPlan(null);
+  };
+
+  const handleQuestionnaireSubmit = () => {
+    // Simple recommendation logic based on questionnaire
+    const collegeCount = parseInt(questionnaireData.colleges);
+    const deadline = questionnaireData.deadline;
+    
+    // Recommend 100 credits plan (popular choice)
+    const recommended = plans.find(p => p.credits === 100 && p.packageType === 'student_profiles') || plans[1];
+    setRecommendedPlan(recommended);
   };
 
   const calculateSavings = (credits: number, price: number) => {
@@ -318,7 +334,10 @@ function SubscriptionPage() {
                 We get it. We&apos;ve compiled a 2 min questionnaire that might help you decide which one to go for.
               </p>
             </div>
-            <button className="inline-flex items-center justify-center gap-2.5 px-6 py-3 bg-[#ff9068] border border-solid border-black shadow-[2px_2px_0px_#000000] hover:shadow-[1px_1px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] transition-all duration-150">
+            <button 
+              onClick={() => setShowQuestionnaireModal(true)}
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-3 bg-[#ff9068] border border-solid border-black shadow-[2px_2px_0px_#000000] hover:shadow-[1px_1px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] transition-all duration-150"
+            >
               <span className="[font-family:'Outfit-SemiBold',Helvetica] font-semibold text-light-text dark:text-dark-text text-base">Take Questionnaire</span>
             </button>
           </div>
@@ -467,6 +486,134 @@ function SubscriptionPage() {
         newBalance={successData?.newBalance || 0}
         planDescription={successData?.plan?.description || ''}
       />
+
+      {/* Questionnaire Modal */}
+      {showQuestionnaireModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-light-bg dark:bg-dark-secondary border border-black w-full max-w-md p-8 relative shadow-[4px_4px_0px_#000000]">
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setShowQuestionnaireModal(false);
+                setRecommendedPlan(null);
+              }}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-[#FF9269] border border-black hover:bg-[#ff8050] transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+
+            <div className="flex flex-col gap-6">
+              <div>
+                <h3 className="font-outfit font-bold text-xl text-light-text dark:text-dark-text mb-2">
+                  Unsure which plan is right for you?
+                </h3>
+                <p className="font-outfit text-sm text-light-p dark:text-dark-text">
+                  Fill in the fields below and let us recommend a package to suit your needs
+                </p>
+              </div>
+
+              {!recommendedPlan ? (
+                <>
+                  {/* Question 1 */}
+                  <div className="flex flex-col gap-2">
+                    <label className="font-outfit font-medium text-sm text-light-text dark:text-dark-text">
+                      How many colleges do you plan to apply to?
+                    </label>
+                    <select
+                      value={questionnaireData.colleges}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, colleges: e.target.value})}
+                      className="w-full p-3 border border-black bg-light-bg dark:bg-dark-tertiary text-light-text dark:text-dark-text font-outfit appearance-none cursor-pointer"
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 12px center'
+                      }}
+                    >
+                      <option value="1">1</option>
+                      <option value="2-3">2-3</option>
+                      <option value="4-5">4-5</option>
+                      <option value="6+">6+</option>
+                    </select>
+                  </div>
+
+                  {/* Question 2 */}
+                  <div className="flex flex-col gap-2">
+                    <label className="font-outfit font-medium text-sm text-light-text dark:text-dark-text">
+                      When is the deadline for your application?
+                    </label>
+                    <select
+                      value={questionnaireData.deadline}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, deadline: e.target.value})}
+                      className="w-full p-3 border border-black bg-light-bg dark:bg-dark-tertiary text-light-text dark:text-dark-text font-outfit appearance-none cursor-pointer"
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 12px center'
+                      }}
+                    >
+                      <option value="In several months">In several months</option>
+                      <option value="In a few weeks">In a few weeks</option>
+                      <option value="Less than a week">Less than a week</option>
+                    </select>
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    onClick={handleQuestionnaireSubmit}
+                    className="w-full py-3 bg-[#FF9269] border border-black text-light-text font-outfit font-semibold shadow-[2px_2px_0px_#000000] hover:shadow-[1px_1px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
+                  >
+                    Get Recommendation
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* Recommendation */}
+                  <div className="flex flex-col gap-4">
+                    <p className="font-outfit font-semibold text-sm text-light-text dark:text-dark-text">
+                      Our recommendation:
+                    </p>
+                    
+                    <div className="border-2 border-[#FF9269] p-6 flex flex-col gap-4">
+                      <div className="flex items-center gap-2">
+                        <Image src="/Coins.svg" alt="Coins" width={24} height={13} />
+                        <span className="font-outfit font-bold text-3xl text-light-text dark:text-dark-text">
+                          {recommendedPlan.credits}
+                        </span>
+                      </div>
+                      <p className="font-outfit font-semibold text-sm text-light-text dark:text-dark-text">
+                        CREDITS
+                      </p>
+                      <p className="font-outfit text-sm text-light-text dark:text-dark-text">
+                        <span className="font-medium">Unlock </span>
+                        <span className="font-bold">{recommendedPlan.profilesUnlocked || 10} profiles</span>
+                        {recommendedPlan.revisionsUnlocked && (
+                          <span> / <span className="font-bold">{recommendedPlan.revisionsUnlocked} revisions</span></span>
+                        )}
+                      </p>
+                      
+                      <button
+                        onClick={() => {
+                          handlePlanSelect(recommendedPlan);
+                          setShowQuestionnaireModal(false);
+                        }}
+                        className="w-full py-3 bg-[#FF9269] border border-black text-light-text font-outfit font-semibold shadow-[2px_2px_0px_#000000] hover:bg-[#ff8050] transition-colors"
+                      >
+                        Select
+                      </button>
+                    </div>
+
+                    <p className="font-outfit text-xs text-light-p dark:text-dark-text leading-relaxed">
+                      This package is ideal for a student who knows which university they want to get into and have a lot of time for your next draft
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     </DotPatternBackground>
   );
