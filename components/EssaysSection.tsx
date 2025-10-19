@@ -1,14 +1,33 @@
-import React from 'react';
+'use client';
 
-const EssaysSection = () => {
-  const essays = [
+import React, { useState } from 'react';
+import Image from 'next/image';
+
+interface Essay {
+  id?: string | number;
+  title: string;
+  content: string;
+  wordCount?: number | string;
+  prompt?: string;
+  submittedFor?: string;
+}
+
+interface EssaysSectionProps {
+  essays?: Essay[];
+  studentName?: string;
+  studentImage?: string;
+}
+
+const EssaysSection: React.FC<EssaysSectionProps> = ({ essays: propEssays, studentName = 'Rebecca Reeves', studentImage = '/profile.png' }) => {
+  const [selectedEssay, setSelectedEssay] = useState<Essay | null>(null);
+  // Fallback essays if none provided
+  const fallbackEssays = [
     {
       id: 1,
       title: 'Diversity Essay',
-      status: 'In Progress',
-      date: 'Due Sep 1, 2024',
-      content: 'Submitted for Harvard application',
-      wordCount: '490',
+      submittedFor: 'Submitted for Harvard application',
+      content: 'Growing up in a multicultural neighborhood shaped my worldview in profound ways. My family immigrated from Mexico when I was five, and I quickly learned to navigate between two cultures. At home, we spoke Spanish and maintained our traditions, while at school, I embraced American customs and the English language. This duality taught me the value of diversity and the importance of cultural understanding.\n\nIn high school, I founded the Cultural Exchange Club, bringing together students from various backgrounds to share their heritage through food, music, and stories. What started as a small group of ten students grew to over fifty members within a year. We organized monthly events celebrating different cultures, from Diwali to Lunar New Year, creating a space where everyone felt represented and valued.\n\nThese experiences taught me that diversity is not just about representation—it\'s about creating environments where different perspectives can thrive and contribute to collective growth. I bring this understanding to everything I do, whether it\'s group projects, community service, or casual conversations. I believe that the most innovative solutions come from diverse teams that challenge each other\'s assumptions and build on each other\'s strengths.',
+      wordCount: 490,
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -21,10 +40,9 @@ const EssaysSection = () => {
     {
       id: 2,
       title: 'Overcoming Challenges',
-      status: 'In Progress',
-      date: 'Due Sep 1, 2024',
-      content: 'Submitted for Bath application',
-      wordCount: '549',
+      submittedFor: 'Submitted for Bath application',
+      content: 'When I was diagnosed with dyslexia in seventh grade, I felt like my academic dreams were crumbling. Reading, which came naturally to my peers, was a daily struggle for me. Simple assignments took hours, and I often felt frustrated and defeated. However, this challenge became the catalyst for my greatest personal growth.\n\nI refused to let dyslexia define my capabilities. I worked with specialists, developed new study strategies, and learned to advocate for myself. I discovered audiobooks, text-to-speech software, and color-coded note-taking systems that transformed my learning experience. What once took me hours now took minutes, and I began to excel in subjects I had previously struggled with.\n\nMore importantly, this experience taught me resilience and empathy. I started a peer tutoring program for students with learning differences, helping them discover their own strategies for success. I learned that challenges are not roadblocks—they are opportunities to develop strength, creativity, and compassion. My dyslexia taught me to think differently, and that different thinking is often what leads to innovation.',
+      wordCount: 549,
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -35,10 +53,9 @@ const EssaysSection = () => {
     {
       id: 3,
       title: 'Personal Statement',
-      status: 'In Progress',
-      date: 'Due Sep 1, 2024',
-      content: 'Submitted for Bath application',
-      wordCount: '820',
+      submittedFor: 'Submitted for Bath application',
+      content: 'From an early stage in my education, I have been drawn to problem-solving, creativity, and the intersection between technology and people. This interest naturally evolved into my pursuit of computer science and design, where I discovered how impactful thoughtful design can be in shaping how people interact with products, services, and even each other. Alongside my academic background, I have gained hands-on experience working on real projects where I have applied my skills in web design, user experience, and teamwork.\n\nThese experiences have not only deepened my technical abilities but also helped me grow personally, building confidence, resilience, and a genuine excitement for contributing to meaningful work. One of the most important lessons I have learned through my academic and practical experiences is that design and technology do not exist in isolation. A design is not successful simply because it looks attractive; it must serve a purpose, solve a problem, and create value for the user.\n\nIn this sense, I see design as a bridge between people\'s needs and technological possibilities. I am motivated by the challenge of creating solutions that are not only functional but also intuitive and delightful to use. This mindset has guided me in every project I have undertaken, from building small-scale prototypes during my studies to collaborating with startups where the stakes were much higher.',
+      wordCount: 820,
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 20H21" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -49,10 +66,9 @@ const EssaysSection = () => {
     {
       id: 4,
       title: 'Why This Major',
-      status: 'In Progress',
-      date: 'Due Sep 1, 2024',
-      content: 'Submitted for Bath application',
-      wordCount: '729',
+      submittedFor: 'Submitted for Yale application',
+      content: 'Psychology offers a unique lens through which to explore the intricate interplay between biology, behavior, and environment, providing a framework for understanding human experiences. I\'m particularly drawn to the field\'s potential to alleviate suffering and promote well-being, empowering individuals to lead fulfilling lives.\n\nMy fascination with psychology began in high school when I volunteered at a local mental health clinic. Witnessing the transformative power of therapy and the resilience of individuals facing mental health challenges ignited my passion for this field. I was struck by how psychological interventions could help people overcome trauma, manage anxiety, and build healthier relationships.\n\nThrough my coursework and research experiences, I\'ve developed a strong foundation in psychological theories and research methods. I\'ve explored topics ranging from cognitive development to social psychology, and I\'m particularly interested in the intersection of psychology and neuroscience. Understanding how brain structure and function relate to behavior and mental processes fascinates me, and I believe this interdisciplinary approach is crucial for advancing our understanding of the human mind.',
+      wordCount: 729,
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -63,10 +79,9 @@ const EssaysSection = () => {
     {
       id: 5,
       title: 'Reducing distractions',
-      status: 'Not Started',
-      date: 'Due Oct 15, 2024',
-      content: 'Submitted for Bath application',
-      wordCount: '339',
+      submittedFor: 'Submitted for Harvard application',
+      content: 'In our hyperconnected world, distractions are everywhere. Social media notifications, endless streaming content, and the constant buzz of our devices make it increasingly difficult to focus on what truly matters. I learned this lesson the hard way during my sophomore year when my grades began to slip despite spending hours "studying."\n\nI realized I was spending more time scrolling through social media than actually engaging with my coursework. This wake-up call prompted me to develop strategies for managing distractions. I started by tracking my screen time and was shocked to discover I was spending over five hours daily on my phone. I implemented the Pomodoro Technique, working in focused 25-minute intervals with short breaks, and used website blockers during study sessions.\n\nThe results were transformative. My grades improved, but more importantly, I felt more present and engaged in my learning. I now help other students develop similar strategies through peer mentoring sessions.',
+      wordCount: 339,
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -77,10 +92,9 @@ const EssaysSection = () => {
     {
       id: 6,
       title: 'What Drives Me',
-      status: 'Not Started',
-      date: 'Due Nov 1, 2024',
-      content: 'Submitted for Bath application',
-      wordCount: '593',
+      submittedFor: 'Submitted for Columbia application',
+      content: 'What drives me is the desire to make a tangible difference in people\'s lives through innovation and service. This motivation stems from my upbringing in a community where resources were limited but determination was abundant. I watched my parents work multiple jobs to provide for our family, and their resilience taught me the value of hard work and perseverance.\n\nIn high school, I channeled this drive into founding a tutoring program for underprivileged students in my community. What started as helping a few neighbors with homework grew into a structured program serving over 50 students. Seeing younger students gain confidence in their abilities and achieve academic success they never thought possible reinforced my belief that education is the key to breaking cycles of poverty.\n\nThis experience also taught me that making a difference requires more than good intentions—it requires strategic thinking, collaboration, and sustained effort. I learned to recruit volunteers, secure funding, and build partnerships with local organizations. These skills, combined with my academic interests in social entrepreneurship, drive my ambition to create scalable solutions to social problems.',
+      wordCount: 593,
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -92,7 +106,36 @@ const EssaysSection = () => {
     }
   ];
 
-  // Removed unused functions getStatusColor and getProgressPercentage to clean up the code
+  // Ensure we always have exactly 6 essays
+  const essays = (() => {
+    const backendEssays = propEssays || [];
+    const totalNeeded = 6;
+    
+    // If we have 6 or more from backend, use first 6
+    if (backendEssays.length >= totalNeeded) {
+      return backendEssays.slice(0, totalNeeded);
+    }
+    
+    // If we have some from backend but less than 6, fill with fallback
+    if (backendEssays.length > 0) {
+      const needed = totalNeeded - backendEssays.length;
+      const fallbacksToUse = fallbackEssays.slice(0, needed);
+      return [...backendEssays, ...fallbacksToUse];
+    }
+    
+    // If no backend essays, use all fallback
+    return fallbackEssays;
+  })();
+
+  // Count words in essay content
+  const countWords = (text: string) => {
+    return text.trim().split(/\s+/).length;
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setSelectedEssay(null);
+  };
 
   return (
     <div className="mt-16 mb-16 border border-black dark:border-dark-text">
@@ -104,8 +147,11 @@ const EssaysSection = () => {
             <div key={essay.id} className="bg-[#FFF3ED] border-[1px] border-black rounded-none p-6 hover:shadow-md transition-all duration-300 flex flex-col h-full">
               {/* Top section with word count and button */}
               <div className="flex justify-between items-center mb-8">
-                <span className="text-sm font-medium text-[#EF622F]">{essay.wordCount} words</span>
-                <button className="text-[#4B5563] hover:text-gray-700 p-2 rounded-full hover:bg-gray-200">
+                <span className="text-sm font-medium text-[#EF622F]">{essay.wordCount || countWords(essay.content)} words</span>
+                <button 
+                  onClick={() => setSelectedEssay(essay)}
+                  className="text-[#4B5563] hover:text-gray-700 p-2 rounded-full hover:bg-gray-200 transition-all"
+                >
                 <svg width="39" height="38" viewBox="0 0 39 38" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <g filter="url(#filter0_d_1_375)">
                     <rect x="0.666656" width="36" height="36" fill="#FF9169" shapeRendering="crispEdges"/>
@@ -131,12 +177,77 @@ const EssaysSection = () => {
               {/* Bottom section with title and description */}
               <div className="mt-auto pt-16">
                 <h3 className="text-lg font-semibold text-[#111827] mb-1">{essay.title}</h3>
-                <p className="text-sm text-[#6B7280]">{essay.content}</p>
+                <p className="text-sm text-[#6B7280]">{essay.submittedFor || essay.content}</p>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Essay Modal */}
+      {selectedEssay && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={closeModal}>
+          <div 
+            className="bg-white dark:bg-dark-bg max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-black relative"
+            onClick={(e) => e.stopPropagation()}
+            style={{ boxShadow: '4px 4px 0 0 #000' }}
+          >
+            {/* Header */}
+            <div className="sticky top-0 bg-white dark:bg-dark-bg border-b-2 border-black p-6 flex justify-between items-start z-10">
+              <div>
+                <h2 className="text-2xl font-bold text-black dark:text-white mb-4">{selectedEssay.title}</h2>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-black">
+                    <Image 
+                      src={studentImage} 
+                      alt={studentName}
+                      width={40}
+                      height={40}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-black dark:text-white">{studentName}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">17 Jun 2025</p>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={closeModal}
+                className="bg-[#FF9169] border-2 border-black p-2 hover:bg-[#ff7b4d] transition-colors"
+                style={{ boxShadow: '2px 2px 0 0 #000' }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6L18 18" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              {/* Submitted For Section */}
+              {selectedEssay.submittedFor && (
+                <div className="mb-6 pb-6 border-b-2 border-gray-200">
+                  <p className="text-base font-medium text-black dark:text-white">
+                    {selectedEssay.submittedFor}
+                  </p>
+                </div>
+              )}
+              
+              {/* Essay Content */}
+              <div className="prose prose-lg max-w-none text-black dark:text-white">
+                {selectedEssay.content.split('\n').map((paragraph, index) => (
+                  paragraph.trim() && (
+                    <p key={index} className="mb-4 leading-relaxed">
+                      {paragraph}
+                    </p>
+                  )
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -957,81 +957,6 @@ function UniversityProfile() {
                 {roadmapData && !roadmapLoading && (
                   <div>
                     {/* Student Profiles Section */}
-                    {roadmapData.students && roadmapData.students.length > 0 && (
-                      <div className="mb-12">
-                        <div className="flex items-center justify-between mb-8">
-                          <div>
-                            <h2 className="text-2xl font-bold text-light-text dark:text-dark-text">
-                              Students at {roadmapData.university?.pages?.Overview?.collegeName || roadmapData.university?.pages?.About?.name || university?.name}
-                            </h2>
-                            <p className="text-light-p dark:text-dark-text mt-2">
-                              {roadmapData.generated ?
-                                `✨ Generated ${roadmapData.students.length} student profiles` :
-                                `${roadmapData.students.length} student profiles available`
-                              }
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-sm text-light-p dark:text-dark-text">
-                              Click on any profile to view details
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {roadmapData.students.map((student: StudentProfile, index: number) => (
-                            <div
-                              key={student.id || index}
-                              className="bg-light-bg dark:bg-dark-tertiary border-2 border-black p-4 cursor-pointer hover:bg-light-secondary dark:hover:bg-dark-secondary transition-colors"
-                              style={{ boxShadow: '4px 4px 0 0 #000' }}
-                              onClick={() => window.location.href = `/student-profile?id=${student.id || index}`}
-                            >
-                              <div className="flex items-center mb-4">
-                                <div className="w-12 h-12 bg-[#FF9169] rounded-full border-2 border-black flex items-center justify-center mr-4">
-                                  <span className="text-white font-bold text-lg">
-                                    {student.name?.charAt(0) || 'S'}
-                                  </span>
-                                </div>
-                                <div>
-                                  <h3 className="font-bold text-light-text dark:text-dark-text">
-                                    {student.name || `Student ${index + 1}`}
-                                  </h3>
-                                  <p className="text-sm text-light-p dark:text-dark-text">
-                                    {(student.major as string) || 'Undeclared'}
-                                  </p>
-                                </div>
-                              </div>
-
-                              <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                  <span className="text-light-p dark:text-dark-text">GPA:</span>
-                                  <span className="text-light-text dark:text-dark-text font-medium">
-                                    {(student.gpa as { current?: string | number })?.current || 'N/A'}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-light-p dark:text-dark-text">SAT:</span>
-                                  <span className="text-light-text dark:text-dark-text font-medium">
-                                    {(student.testScores as { sat?: string | number })?.sat || 'N/A'}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-light-p dark:text-dark-text">Essays:</span>
-                                  <span className="text-light-text dark:text-dark-text font-medium">
-                                    {(student.essays as Array<unknown>)?.length || 0}
-                                  </span>
-                                </div>
-                              </div>
-
-                              <p className="text-xs text-light-p dark:text-dark-text mt-3 line-clamp-2">
-                                {(student.bio as string) || (student.discoveryInfo as { description?: string })?.description || 'Click to view full profile'}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
                     {/* Original Roadmap Components */}
                     <ReadinessRing />
                     <CaseStudyCard />
@@ -1040,7 +965,7 @@ function UniversityProfile() {
                     <TimelineSection />
                     <ExtracurricularsSection />
                     <ScholarshipsAwardsSection />
-                    <ProofBankSection />
+                    <ProofBankSection students={roadmapData.students || []} />
                   </div>
                 )}
 

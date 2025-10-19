@@ -36,10 +36,11 @@ interface Student {
 
 function DiscoverStudentsPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, refreshToken } = useAuth();
 
   // State management
   const [students, setStudents] = useState<Student[]>([]);
+  const [studentsData, setStudentsData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -66,13 +67,13 @@ function DiscoverStudentsPage() {
     sortBy: 'highest_gpa' as 'most_essays' | 'highest_sat' | 'highest_gpa' | 'most_universities'
   });
 
-  // Fallback data for when API is not available - keeping one dummy profile for testing
+  // Fallback data for when API is not available
   const fallbackStudents: Student[] = [
     {
-      id: 3,
-      name: "Mei Wong",
-      stats: "30 Essays | 12 Colleges | 6 Awards | 9 Activities | 5 Q&As | 7 AP/IBs",
-      description: "Business Administration student at Harvard University | 700K in Scholarships | Profile includes Cover Letter and Internship Guide",
+      id: 1,
+      name: "Jordan Hughes",
+      stats: "38 Essays | 11 Colleges | 5 Awards | 10 Activities | 10 Q&As | 8 AP/IBs",
+      description: "Economics & Political Science student at Stanford University | 500K in Scholarships | Profile includes Research and Summer Research Email Templates",
       background: "African American male student from USA",
       interests: "Computer Science, Artificial Intelligence, Robotics",
       sat: "1580",
@@ -80,21 +81,56 @@ function DiscoverStudentsPage() {
       uwGpa: "4.5",
       profileImage: "/profile.png",
       colleges: ["/mit.png", "/harvard.png", "/college.png", "/bath.png"],
+      sticker: "/sticker1.png",
+      hasSticker: true
+    },
+    {
+      id: 2,
+      name: "Sofia Martinez",
+      stats: "25 Essays | 8 Colleges | 3 Awards | 7 Activities | 4 Q&As | 5 AP/IBs",
+      description: "Biology & Environmental Studies student at UC Berkeley | 300K in Scholarships | Profile includes Personal Statement and Research Proposal Templates",
+      background: "Hispanic female student from Mexico",
+      interests: "Environmental Science, Sustainability, Renewable Energy",
+      sat: "1560",
+      gpa: "4.2",
+      uwGpa: "4.0",
+      profileImage: "/profile.png",
+      colleges: ["/mit.png", "/harvard.png", "/college.png", "/bath.png"],
       hasSticker: false
+    },
+    {
+      id: 3,
+      name: "Mei Wong",
+      stats: "30 Essays | 12 Colleges | 6 Awards | 9 Activities | 5 Q&As | 7 AP/IBs",
+      description: "Business Administration student at Harvard University | 700K in Scholarships | Profile includes Cover Letter and Internship Guide",
+      background: "Asian American female student from Canada",
+      interests: "Business, Finance, Marketing",
+      sat: "1590",
+      gpa: "4.6",
+      uwGpa: "4.3",
+      profileImage: "/profile.png",
+      colleges: ["/mit.png", "/harvard.png", "/college.png", "/bath.png"],
+      hasSticker: false
+    },
+    {
+      id: 4,
+      name: "Liam Johnson",
+      stats: "40 Essays | 15 Colleges | 8 Awards | 12 Activities | 6 Q&As | 9 AP/IBs",
+      description: "Physics & Astronomy student at MIT | 1M in Scholarships | Profile includes Research Paper and Conference Presentation Guidelines",
+      background: "Caucasian male student from Australia",
+      interests: "Physics, Astronomy, Mathematics",
+      sat: "1600",
+      gpa: "4.9",
+      uwGpa: "4.6",
+      profileImage: "/profile.png",
+      colleges: ["/mit.png", "/harvard.png", "/college.png", "/bath.png"],
+      sticker: "/sticker2.png",
+      hasSticker: true
     }
   ];
 
   // Fetch students data from backend
   const fetchStudentsData = async () => {
-    // Always show fallback data for testing purposes
-    console.log('🔄 Using fallback data for testing');
-    setStudents(fallbackStudents);
-    setLoading(false);
-    setError(null);
-    return;
-
-    // Commented out API call for testing - uncomment when ready for production
-    /*
     if (!user) {
       console.log('❌ No user found, using fallback data');
       setStudents(fallbackStudents);
@@ -108,7 +144,7 @@ function DiscoverStudentsPage() {
       const token = await refreshToken();
       const searchParams = new URLSearchParams();
       searchParams.set('page', currentPage.toString());
-      searchParams.set('limit', studentsPerPage.toString());
+      searchParams.set('limit', '10');
       if (searchQuery.trim()) {
         searchParams.set('search', searchQuery);
       }
@@ -131,6 +167,7 @@ function DiscoverStudentsPage() {
 
       const data = await response.json();
       console.log('✅ API Data received:', data);
+      setStudentsData(data);
 
       if (data.success && data.data?.students) {
         setStudents(data.data.students);
@@ -138,12 +175,9 @@ function DiscoverStudentsPage() {
     } catch (err: any) {
       console.error('❌ Failed to fetch students:', err);
       setError(err.message);
-      // Fallback to mock data on error
-      setStudents(fallbackStudents);
     } finally {
       setLoading(false);
     }
-    */
   };
 
   useEffect(() => {
@@ -225,7 +259,7 @@ function DiscoverStudentsPage() {
 
   // Handle student card click
   const handleStudentClick = (student: Student) => {
-    router.push(`/student-profile/${student.id}`);
+    router.push(`/student-profile?id=${student.id}`);
   };
 
   // Handle 403 subscription required error

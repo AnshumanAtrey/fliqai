@@ -20,16 +20,16 @@ interface ChartDataItem {
 export const EssayStyleSection = ({ essayData }: EssayStyleSectionProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // Default data if none provided
-  const defaultData = {
-    narrative: 50,
-    reflection: 20,
-    impact: 10,
-    academics: 10,
-    voice: 10
-  };
+  // Check if we have any data
+  const hasData = essayData && Object.values(essayData).some(val => val > 0);
 
-  const data = essayData || defaultData;
+  const data = essayData || {
+    narrative: 0,
+    reflection: 0,
+    impact: 0,
+    academics: 0,
+    voice: 0
+  };
 
   // Convert data to chart format
   const chartData: ChartDataItem[] = [
@@ -202,36 +202,48 @@ export const EssayStyleSection = ({ essayData }: EssayStyleSectionProps) => {
         </span>
       </div>
       
-      {/* Responsive Donut Chart - Made much bigger by removing constraints */}
-      <div className="flex items-center justify-center w-full mt-6 mb-6">
-        <div className="w-full aspect-square">
-          <svg 
-            ref={svgRef}
-            viewBox="0 0 700 700"
-            className="w-full h-full"
-            style={{ maxWidth: '520px', maxHeight: '520px' }}
-          >
-          </svg>
+      {/* Conditional rendering based on data availability */}
+      {!hasData ? (
+        /* Placeholder when no data */
+        <div className="w-full mt-6 mb-6 border-2 border-black dark:border-dark-text bg-light-bg dark:bg-dark-tertiary p-12 flex items-center justify-center" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+          <p className="text-center text-light-p dark:text-dark-text font-outfit text-base">
+            Submit your essay to see essay style
+          </p>
         </div>
-      </div>
-      
-      {/* Legend */}
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {chartData.map((item, index) => (
-          <div key={index} className="flex items-center">
-            <div 
-              className="w-4 h-4 border-2 border-black mr-3 flex-shrink-0" 
-              style={{ 
-                backgroundColor: item.color,
-                boxShadow: '1px 1px 0 #000'
-              }}
-            ></div>
-            <span className="text-sm text-light-text dark:text-dark-text font-outfit font-medium">
-              {item.title} ({item.value}%)
-            </span>
+      ) : (
+        <>
+          {/* Responsive Donut Chart - Made much bigger by removing constraints */}
+          <div className="flex items-center justify-center w-full mt-6 mb-6">
+            <div className="w-full aspect-square">
+              <svg 
+                ref={svgRef}
+                viewBox="0 0 700 700"
+                className="w-full h-full"
+                style={{ maxWidth: '520px', maxHeight: '520px' }}
+              >
+              </svg>
+            </div>
           </div>
-        ))}
-      </div>
+          
+          {/* Legend */}
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {chartData.map((item, index) => (
+              <div key={index} className="flex items-center">
+                <div 
+                  className="w-4 h-4 border-2 border-black mr-3 flex-shrink-0" 
+                  style={{ 
+                    backgroundColor: item.color,
+                    boxShadow: '1px 1px 0 #000'
+                  }}
+                ></div>
+                <span className="text-sm text-light-text dark:text-dark-text font-outfit font-medium">
+                  {item.title} ({item.value}%)
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };

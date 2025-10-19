@@ -87,6 +87,7 @@ const fallbackProfile: StudentProfile = {
 
 function StudentProfile() {
   const [profile, setProfile] = useState<StudentProfile>(fallbackProfile);
+  const [essays, setEssays] = useState<any[]>([]);
   const searchParams = useSearchParams();
   const studentId = searchParams.get('id') || '1';
 
@@ -172,6 +173,11 @@ function StudentProfile() {
           }
         };
         setProfile(transformedProfile);
+        
+        // Extract essays from API response
+        if (apiProfile.essays && Array.isArray(apiProfile.essays)) {
+          setEssays(apiProfile.essays);
+        }
       }
     } catch (err: unknown) {
       console.error('❌ Failed to fetch profile:', err);
@@ -436,7 +442,11 @@ function StudentProfile() {
 
           {/* Essays Section */}
           <div className="mt-12">
-            <EssaysSection />
+            <EssaysSection 
+              essays={essays}
+              studentName={profile.name}
+              studentImage={profile.profileImage}
+            />
           </div>
 
           {/* Questions & Answers Section */}

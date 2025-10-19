@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface ProfileCardProps {
   name: string;
@@ -7,6 +10,8 @@ interface ProfileCardProps {
   major: string;
   description: string;
   imageUrl: string;
+  studentId?: string | number;
+  onViewProfile: (id: string | number) => void;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -15,6 +20,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   major,
   description,
   imageUrl,
+  studentId,
+  onViewProfile,
 }) => {
   return (
     <div className="border-2 border-black bg-light-bg dark:bg-dark-tertiary p-2 h-[570px] w-[350px]  flex flex-col" style={{ boxShadow: '4px 4px 0 0 #000' }}>
@@ -36,6 +43,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       </div>
       <p className="text-light-p dark:text-dark-text mb-4 text-sm flex-grow">{description}</p>
       <button
+        onClick={() => studentId && onViewProfile(studentId)}
         className="mt-auto bg-[#FF9169] text-black hover:bg-black hover:text-[#FF9169] transition-colors w-full border-2 border-black px-4 py-2 text-sm font-medium self-start"
         style={{ boxShadow: '2px 2px 0 0 #000' }}
       >
@@ -45,16 +53,39 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   );
 };
 
-const ProofBankSection = () => {
-  const profiles = [
+interface StudentProfile {
+  id?: string | number;
+  name?: string;
+  major?: string | { name?: string };
+  bio?: string;
+  discoveryInfo?: { description?: string };
+  admissionYear?: number;
+  profileImage?: string;
+}
+
+interface ProofBankSectionProps {
+  students?: StudentProfile[];
+}
+
+const ProofBankSection: React.FC<ProofBankSectionProps> = ({ students = [] }) => {
+  const router = useRouter();
+
+  const handleViewProfile = (studentId: string | number) => {
+    router.push(`/student-profile?id=${studentId}`);
+  };
+
+  // Fallback profiles if no students data
+  const fallbackProfiles = [
     {
+      id: 'fallback-1',
       name: 'Rahul Sharma',
       admissionYear: 2023,
       major: 'Computer Science',
       description: 'Secured a full scholarship through the National Talent Search Examination (NTSE).',
-      imageUrl: '/Bank-1.jpg', // Replace with actual image path
+      imageUrl: '/Bank-1.jpg',
     },
     {
+      id: 'fallback-2',
       name: 'Priya Patel',
       admissionYear: 2023,
       major: 'Mechanical Engineering',
@@ -62,6 +93,7 @@ const ProofBankSection = () => {
       imageUrl: '/Bank-2.jpg',
     },
     {
+      id: 'fallback-3',
       name: 'Amit Kumar',
       admissionYear: 2022,
       major: 'Electrical Engineering',
@@ -69,6 +101,7 @@ const ProofBankSection = () => {
       imageUrl: '/Bank-3.jpg',
     },
     {
+      id: 'fallback-4',
       name: 'Neha Gupta',
       admissionYear: 2023,
       major: 'Biotechnology',
@@ -76,6 +109,7 @@ const ProofBankSection = () => {
       imageUrl: '/Bank-4.jpg',
     },
     {
+      id: 'fallback-5',
       name: 'Vikram Singh',
       admissionYear: 2022,
       major: 'Civil Engineering',
@@ -83,6 +117,7 @@ const ProofBankSection = () => {
       imageUrl: '/Bank-5.jpg',
     },
     {
+      id: 'fallback-6',
       name: 'Ananya Desai',
       admissionYear: 2023,
       major: 'Aerospace Engineering',
@@ -90,6 +125,18 @@ const ProofBankSection = () => {
       imageUrl: '/Bank-6.jpg',
     },
   ];
+
+  // Use student data if available, otherwise use fallback
+  const displayProfiles = students.length > 0
+    ? students.slice(0, 6).map((student, index) => ({
+        id: student.id || `student-${index}`,
+        name: student.name || `Student ${index + 1}`,
+        admissionYear: student.admissionYear || 2023,
+        major: typeof student.major === 'string' ? student.major : (student.major as any)?.name || 'Undeclared',
+        description: (student.bio as string) || (student.discoveryInfo as any)?.description || 'Click to view full profile',
+        imageUrl: student.profileImage || fallbackProfiles[index % fallbackProfiles.length].imageUrl,
+      }))
+    : fallbackProfiles;
 
   return (
     <div className="py-12 px-[80px] max-w-7xl mx-auto">
@@ -101,7 +148,7 @@ const ProofBankSection = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-light-text dark:text-dark-text">
-        {profiles.map((profile, index) => (
+        {displayProfiles.map((profile, index) => (
           <ProfileCard
             key={index}
             name={profile.name}
@@ -109,6 +156,8 @@ const ProofBankSection = () => {
             major={profile.major}
             description={profile.description}
             imageUrl={profile.imageUrl}
+            studentId={profile.id}
+            onViewProfile={handleViewProfile}
           />
         ))}
       </div>

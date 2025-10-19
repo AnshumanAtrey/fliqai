@@ -205,32 +205,55 @@ function BrowseUniversities() {
       setLoading(true);
       setError(null);
 
-      const queryParams = new URLSearchParams({ exact: 'false' });
+      const queryParams = new URLSearchParams({ limit: '20' });
       if (selectedCountry) {
         queryParams.append('country', selectedCountry);
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com'}/api/university/name/${encodeURIComponent(name)}?${queryParams.toString()}`);
-
-      if (!response.ok) {
-        throw new Error('Failed to search universities');
-      }
+      console.log('🔍 Searching for:', name);
+      
+      // Use the /search/:term endpoint for better results
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com'}/api/university/search/${encodeURIComponent(name)}?${queryParams.toString()}`);
 
       const data = await response.json();
+      console.log('📦 Search response:', data);
 
-      if (data.success) {
-        const universitiesArray = Array.isArray(data.data) ? data.data : [data.data];
-        const transformedUniversities = universitiesArray
-          .map(transformUniversity)
-          .filter((uni: University) => uni.name);
-
-        setUniversities(transformedUniversities);
-      } else {
-        setError('No universities found matching your search.');
+      // Handle 404 or unsuccessful response
+      if (!response.ok || !data.success) {
+        console.log('❌ Search failed:', data);
+        setError(data.error || data.message || 'No universities found matching your search.');
         setUniversities([]);
+        return;
       }
+
+      // Handle different response formats
+      let universitiesArray = [];
+      if (data.data.universities) {
+        // Response format: { data: { universities: [...] } }
+        universitiesArray = data.data.universities;
+      } else if (Array.isArray(data.data)) {
+        // Response format: { data: [...] }
+        universitiesArray = data.data;
+      } else {
+        // Response format: { data: {...} } (single university)
+        universitiesArray = [data.data];
+      }
+
+      console.log('📊 Found universities:', universitiesArray.length);
+
+      const transformedUniversities = universitiesArray
+        .map(transformUniversity)
+        .filter((uni: University) => uni.name);
+
+      console.log('✅ Transformed universities:', transformedUniversities.length);
+
+      if (transformedUniversities.length === 0) {
+        setError('No universities found matching your search.');
+      }
+
+      setUniversities(transformedUniversities);
     } catch (err) {
-      console.error('Error searching universities:', err);
+      console.error('❌ Error searching universities:', err);
       setError('Failed to search universities. Please try again.');
       setUniversities([]);
     } finally {

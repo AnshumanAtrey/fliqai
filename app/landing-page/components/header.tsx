@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import logo from '../assets/fliq-black.svg';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <header className="sticky top-0 z-50 flex w-full max-w-[1640px] px-4 md:px-10 lg:px-[120px] py-4 justify-between items-center border-b border-[#F3EAE1] bg-[#FAF6F2]">
@@ -23,10 +25,21 @@ const Header = () => {
           <a href="#faqs" className="text-[#5D5237] font-outfit text-sm font-medium hover:opacity-75 transition-opacity">FAQs</a>
         </nav>
         
-        {/* Desktop Sign Up Button */}
-        <button className="hidden md:flex items-center justify-center gap-2 px-3 py-2 md:px-6 md:py-3 rounded-xl border border-[#191919] bg-[#191919] hover:bg-[#333333] transition-colors">
-          <span className="text-white font-outfit text-xs md:text-sm font-medium">Sign Up</span>
-        </button>
+        {/* Desktop Login & Sign Up Buttons */}
+        <div className="hidden md:flex items-center gap-3">
+          <button 
+            onClick={() => router.push('/login')}
+            className="flex items-center justify-center gap-2 px-3 py-2 md:px-6 md:py-3 rounded-xl border border-[#191919] bg-transparent hover:bg-[#F3EAE1] transition-colors"
+          >
+            <span className="text-[#191919] font-outfit text-xs md:text-sm font-medium">Login</span>
+          </button>
+          <button 
+            onClick={() => router.push('/signup')}
+            className="flex items-center justify-center gap-2 px-3 py-2 md:px-6 md:py-3 rounded-xl border border-[#191919] bg-[#191919] hover:bg-[#333333] transition-colors"
+          >
+            <span className="text-white font-outfit text-xs md:text-sm font-medium">Sign Up</span>
+          </button>
+        </div>
 
         {/* Mobile Hamburger Menu Icon */}
         <button 
@@ -80,12 +93,26 @@ const Header = () => {
             >
               FAQs
             </a>
-            <button 
-              className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[#191919] bg-[#191919] hover:bg-[#333333] transition-colors mt-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <span className="text-white font-outfit text-sm font-medium">Sign Up</span>
-            </button>
+            <div className="flex flex-col gap-3 mt-2">
+              <button 
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[#191919] bg-transparent hover:bg-[#F3EAE1] transition-colors"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  router.push('/login');
+                }}
+              >
+                <span className="text-[#191919] font-outfit text-sm font-medium">Login</span>
+              </button>
+              <button 
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-[#191919] bg-[#191919] hover:bg-[#333333] transition-colors"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  router.push('/signup');
+                }}
+              >
+                <span className="text-white font-outfit text-sm font-medium">Sign Up</span>
+              </button>
+            </div>
           </nav>
         </div>
       )}
