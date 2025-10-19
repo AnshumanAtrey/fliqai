@@ -24,10 +24,12 @@ const ReadinessRingSection = () => {
     ]
   };
 
-  const drawDonutChart = (canvas: HTMLCanvasElement, data: any) => {
+  const drawDonutChart = (canvas: HTMLCanvasElement, data: { segments: Array<{ label: string; value: number; color: string }> }) => {
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const outerRadius = 180;
@@ -66,7 +68,7 @@ const ReadinessRingSection = () => {
     }
   }, []);
 
-  const Label = ({ text, position }) => (
+  const Label = ({ text, position }: { text: string; position: string }) => (
     <div 
       className={`absolute border-2 text-light-text dark:text-dark-text bg-light-bg dark:bg-dark-tertiary border-black px-2 py-1 text-sm font-medium ${position}`}
       style={{ boxShadow: '2px 2px 0 0 #000' }}

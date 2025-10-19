@@ -101,16 +101,17 @@ export function useApi<T>(
             }
 
             return result;
-        } catch (error: any) {
+        } catch (error: unknown) {
             if (!isMountedRef.current) return null;
 
             // Don't update state if request was aborted
-            if (error.name === 'AbortError' || error.message?.includes('aborted')) {
+            const errorObj = error as Error;
+            if (errorObj.name === 'AbortError' || errorObj.message?.includes('aborted')) {
                 return null;
             }
 
-            const errorMessage = error.message || 'An unexpected error occurred';
-            const errorType = error.type || ErrorType.UNKNOWN;
+            const errorMessage = (error as Error)?.message || 'An unexpected error occurred';
+            const errorType = (error as { type?: ErrorType })?.type || ErrorType.UNKNOWN;
 
             setState(prev => ({
                 ...prev,
@@ -195,7 +196,7 @@ export function useApiGet<T>(
 /**
  * Hook for making POST requests
  */
-export function useApiPost<T, D = any>(
+export function useApiPost<T, D extends Record<string, unknown> = Record<string, unknown>>(
     endpoint: string,
     requestOptions?: RequestOptions,
     hookOptions?: {
@@ -235,7 +236,7 @@ export function useApiPost<T, D = any>(
 /**
  * Hook for making PUT requests
  */
-export function useApiPut<T, D = any>(
+export function useApiPut<T, D extends Record<string, unknown> = Record<string, unknown>>(
     endpoint: string,
     requestOptions?: RequestOptions,
     hookOptions?: {
@@ -294,7 +295,7 @@ export function useApiDelete<T>(
 /**
  * Hook for making multiple API requests in parallel
  */
-export function useApiMultiple<T extends Record<string, any>>(
+export function useApiMultiple<T extends Record<string, unknown>>(
     requests: Record<keyof T, RequestFunction<T[keyof T]>>,
     options?: {
         immediate?: boolean;
@@ -330,7 +331,8 @@ export function useApiPaginated<T>(
         onSuccess?: (data: T[], hasMore: boolean) => void;
         onError?: (error: string, errorType: ErrorType) => void;
     }
-): UseApiReturn<T[]> & {
+): Omit<UseApiReturn<{ items: T[]; hasMore: boolean; total?: number }>, 'data'> & {
+    data: T[];
     loadMore: () => Promise<void>;
     hasMore: boolean;
     page: number;
@@ -349,7 +351,7 @@ export function useApiPaginated<T>(
         [endpoint, page, pageSize, requestOptions]
     );
 
-    const baseHook = useApi(requestFn, {
+    const baseHook = useApi<{ items: T[]; hasMore: boolean; total?: number }>(requestFn, {
         immediate: false,
         onSuccess: (response) => {
             const newItems = response.items || [];

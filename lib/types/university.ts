@@ -74,7 +74,7 @@ export interface UniversityAdmissions {
     overalladmissionrate: string[];
     men?: string;
     studentsenrolled: string[];
-    [key: string]: any; // For SAT/ACT score distributions
+    [key: string]: unknown; // For SAT/ACT score distributions
   };
 }
 

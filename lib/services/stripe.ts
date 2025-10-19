@@ -65,9 +65,9 @@ class StripeManager implements StripeService {
     }
 
     this.isInitializing = true;
-    
+
     this.initializationPromise = this.initializeStripe();
-    
+
     try {
       this.stripe = await this.initializationPromise;
       return this.stripe;
@@ -131,11 +131,8 @@ class StripeManager implements StripeService {
     }
 
     try {
-      const result = await this.stripe.confirmPayment({
-        clientSecret,
-        confirmParams: {
-          payment_method: paymentMethodId,
-        },
+      const result = await this.stripe.confirmCardPayment(clientSecret, {
+        payment_method: paymentMethodId,
       });
 
       if (result.error) {
@@ -159,8 +156,8 @@ class StripeManager implements StripeService {
    * Create payment method from card element
    */
   async createPaymentMethod(
-    cardElement: any,
-    billingDetails?: any
+    cardElement: import('@stripe/stripe-js').StripeCardElement,
+    billingDetails?: Record<string, unknown>
   ): Promise<{ paymentMethod?: StripePaymentMethod; error?: string }> {
     if (!this.stripe) {
       throw new StripeServiceError('Stripe not initialized');
@@ -196,7 +193,7 @@ class StripeManager implements StripeService {
   private async initializeStripe(): Promise<Stripe | null> {
     // Ensure configuration is loaded
     await configManager.loadConfig();
-    
+
     const stripeConfig = this.getConfig();
     if (!stripeConfig) {
       throw new StripeServiceError('Stripe configuration not available');
@@ -234,29 +231,31 @@ class StripeManager implements StripeService {
   /**
    * Handle Stripe errors with proper logging and user-friendly messages
    */
-  private handleStripeError(error: any, context: string): void {
+  private handleStripeError(error: unknown, context: string): void {
     console.error(`${context}:`, error);
-    
+
     if (error instanceof StripeServiceError) {
       throw error;
     }
 
     // Convert Stripe errors to StripeServiceError
-    if (error?.type) {
+    const stripeError = error as StripeError;
+    if (stripeError?.type) {
       throw new StripeServiceError(
-        this.getUserFriendlyErrorMessage(error),
-        error.code,
-        error.type,
-        error
+        this.getUserFriendlyErrorMessage(stripeError),
+        stripeError.code || 'UNKNOWN_CODE',
+        stripeError.type,
+        error as Error
       );
     }
 
     // Handle generic errors
+    const genericError = error as { message?: string };
     throw new StripeServiceError(
-      `${context}: ${error?.message || 'Unknown error'}`,
+      `${context}: ${genericError?.message || 'Unknown error'}`,
       'UNKNOWN_ERROR',
       'generic_error',
-      error
+      error as Error
     );
   }
 

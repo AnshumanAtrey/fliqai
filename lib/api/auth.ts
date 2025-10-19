@@ -3,12 +3,11 @@
  * Handles Firebase authentication with backend integration
  */
 
-import { 
-  Auth, 
-  User as FirebaseUser, 
-  getAuth, 
+import {
+  Auth,
+  User as FirebaseUser,
+  getAuth,
   signInWithEmailAndPassword,
-  signInWithCustomToken,
   signOut as firebaseSignOut,
   onAuthStateChanged as firebaseOnAuthStateChanged,
   getIdToken as firebaseGetIdToken,
@@ -25,7 +24,7 @@ class AuthManagerImpl implements AuthManager {
   private currentUser: User | null = null;
   private authStateListeners: ((user: User | null) => void)[] = [];
   private initialized: boolean = false;
-  private firebaseConfig: any = null;
+  private firebaseConfig: Record<string, unknown> | null = null;
 
   constructor() {
     this.initializeAuth();
@@ -40,33 +39,40 @@ class AuthManagerImpl implements AuthManager {
     try {
       // Load Firebase configuration from backend
       const configResponse = await backendAPI.loadConfiguration();
-      
+
       if (configResponse?.success && configResponse?.config?.firebase) {
-        this.firebaseConfig = configResponse.config.firebase;
-        
-        // Validate required Firebase config fields
-        const requiredFields = ['apiKey', 'authDomain', 'projectId'];
-        const missingFields = requiredFields.filter(field => !this.firebaseConfig[field]);
-        
-        if (missingFields.length > 0) {
-          throw new Error(`Missing Firebase configuration fields: ${missingFields.join(', ')}`);
+        const firebaseConfig = configResponse.config.firebase;
+
+        // Ensure firebase config is a proper object with string keys
+        if (typeof firebaseConfig === 'object' && firebaseConfig !== null && !Array.isArray(firebaseConfig)) {
+          this.firebaseConfig = firebaseConfig as Record<string, unknown>;
+
+          // Validate required Firebase config fields
+          const requiredFields = ['apiKey', 'authDomain', 'projectId'];
+          const missingFields = requiredFields.filter(field => !this.firebaseConfig![field]);
+
+          if (missingFields.length > 0) {
+            throw new Error(`Missing Firebase configuration fields: ${missingFields.join(', ')}`);
+          }
+
+          // Initialize Firebase with backend config
+          if (!getApps().length) {
+            initializeApp(this.firebaseConfig);
+          }
+        } else {
+          throw new Error('Invalid Firebase configuration format received from backend');
         }
-        
-        // Initialize Firebase with backend config
-        if (!getApps().length) {
-          initializeApp(this.firebaseConfig);
-        }
-        
+
         this.auth = getAuth();
-        
+
         // Set up Firebase auth state listener
         firebaseOnAuthStateChanged(this.auth, async (firebaseUser) => {
           if (firebaseUser) {
             // Get ID token and validate with backend
             try {
               const idToken = await firebaseUser.getIdToken();
-              const response = await this.validateWithBackend(idToken) as any;
-              
+              const response = await this.validateWithBackend(idToken) as { success?: boolean; data?: { uid: string; email: string; displayName: string; profileCompleted?: boolean } };
+
               if (response?.success && response?.data) {
                 this.currentUser = {
                   uid: response.data.uid,
@@ -82,7 +88,7 @@ class AuthManagerImpl implements AuthManager {
           } else {
             this.currentUser = null;
           }
-          
+
           this.notifyAuthStateListeners(this.currentUser);
         });
       } else {
@@ -102,7 +108,7 @@ class AuthManagerImpl implements AuthManager {
   /**
    * Validate Firebase user with backend
    */
-  private async validateWithBackend(idToken: string): Promise<any> {
+  private async validateWithBackend(idToken: string): Promise<{ success?: boolean; data?: { uid: string; email: string; displayName: string; profileCompleted?: boolean } }> {
     return await backendAPI.post('/auth/signin', { idToken }, { requireAuth: false });
   }
 
@@ -153,17 +159,17 @@ class AuthManagerImpl implements AuthManager {
       // Create user in Firebase (client-side)
       const { createUserWithEmailAndPassword } = await import('firebase/auth');
       const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
-      
+
       // Update display name if provided
       if (displayName) {
         await updateProfile(userCredential.user, { displayName });
       }
-      
+
       // Try to register with backend (optional - for storing additional user data)
       try {
         const idToken = await userCredential.user.getIdToken();
-        const response = await this.validateWithBackend(idToken) as any;
-        
+        const response = await this.validateWithBackend(idToken);
+
         if (response?.success && response?.data) {
           // Backend has user data
           const user: User = {
@@ -177,16 +183,18 @@ class AuthManagerImpl implements AuthManager {
       } catch (backendError) {
         console.warn('Backend registration failed, continuing with Firebase user:', backendError);
       }
-      
+
       // Fallback to Firebase user data
       const user = this.mapFirebaseUser(userCredential.user);
       this.currentUser = user;
       this.notifyAuthStateListeners(this.currentUser);
       return user;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign up error:', error);
-      throw new Error(this.getAuthErrorMessage(error.code || error.message));
+      const errorCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined;
+      const errorMessage = error instanceof Error ? error.message : 'Sign up failed';
+      throw new Error(this.getAuthErrorMessage(errorCode || errorMessage));
     }
   }
 
@@ -206,11 +214,11 @@ class AuthManagerImpl implements AuthManager {
     try {
       // Sign in with Firebase first
       const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
-      
+
       // Get ID token and validate with backend
       const idToken = await userCredential.user.getIdToken();
-      const response = await this.validateWithBackend(idToken) as any;
-      
+      const response = await this.validateWithBackend(idToken);
+
       if (response?.success && response?.data) {
         const user = {
           uid: response.data.uid,
@@ -220,15 +228,17 @@ class AuthManagerImpl implements AuthManager {
         this.currentUser = user;
         return user;
       }
-      
+
       // Fallback to Firebase user if backend validation fails
       const user = this.mapFirebaseUser(userCredential.user);
       this.currentUser = user;
       return user;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign in error:', error);
-      throw new Error(this.getAuthErrorMessage(error.code || error.message));
+      const errorCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined;
+      const errorMessage = error instanceof Error ? error.message : 'Sign in failed';
+      throw new Error(this.getAuthErrorMessage(errorCode || errorMessage));
     }
   }
 
@@ -243,16 +253,16 @@ class AuthManagerImpl implements AuthManager {
     try {
       // Create Google Auth Provider
       const provider = new GoogleAuthProvider();
-      
+
       // Sign in with popup
       const result = await signInWithPopup(this.auth, provider);
       const idToken = await result.user.getIdToken();
-      
+
       // Call backend OAuth endpoint
       const response = await backendAPI.post('/auth/oauth', {
         idToken,
         provider: 'google'
-      }, { requireAuth: false }) as any;
+      }, { requireAuth: false }) as { success?: boolean; data?: { uid: string; email: string; displayName: string; profileCompleted?: boolean }; message?: string };
 
       if (response?.success && response?.data) {
         const user: User = {
@@ -261,15 +271,17 @@ class AuthManagerImpl implements AuthManager {
           displayName: response.data.displayName,
           profileCompleted: response.data.profileCompleted ?? false
         };
-        
+
         this.currentUser = user;
         return user;
       } else {
         throw new Error(response?.message || 'Google sign in failed');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Google sign in error:', error);
-      throw new Error(this.getAuthErrorMessage(error.code || error.message));
+      const errorCode = error && typeof error === 'object' && 'code' in error ? (error as { code: string }).code : undefined;
+      const errorMessage = error instanceof Error ? error.message : 'Google sign in failed';
+      throw new Error(this.getAuthErrorMessage(errorCode || errorMessage));
     }
   }
 
@@ -282,7 +294,7 @@ class AuthManagerImpl implements AuthManager {
       if (this.auth) {
         await firebaseSignOut(this.auth);
       }
-      
+
       // Call backend signout if available
       try {
         await backendAPI.post('/auth/signout', {});
@@ -303,7 +315,7 @@ class AuthManagerImpl implements AuthManager {
    */
   onAuthStateChanged(callback: (user: User | null) => void): () => void {
     this.authStateListeners.push(callback);
-    
+
     // If not initialized yet, wait for initialization
     if (!this.initialized) {
       this.initializeAuth().then(() => {
@@ -313,7 +325,7 @@ class AuthManagerImpl implements AuthManager {
       // Immediately call with current state
       callback(this.currentUser);
     }
-    
+
     // Return unsubscribe function
     return () => {
       const index = this.authStateListeners.indexOf(callback);
@@ -376,13 +388,13 @@ class AuthManagerImpl implements AuthManager {
           return 'Authentication failed. Please try again.';
       }
     }
-    
+
     // Backend error messages
     const message = errorCode.toLowerCase();
     if (message.includes('email already') || message.includes('already exists')) {
       return 'An account with this email already exists.';
     }
-    
+
     return errorCode || 'Authentication failed. Please try again.';
   }
 }

@@ -24,7 +24,7 @@ class BackendAPIClient implements ApiClient {
         return 'https://fliq-backend-bxhr.onrender.com';
       }
     }
-    
+
     // Production or server-side
     return process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
   }
@@ -32,27 +32,27 @@ class BackendAPIClient implements ApiClient {
   /**
    * Load configuration from backend
    */
-  async loadConfiguration(): Promise<any> {
+  async loadConfiguration(): Promise<{ success: boolean; config?: Record<string, unknown>; message?: string }> {
     try {
       const response = await fetch(`${this.baseUrl}/api/config/client`);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to load configuration: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       // Backend returns both 'data' and 'config' for compatibility
       // Extract the configuration from either field
       const configData = data.data || data.config;
-      
-      return { 
-        success: data.success, 
+
+      return {
+        success: data.success,
         config: configData
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Configuration load error:', error);
-      return { success: false, message: error.message };
+      return { success: false, message: error instanceof Error ? error.message : 'Configuration load failed' };
     }
   }
 
@@ -74,13 +74,13 @@ class BackendAPIClient implements ApiClient {
    * Make HTTP request to backend
    */
   private async makeRequest<T>(
-    method: string, 
-    endpoint: string, 
-    data?: any, 
+    method: string,
+    endpoint: string,
+    data?: Record<string, unknown>,
     options: RequestOptions = {}
   ): Promise<T> {
     const url = `${this.baseUrl}/api${endpoint}`;
-    
+
     // Get auth token if required
     let authToken = null;
     if (options.requireAuth !== false) {
@@ -120,13 +120,13 @@ class BackendAPIClient implements ApiClient {
       }
 
       return responseData;
-    } catch (error: any) {
+    } catch (error: unknown) {
       clearTimeout(timeoutId);
-      
-      if (error.name === 'AbortError') {
+
+      if (error instanceof Error && error.name === 'AbortError') {
         throw new Error('Request timeout');
       }
-      
+
       throw error;
     }
   }
@@ -141,14 +141,14 @@ class BackendAPIClient implements ApiClient {
   /**
    * POST request
    */
-  async post<T>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
+  async post<T>(endpoint: string, data?: Record<string, unknown>, options?: RequestOptions): Promise<T> {
     return this.makeRequest<T>('POST', endpoint, data, options);
   }
 
   /**
    * PUT request
    */
-  async put<T>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
+  async put<T>(endpoint: string, data?: Record<string, unknown>, options?: RequestOptions): Promise<T> {
     return this.makeRequest<T>('PUT', endpoint, data, options);
   }
 
@@ -194,12 +194,12 @@ class BackendAPIClient implements ApiClient {
   /**
    * Sign out user
    */
-  async signOut(): Promise<ApiResponse<any>> {
-    const result = await this.post<ApiResponse<any>>('/auth/signout', {}, { requireAuth: true });
-    
+  async signOut(): Promise<ApiResponse<Record<string, unknown>>> {
+    const result = await this.post<ApiResponse<Record<string, unknown>>>('/auth/signout', {}, { requireAuth: true });
+
     // Clear stored token
     this.clearToken();
-    
+
     return result;
   }
 
@@ -244,9 +244,9 @@ class BackendAPIClient implements ApiClient {
       // Decode payload to check expiry (basic check)
       const payload = JSON.parse(atob(parts[1]));
       const now = Date.now() / 1000;
-      
+
       return payload.exp && payload.exp > now;
-    } catch (error) {
+    } catch (error: unknown) {
       console.warn('Invalid token format:', error);
       return false;
     }

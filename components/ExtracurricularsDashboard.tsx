@@ -121,11 +121,11 @@ const ExtracurricularsDashboard: React.FC = () => {
   }, [inView]);
   return (
     <div className="bg-white dark:bg-dark-tertiary p-6 border border-black dark:border-dark-text">
-      <h2 className="text-3xl font-bold text-black dark:text-white pt-4 font-outfit">Extracurriculars & Scholarships</h2>
       
       <div ref={ref} className="flex flex-col lg:flex-row gap-14">
         {/* Left Section - Legend */}
-        <div className="w-full lg:w-2/5 text-black pt-6">
+        <div className="w-full flex flex-col lg:w-1/2 text-black pt-6 gap-6">
+          <h2 className="text-3xl font-bold text-black dark:text-white pt-4 font-outfit">Extracurriculars & Scholarships</h2>
           <div className="border border-black bg-[#FFF3ED] p-4">
             <div className="space-y-4">
               {data.map((item) => (
@@ -180,7 +180,7 @@ const ExtracurricularsDashboard: React.FC = () => {
       </div>
 
       {/* Scholarships Section */}
-      <div className="mt-12">
+      <div>
         <div className="text-black">
           {/* Tier 1 */}
           <div style={{ padding: '8px', backgroundColor: '#FFF3ED'}} className="w-1/4 relative z-10 top-[1px] border-[1px] border-black border-b-0">

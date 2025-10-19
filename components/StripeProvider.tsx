@@ -8,7 +8,7 @@ interface StripeProviderProps {
   children: ReactNode;
 }
 
-let stripePromise: Promise<any> | null = null;
+let stripePromise: Promise<import('@stripe/stripe-js').Stripe | null> | null = null;
 
 const getStripe = (publishableKey: string) => {
   if (!stripePromise) {

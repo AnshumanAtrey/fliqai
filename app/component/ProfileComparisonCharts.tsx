@@ -35,10 +35,10 @@ const ProfileComparisonCharts = () => {
     name = ''
   }: Partial<PieLabelRenderProps> & { percent?: number; name?: string }) => {
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius * 1.4;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    const isRightSide = Math.cos(-midAngle * RADIAN) > 0;
+    const radius = Number(outerRadius || 0) * 1.4;
+    const x = Number(cx || 0) + radius * Math.cos(-Number(midAngle || 0) * RADIAN);
+    const y = Number(cy || 0) + radius * Math.sin(-Number(midAngle || 0) * RADIAN);
+    const isRightSide = Math.cos(-Number(midAngle || 0) * RADIAN) > 0;
 
     return (
       <g>
@@ -60,7 +60,7 @@ const ProfileComparisonCharts = () => {
           dominantBaseline="central"
           className="text-xs font-semibold"
         >
-          {`${(percent * 100).toFixed(0)}%`}
+          {`${(Number(percent || 0) * 100).toFixed(0)}%`}
         </text>
       </g>
     );

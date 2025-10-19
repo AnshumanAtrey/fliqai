@@ -20,14 +20,6 @@ module.exports = {
       lineHeight: {
         'paragraph': '150%',
       },
-      spacing: {
-        '8': '8px',
-        '16': '16px',   
-        '24': '24px',
-        '32': '32px',
-        '40': '40px',
-        '48': '48px',
-      },
       colors: {
         // Light Theme
         'light-bg': '#FFFBF1',
@@ -35,7 +27,7 @@ module.exports = {
         'accent': '#FF9269',
         'light-text': '#000',
         'light-p': '#5D5237',
-        
+
         // Dark Theme
         'dark-bg': '#0F0D0E',
         'dark-secondary': '#231F20',

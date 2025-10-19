@@ -153,7 +153,7 @@ function Signup() {
 
   return (
     <DotPatternBackground>
-    <div className="min-h-screen flex flex-col items-center justify-center p-24 relative">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative">
       
       {/* Theme Toggle Button */}
       <button

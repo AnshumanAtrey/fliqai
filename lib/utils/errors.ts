@@ -31,7 +31,7 @@ export interface ClassifiedError {
   userMessage: string;
   originalError?: Error;
   timestamp: Date;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 // Network error types
@@ -64,7 +64,7 @@ export class ApiError extends Error {
     message: string, 
     public statusCode?: number, 
     public code?: string,
-    public details?: any
+    public details?: Record<string, unknown>
   ) {
     super(message);
     this.name = 'ApiError';
@@ -274,7 +274,7 @@ export function getUserFriendlyMessage(
  */
 export interface ErrorLogger {
   log(error: ClassifiedError): void;
-  logError(error: Error | unknown, context?: Record<string, any>): void;
+  logError(error: Error | unknown, context?: Record<string, unknown>): void;
   report(error: ClassifiedError): Promise<void>;
 }
 
@@ -297,7 +297,7 @@ class ConsoleErrorLogger implements ErrorLogger {
     }
   }
 
-  logError(error: Error | unknown, context?: Record<string, any>): void {
+  logError(error: Error | unknown, context?: Record<string, unknown>): void {
     const classified = classifyError(error);
     if (context) {
       classified.context = { ...classified.context, ...context };
@@ -336,7 +336,7 @@ export const errorLogger: ErrorLogger = new ConsoleErrorLogger();
  */
 export function handleError(
   error: Error | unknown, 
-  context?: Record<string, any>
+  context?: Record<string, unknown>
 ): ClassifiedError {
   const classified = classifyError(error);
   

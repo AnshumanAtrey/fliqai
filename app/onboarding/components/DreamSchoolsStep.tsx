@@ -2,20 +2,21 @@
 import { useState, useEffect } from 'react';
 
 interface DreamSchoolsStepProps {
-  data: Record<string, any>;
-  updateData: (section: string, data: Record<string, any>) => void;
+  data: Record<string, unknown>;
+  updateData: (section: string, data: Record<string, unknown>) => void;
   theme: 'light' | 'dark';
   onNext?: () => void;
   onBack?: () => void;
+  registerInternalBack?: (hasBack: boolean, backHandler: (() => void) | null) => void;
 }
 
-export default function DreamSchoolsStep({ data, updateData, onNext }: DreamSchoolsStepProps) {
+export default function DreamSchoolsStep({ data, updateData, onNext, registerInternalBack }: DreamSchoolsStepProps) {
   const [formData, setFormData] = useState({
     hasDreamSchools: '',
     dreamSchoolsList: '',
     searchStage: '',
     annualBudget: '',
-    ...data.dreamSchools
+    ...(data.dreamSchools || {})
   });
   const [currentQuestion, setCurrentQuestion] = useState(1);
 
@@ -23,8 +24,17 @@ export default function DreamSchoolsStep({ data, updateData, onNext }: DreamScho
     updateData('dreamSchools', formData);
   }, [formData]);
 
+  // Register internal back state with parent
+  useEffect(() => {
+    if (registerInternalBack) {
+      const hasBack = currentQuestion > 1;
+      const backHandler = hasBack ? handleBack : null;
+      registerInternalBack(hasBack, backHandler);
+    }
+  }, [currentQuestion, registerInternalBack]);
+
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev: Record<string, any>) => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value
     }));
@@ -50,7 +60,7 @@ export default function DreamSchoolsStep({ data, updateData, onNext }: DreamScho
     <div className="w-full max-w-2xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4 font-outfit text-light-text dark:text-dark-text">
-          Do you already have "dream schools" in mind?
+          Do you already have &quot;dream schools&quot; in mind?
         </h1>
         <p className="text-base md:text-lg font-outfit text-light-p dark:text-dark-text">
           Select one
@@ -77,11 +87,13 @@ export default function DreamSchoolsStep({ data, updateData, onNext }: DreamScho
                 onChange={(e) => handleInputChange('hasDreamSchools', e.target.value)}
                 className="sr-only"
               />
-              <div className={`w-5 h-5 rounded-full border-2 border-light-text dark:border-dark-text ${
+              <div className={`w-5 h-5 rounded border-2 border-light-text dark:border-dark-text ${
                 formData.hasDreamSchools === option.value ? 'bg-[#FF9269]' : 'bg-transparent'
               }`}>
                 {formData.hasDreamSchools === option.value && (
-                  <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5" />
+                  <svg className="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
                 )}
               </div>
             </div>
@@ -151,11 +163,13 @@ export default function DreamSchoolsStep({ data, updateData, onNext }: DreamScho
                 onChange={(e) => handleInputChange('searchStage', e.target.value)}
                 className="sr-only"
               />
-              <div className={`w-5 h-5 rounded-full border-2 border-light-text dark:border-dark-text ${
+              <div className={`w-5 h-5 rounded border-2 border-light-text dark:border-dark-text ${
                 formData.searchStage === option.value ? 'bg-[#FF9269]' : 'bg-transparent'
               }`}>
                 {formData.searchStage === option.value && (
-                  <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5" />
+                  <svg className="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
                 )}
               </div>
             </div>
@@ -166,24 +180,15 @@ export default function DreamSchoolsStep({ data, updateData, onNext }: DreamScho
         ))}
       </div>
 
-      <div className="flex gap-4">
+      {formData.searchStage && (
         <button
-          onClick={handleBack}
-          className="flex-1 bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text px-6 py-4 text-base md:text-lg font-outfit font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border border-light-text dark:border-dark-text"
-          style={{ boxShadow: '2px 2px 0 0 rgba(0,0,0,0.8)' }}
+          onClick={handleNext}
+          className="w-full bg-[#FF9269] text-white px-6 py-4 text-base md:text-lg font-outfit font-medium hover:bg-[#e5825a] transition-colors border border-light-text dark:border-dark-text"
+          style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}
         >
-          Back
+          Continue
         </button>
-        {formData.searchStage && (
-          <button
-            onClick={handleNext}
-            className="flex-1 bg-[#FF9269] text-white px-6 py-4 text-base md:text-lg font-outfit font-medium hover:bg-[#e5825a] transition-colors border border-light-text dark:border-dark-text"
-            style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}
-          >
-            Continue
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 
@@ -220,11 +225,13 @@ export default function DreamSchoolsStep({ data, updateData, onNext }: DreamScho
                 onChange={(e) => handleInputChange('annualBudget', e.target.value)}
                 className="sr-only"
               />
-              <div className={`w-5 h-5 rounded-full border-2 border-light-text dark:border-dark-text ${
+              <div className={`w-5 h-5 rounded border-2 border-light-text dark:border-dark-text ${
                 formData.annualBudget === option.value ? 'bg-[#FF9269]' : 'bg-transparent'
               }`}>
                 {formData.annualBudget === option.value && (
-                  <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5" />
+                  <svg className="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
                 )}
               </div>
             </div>
@@ -235,24 +242,15 @@ export default function DreamSchoolsStep({ data, updateData, onNext }: DreamScho
         ))}
       </div>
 
-      <div className="flex gap-4">
+      {formData.annualBudget && (
         <button
-          onClick={handleBack}
-          className="flex-1 bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text px-6 py-4 text-base md:text-lg font-outfit font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border border-light-text dark:border-dark-text"
-          style={{ boxShadow: '2px 2px 0 0 rgba(0,0,0,0.8)' }}
+          onClick={handleNext}
+          className="w-full bg-[#FF9269] text-white px-6 py-4 text-base md:text-lg font-outfit font-medium hover:bg-[#e5825a] transition-colors border border-light-text dark:border-dark-text"
+          style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}
         >
-          Back
+          Continue
         </button>
-        {formData.annualBudget && (
-          <button
-            onClick={handleNext}
-            className="flex-1 bg-[#FF9269] text-white px-6 py-4 text-base md:text-lg font-outfit font-medium hover:bg-[#e5825a] transition-colors border border-light-text dark:border-dark-text"
-            style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}
-          >
-            Continue
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 

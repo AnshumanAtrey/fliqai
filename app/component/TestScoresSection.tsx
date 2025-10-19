@@ -11,14 +11,14 @@ export const TestScoresSection = () => {
     { subject: "Literature", avgScore: "A-", yourScore: "A" },
   ];
 
-  const getScoreColor = (score) => {
+  const getScoreColor = (score: string) => {
     if (score.startsWith("A")) return "text-green-600";
     if (score.startsWith("B")) return "text-blue-500";
     if (score.startsWith("C")) return "text-orange-500";
     return "text-red-500";
   };
 
-  const getScoreLetter = (score) => {
+  const getScoreLetter = (score: string) => {
     return score.charAt(0);
   };
 

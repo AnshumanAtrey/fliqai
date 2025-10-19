@@ -65,7 +65,7 @@ export const usePayment = () => {
 
       if (data.success && data.plans) {
         // Transform backend plans to frontend format
-        const transformedPlans: PaymentPlan[] = data.plans.map((plan: any) => {
+        const transformedPlans: PaymentPlan[] = data.plans.map((plan: { category: string; name: string; price: number; [key: string]: unknown }) => {
           // Use the category from backend to determine package type
           let packageType: 'student_profiles' | 'essay_revisions' | 'combo_package';
           if (plan.category === 'student_profiles') {

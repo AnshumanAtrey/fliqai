@@ -4,9 +4,8 @@
  */
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import { ApiResponse, ApiError, RequestOptions } from './types';
+import { ApiResponse, RequestOptions } from './types';
 import { authManager } from './auth';
-import { configManager } from './config';
 import { getEnvironmentConfig } from '../services/environment';
 
 // Retry configuration
@@ -30,7 +29,7 @@ export interface CategorizedError {
   type: ErrorType;
   code: string;
   message: string;
-  originalError?: any;
+  originalError?: Error;
 }
 
 /**
@@ -67,7 +66,7 @@ export class ApiClient {
 
     // Set up request interceptor for authentication
     this.setupRequestInterceptor();
-    
+
     // Set up response interceptor for error handling
     this.setupResponseInterceptor();
   }
@@ -86,7 +85,7 @@ export class ApiClient {
   /**
    * POST request with retry logic
    */
-  async post<T>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
+  async post<T>(endpoint: string, data?: Record<string, unknown>, options?: RequestOptions): Promise<T> {
     return this.executeWithRetry(async () => {
       const config = this.buildRequestConfig(options);
       const response = await this.axiosInstance.post<ApiResponse<T>>(endpoint, data, config);
@@ -97,7 +96,7 @@ export class ApiClient {
   /**
    * PUT request with retry logic
    */
-  async put<T>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
+  async put<T>(endpoint: string, data?: Record<string, unknown>, options?: RequestOptions): Promise<T> {
     return this.executeWithRetry(async () => {
       const config = this.buildRequestConfig(options);
       const response = await this.axiosInstance.put<ApiResponse<T>>(endpoint, data, config);
@@ -135,39 +134,39 @@ export class ApiClient {
    * Execute request with retry logic
    */
   private async executeWithRetry<T>(requestFn: () => Promise<T>): Promise<T> {
-    let lastError: any;
-    
+    let lastError: Error = new Error('Request failed');
+
     for (let attempt = 0; attempt <= this.retryConfig.maxRetries; attempt++) {
       try {
         return await requestFn();
-      } catch (error: any) {
-        lastError = error;
-        
+      } catch (error: unknown) {
+        lastError = error instanceof Error ? error : new Error('Unknown error');
+
         // Don't retry on the last attempt
         if (attempt === this.retryConfig.maxRetries) {
           break;
         }
-        
+
         // Check if we should retry this error
         const axiosError = error as AxiosError;
         if (!this.retryConfig.retryCondition(axiosError)) {
           break;
         }
-        
+
         // Calculate delay with exponential backoff
         const delay = this.calculateRetryDelay(attempt);
-        
+
         console.warn(`API request failed (attempt ${attempt + 1}/${this.retryConfig.maxRetries + 1}), retrying in ${delay}ms:`, {
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
           endpoint: axiosError.config?.url,
           method: axiosError.config?.method?.toUpperCase(),
         });
-        
+
         // Wait before retrying
         await this.sleep(delay);
       }
     }
-    
+
     throw lastError;
   }
 
@@ -193,7 +192,7 @@ export class ApiClient {
    */
   private extractData<T>(response: AxiosResponse<ApiResponse<T>>): T {
     const apiResponse = response.data;
-    
+
     if (!apiResponse.success) {
       throw new Error(apiResponse.error || apiResponse.message || 'API request failed');
     }
@@ -209,7 +208,7 @@ export class ApiClient {
       async (config) => {
         // Check if authentication is required (default to true for most endpoints)
         const requireAuth = config.headers?.['X-Require-Auth'] !== 'false';
-        
+
         if (requireAuth) {
           try {
             const token = await authManager.getIdToken();
@@ -246,7 +245,7 @@ export class ApiClient {
       },
       (error: AxiosError) => {
         const categorizedError = this.categorizeError(error);
-        
+
         // Log error for debugging
         console.error('API Error:', {
           type: categorizedError.type,
@@ -257,10 +256,10 @@ export class ApiClient {
         });
 
         // Convert to a more user-friendly error
-        const friendlyError = new Error(categorizedError.message);
-        (friendlyError as any).type = categorizedError.type;
-        (friendlyError as any).code = categorizedError.code;
-        (friendlyError as any).originalError = categorizedError.originalError;
+        const friendlyError = new Error(categorizedError.message) as Error & CategorizedError;
+        friendlyError.type = categorizedError.type;
+        friendlyError.code = categorizedError.code;
+        friendlyError.originalError = categorizedError.originalError;
 
         return Promise.reject(friendlyError);
       }
@@ -277,7 +276,7 @@ export class ApiClient {
     }
 
     const status = error.response.status;
-    const responseData = error.response.data as any;
+    const responseData = error.response.data as Record<string, unknown>;
 
     // Authentication errors
     if (status === 401) {
@@ -307,8 +306,8 @@ export class ApiClient {
     // Unknown errors
     return {
       type: ErrorType.UNKNOWN,
-      code: responseData?.code || 'UNKNOWN_ERROR',
-      message: this.getFriendlyErrorMessage('UNKNOWN_ERROR', responseData?.message),
+      code: (responseData?.code as string) || 'UNKNOWN_ERROR',
+      message: this.getFriendlyErrorMessage('UNKNOWN_ERROR', responseData?.message as string),
       originalError: error
     };
   }
@@ -346,12 +345,12 @@ export class ApiClient {
   /**
    * Handle authentication errors
    */
-  private handleAuthenticationError(responseData: any, error: AxiosError): CategorizedError {
-    const code = responseData?.code || 'UNAUTHORIZED';
+  private handleAuthenticationError(responseData: Record<string, unknown>, error: AxiosError): CategorizedError {
+    const code = (responseData?.code as string) || 'UNAUTHORIZED';
     return {
       type: ErrorType.AUTHENTICATION,
       code,
-      message: this.getFriendlyErrorMessage(code, responseData?.message),
+      message: this.getFriendlyErrorMessage(code, responseData?.message as string),
       originalError: error
     };
   }
@@ -359,12 +358,12 @@ export class ApiClient {
   /**
    * Handle authorization errors
    */
-  private handleAuthorizationError(responseData: any, error: AxiosError): CategorizedError {
-    const code = responseData?.code || 'FORBIDDEN';
+  private handleAuthorizationError(responseData: Record<string, unknown>, error: AxiosError): CategorizedError {
+    const code = (responseData?.code as string) || 'FORBIDDEN';
     return {
       type: ErrorType.AUTHORIZATION,
       code,
-      message: this.getFriendlyErrorMessage(code, responseData?.message),
+      message: this.getFriendlyErrorMessage(code, responseData?.message as string),
       originalError: error
     };
   }
@@ -372,12 +371,12 @@ export class ApiClient {
   /**
    * Handle validation errors
    */
-  private handleValidationError(responseData: any, error: AxiosError): CategorizedError {
-    const code = responseData?.code || 'VALIDATION_ERROR';
+  private handleValidationError(responseData: Record<string, unknown>, error: AxiosError): CategorizedError {
+    const code = (responseData?.code as string) || 'VALIDATION_ERROR';
     return {
       type: ErrorType.VALIDATION,
       code,
-      message: this.getFriendlyErrorMessage(code, responseData?.message),
+      message: this.getFriendlyErrorMessage(code, responseData?.message as string),
       originalError: error
     };
   }
@@ -385,12 +384,12 @@ export class ApiClient {
   /**
    * Handle server errors
    */
-  private handleServerError(responseData: any, error: AxiosError): CategorizedError {
-    const code = responseData?.code || 'SERVER_ERROR';
+  private handleServerError(responseData: Record<string, unknown>, error: AxiosError): CategorizedError {
+    const code = (responseData?.code as string) || 'SERVER_ERROR';
     return {
       type: ErrorType.SERVER,
       code,
-      message: this.getFriendlyErrorMessage(code, responseData?.message),
+      message: this.getFriendlyErrorMessage(code, responseData?.message as string),
       originalError: error
     };
   }
@@ -398,8 +397,8 @@ export class ApiClient {
   /**
    * Handle other client errors
    */
-  private handleClientError(status: number, responseData: any, error: AxiosError): CategorizedError {
-    let code = responseData?.code;
+  private handleClientError(status: number, responseData: Record<string, unknown>, error: AxiosError): CategorizedError {
+    let code: string = (responseData?.code as string) || '';
     let type = ErrorType.UNKNOWN;
 
     switch (status) {
@@ -422,7 +421,7 @@ export class ApiClient {
     return {
       type,
       code,
-      message: this.getFriendlyErrorMessage(code, responseData?.message),
+      message: this.getFriendlyErrorMessage(code, responseData?.message as string),
       originalError: error
     };
   }
@@ -498,12 +497,12 @@ export class ApiClient {
   /**
    * Check if an error is retryable
    */
-  isRetryableError(error: any): boolean {
-    if (error.type) {
+  isRetryableError(error: Error | CategorizedError): boolean {
+    if ('type' in error && error.type) {
       // Use our categorized error type
       return error.type === ErrorType.NETWORK || error.type === ErrorType.SERVER;
     }
-    
+
     // Fallback to axios error checking
     const axiosError = error as AxiosError;
     return this.retryConfig.retryCondition(axiosError);

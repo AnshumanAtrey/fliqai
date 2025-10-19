@@ -53,11 +53,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         loading: false,
         error: null
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       setAuthState({
         user: null,
         loading: false,
-        error: error.message || 'Sign in failed'
+        error: error instanceof Error ? error.message : 'Sign in failed'
       });
       throw error; // Re-throw so components can handle it
     }
@@ -82,11 +82,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         loading: false,
         error: null
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       setAuthState({
         user: null,
         loading: false,
-        error: error.message || 'Sign up failed'
+        error: error instanceof Error ? error.message : 'Sign up failed'
       });
       throw error; // Re-throw so components can handle it
     }
@@ -111,11 +111,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         loading: false,
         error: null
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       setAuthState({
         user: null,
         loading: false,
-        error: error.message || 'Google sign in failed'
+        error: error instanceof Error ? error.message : 'Google sign in failed'
       });
       throw error; // Re-throw so components can handle it
     }
@@ -137,11 +137,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         loading: false,
         error: null
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       setAuthState(prev => ({
         ...prev,
         loading: false,
-        error: error.message || 'Sign out failed'
+        error: error instanceof Error ? error.message : 'Sign out failed'
       }));
       throw error; // Re-throw so components can handle it
     }
@@ -310,6 +310,14 @@ interface AuthLoadingProps {
 
 export function AuthLoading({ children, fallback }: AuthLoadingProps) {
   const { loading } = useAuthContext();
+  
+  // Check if we're on the landing page (root path)
+  const isLandingPage = typeof window !== 'undefined' && window.location.pathname === '/';
+  
+  // Skip loading screen for landing page
+  if (isLandingPage && loading) {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (

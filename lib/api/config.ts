@@ -26,9 +26,9 @@ class ConfigurationManager implements ConfigManager {
     }
 
     this.loading = true;
-    
+
     this.loadPromise = this.fetchConfiguration();
-    
+
     try {
       this.config = await this.loadPromise;
       return this.config;
@@ -93,7 +93,7 @@ class ConfigurationManager implements ConfigManager {
     }
 
     // Validate the configuration structure
-    this.validateConfiguration(apiResponse.data);
+    this.validateConfiguration(apiResponse.data as unknown as Record<string, unknown>);
 
     return apiResponse.data;
   }
@@ -101,19 +101,24 @@ class ConfigurationManager implements ConfigManager {
   /**
    * Validate configuration structure
    */
-  private validateConfiguration(config: any): void {
+  private validateConfiguration(config: Record<string, unknown>): void {
     if (!config) {
       throw new Error('Configuration is null or undefined');
     }
 
-    if (!config.stripe || typeof config.stripe.publishableKey !== 'string') {
+    // Validate Stripe configuration
+    const stripe = config.stripe as Record<string, unknown>;
+    if (!stripe || typeof stripe?.publishableKey !== 'string') {
       throw new Error('Invalid Stripe configuration: missing or invalid publishableKey');
     }
 
-    if (!config.api || typeof config.api.baseUrl !== 'string') {
+    // Validate API configuration
+    const api = config.api as Record<string, unknown>;
+    if (!api || typeof api?.baseUrl !== 'string') {
       throw new Error('Invalid API configuration: missing or invalid baseUrl');
     }
 
+    // Validate features configuration
     if (!config.features || typeof config.features !== 'object') {
       throw new Error('Invalid features configuration: missing or invalid features object');
     }
@@ -124,9 +129,9 @@ class ConfigurationManager implements ConfigManager {
    */
   private getFallbackConfig(): ClientConfig {
     const backendUrl = getBackendUrl();
-    
+
     console.warn('Using fallback configuration due to backend unavailability');
-    
+
     return {
       stripe: {
         publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',

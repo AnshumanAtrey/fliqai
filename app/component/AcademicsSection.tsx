@@ -20,7 +20,7 @@ const AcademicsSection = () => {
     { name: "Ap Computer Science", grade: "Not Done", isNotDone: true }
   ];
 
-  const getGradeColor = (grade) => {
+  const getGradeColor = (grade: string) => {
     if (grade === "A*") return "text-green-600 font-bold";
     if (grade === "A") return "text-green-500 font-bold";
     if (grade === "B") return "text-blue-500 font-bold";

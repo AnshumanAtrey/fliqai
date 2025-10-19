@@ -38,7 +38,7 @@ export interface ApiResponse<T> {
 export interface ApiError {
   code: string;
   message: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 // Request Options
@@ -85,8 +85,8 @@ export interface ConfigManager {
 // API Client Interface
 export interface ApiClient {
   get<T>(endpoint: string, options?: RequestOptions): Promise<T>;
-  post<T>(endpoint: string, data?: any, options?: RequestOptions): Promise<T>;
-  put<T>(endpoint: string, data?: any, options?: RequestOptions): Promise<T>;
+  post<T>(endpoint: string, data?: Record<string, unknown>, options?: RequestOptions): Promise<T>;
+  put<T>(endpoint: string, data?: Record<string, unknown>, options?: RequestOptions): Promise<T>;
   delete<T>(endpoint: string, options?: RequestOptions): Promise<T>;
   updateBaseUrl(newBaseUrl: string): void;
   getBaseUrl(): string;

@@ -2,20 +2,21 @@
 import { useState, useEffect } from 'react';
 
 interface PreferencesStepProps {
-  data: Record<string, any>;
-  updateData: (section: string, data: Record<string, any>) => void;
+  data: Record<string, unknown>;
+  updateData: (section: string, data: Record<string, unknown>) => void;
   theme: 'light' | 'dark';
   onNext?: () => void;
   onBack?: () => void;
+  registerInternalBack?: (hasBack: boolean, backHandler: (() => void) | null) => void;
 }
 
-export default function PreferencesStep({ data, updateData, onNext }: PreferencesStepProps) {
+export default function PreferencesStep({ data, updateData, onNext, registerInternalBack }: PreferencesStepProps) {
   const [formData, setFormData] = useState({
-    collegeTypes: [],
+    collegeTypes: [] as string[],
     mostImportant: '',
     specialCircumstances: '',
     otherCircumstances: '',
-    ...data.preferences
+    ...(data.preferences || {})
   });
   const [currentQuestion, setCurrentQuestion] = useState(1);
 
@@ -23,20 +24,29 @@ export default function PreferencesStep({ data, updateData, onNext }: Preference
     updateData('preferences', formData);
   }, [formData]);
 
+  // Register internal back state with parent
+  useEffect(() => {
+    if (registerInternalBack) {
+      const hasBack = currentQuestion > 1;
+      const backHandler = hasBack ? handleBack : null;
+      registerInternalBack(hasBack, backHandler);
+    }
+  }, [currentQuestion, registerInternalBack]);
+
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev: Record<string, any>) => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value
     }));
   };
 
   const handleMultiSelectChange = (field: string, value: string) => {
-    setFormData((prev: Record<string, any>) => {
-      const currentValues = prev[field] || [];
+    setFormData((prev) => {
+      const currentValues = ((prev as Record<string, unknown>)[field] as string[]) || [];
       const updatedValues = currentValues.includes(value)
         ? currentValues.filter((v: string) => v !== value)
         : [...currentValues, value];
-      
+
       return {
         ...prev,
         [field]: updatedValues
@@ -92,9 +102,8 @@ export default function PreferencesStep({ data, updateData, onNext }: Preference
                 onChange={() => handleMultiSelectChange('collegeTypes', option.value)}
                 className="sr-only"
               />
-              <div className={`w-5 h-5 border-2 border-light-text dark:border-dark-text ${
-                formData.collegeTypes?.includes(option.value) ? 'bg-[#FF9269]' : 'bg-transparent'
-              }`}>
+              <div className={`w-5 h-5 border-2 border-light-text dark:border-dark-text ${formData.collegeTypes?.includes(option.value) ? 'bg-[#FF9269]' : 'bg-transparent'
+                }`}>
                 {formData.collegeTypes?.includes(option.value) && (
                   <svg className="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -155,11 +164,12 @@ export default function PreferencesStep({ data, updateData, onNext }: Preference
                 onChange={(e) => handleInputChange('mostImportant', e.target.value)}
                 className="sr-only"
               />
-              <div className={`w-5 h-5 rounded-full border-2 border-light-text dark:border-dark-text ${
-                formData.mostImportant === option.value ? 'bg-[#FF9269]' : 'bg-transparent'
-              }`}>
+              <div className={`w-5 h-5 border-2 border-light-text dark:border-dark-text ${formData.mostImportant === option.value ? 'bg-[#FF9269]' : 'bg-transparent'
+                }`}>
                 {formData.mostImportant === option.value && (
-                  <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5" />
+                  <svg className="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
                 )}
               </div>
             </div>
@@ -170,24 +180,15 @@ export default function PreferencesStep({ data, updateData, onNext }: Preference
         ))}
       </div>
 
-      <div className="flex gap-4">
+      {formData.mostImportant && (
         <button
-          onClick={handleBack}
-          className="flex-1 bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text px-6 py-4 text-base md:text-lg font-outfit font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border border-light-text dark:border-dark-text"
-          style={{ boxShadow: '2px 2px 0 0 rgba(0,0,0,0.8)' }}
+          onClick={handleNext}
+          className="w-full bg-[#FF9269] text-white px-6 py-4 text-base md:text-lg font-outfit font-medium hover:bg-[#e5825a] transition-colors border border-light-text dark:border-dark-text"
+          style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}
         >
-          Back
+          Continue
         </button>
-        {formData.mostImportant && (
-          <button
-            onClick={handleNext}
-            className="flex-1 bg-[#FF9269] text-white px-6 py-4 text-base md:text-lg font-outfit font-medium hover:bg-[#e5825a] transition-colors border border-light-text dark:border-dark-text"
-            style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}
-          >
-            Continue
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 
@@ -224,11 +225,12 @@ export default function PreferencesStep({ data, updateData, onNext }: Preference
                 onChange={(e) => handleInputChange('specialCircumstances', e.target.value)}
                 className="sr-only"
               />
-              <div className={`w-5 h-5 rounded-full border-2 border-light-text dark:border-dark-text ${
-                formData.specialCircumstances === option.value ? 'bg-[#FF9269]' : 'bg-transparent'
-              }`}>
+              <div className={`w-5 h-5 rounded border-2 border-light-text dark:border-dark-text ${formData.specialCircumstances === option.value ? 'bg-[#FF9269]' : 'bg-transparent'
+                }`}>
                 {formData.specialCircumstances === option.value && (
-                  <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5" />
+                  <svg className="w-3 h-3 text-white mx-auto mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
                 )}
               </div>
             </div>
@@ -252,24 +254,15 @@ export default function PreferencesStep({ data, updateData, onNext }: Preference
         </div>
       )}
 
-      <div className="flex gap-4">
+      {formData.specialCircumstances && (
         <button
-          onClick={handleBack}
-          className="flex-1 bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text px-6 py-4 text-base md:text-lg font-outfit font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors border border-light-text dark:border-dark-text"
-          style={{ boxShadow: '2px 2px 0 0 rgba(0,0,0,0.8)' }}
+          onClick={handleNext}
+          className="w-full bg-[#FF9269] text-white px-6 py-4 text-base md:text-lg font-outfit font-medium hover:bg-[#e5825a] transition-colors border border-light-text dark:border-dark-text"
+          style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}
         >
-          Back
+          Continue
         </button>
-        {formData.specialCircumstances && (
-          <button
-            onClick={handleNext}
-            className="flex-1 bg-[#FF9269] text-white px-6 py-4 text-base md:text-lg font-outfit font-medium hover:bg-[#e5825a] transition-colors border border-light-text dark:border-dark-text"
-            style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}
-          >
-            Continue
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 

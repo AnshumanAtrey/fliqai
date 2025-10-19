@@ -173,9 +173,9 @@ function StudentProfile() {
         };
         setProfile(transformedProfile);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('❌ Failed to fetch profile:', err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Failed to fetch profile');
     } finally {
       setLoading(false);
     }
@@ -282,7 +282,7 @@ function StudentProfile() {
                   </div>
 
                   {/* Bio */}
-                  <div className="space-y-2">
+                  <div className="w-[550px] space-y-2">
                     <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                       {profile.bio}
                     </p>
@@ -300,7 +300,7 @@ function StudentProfile() {
                       ].map((uni, index) => (
                         <div
                           key={uni.id}
-                          className="w-[40px] h-[40px] shrink-0 bg-cover bg-center bg-no-repeat relative"
+                          className="w-[70px] h-[70px] shrink-0 bg-contain bg-center bg-no-repeat relative"
                           style={{
                             backgroundImage: `url(${uni.src})`,
                             zIndex: index,

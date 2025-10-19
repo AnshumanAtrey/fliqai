@@ -171,6 +171,14 @@ interface ConfigLoadingProps {
 export function ConfigLoading({ children, fallback }: ConfigLoadingProps) {
   const { loading, error } = useConfigContext();
 
+  // Check if we're on the landing page (root path)
+  const isLandingPage = typeof window !== 'undefined' && window.location.pathname === '/';
+
+  // Skip loading screen for landing page
+  if (isLandingPage && loading) {
+    return <>{children}</>;
+  }
+
   if (loading) {
     return (
       fallback || (
@@ -184,7 +192,7 @@ export function ConfigLoading({ children, fallback }: ConfigLoadingProps) {
     );
   }
 
-  if (error) {
+  if (error && !isLandingPage) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center p-8">

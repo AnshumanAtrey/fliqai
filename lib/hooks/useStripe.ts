@@ -22,8 +22,8 @@ interface UseStripeReturn {
   initialized: boolean;
   initialize: () => Promise<void>;
   createPaymentMethod: (
-    cardElement: any,
-    billingDetails?: any
+    cardElement: import('@stripe/stripe-js').StripeCardElement,
+    billingDetails?: Record<string, unknown>
   ) => Promise<{ paymentMethod?: StripePaymentMethod; error?: string }>;
   confirmPayment: (
     clientSecret: string,
@@ -40,8 +40,8 @@ interface UseStripePaymentReturn {
     paymentMethodId: string
   ) => Promise<boolean>;
   createPaymentMethod: (
-    cardElement: any,
-    billingDetails?: any
+    cardElement: import('@stripe/stripe-js').StripeCardElement,
+    billingDetails?: Record<string, unknown>
   ) => Promise<StripePaymentMethod | null>;
   clearError: () => void;
   reset: () => void;
@@ -77,7 +77,7 @@ export function useStripe(): UseStripeReturn {
       setInitialized(stripeInstance !== null);
       setError(null);
     } catch (err) {
-      const errorMessage = (err as any)?.name === 'StripeServiceError'
+      const errorMessage = (err as Error)?.name === 'StripeServiceError'
         ? (err as Error).message 
         : 'Failed to initialize Stripe';
       
@@ -90,8 +90,8 @@ export function useStripe(): UseStripeReturn {
   }, [initialized]);
 
   const createPaymentMethod = useCallback(async (
-    cardElement: any,
-    billingDetails?: any
+    cardElement: import('@stripe/stripe-js').StripeCardElement,
+    billingDetails?: Record<string, unknown>
   ): Promise<{ paymentMethod?: StripePaymentMethod; error?: string }> => {
     if (!initialized || !stripe) {
       return { error: 'Stripe not initialized' };
@@ -100,7 +100,7 @@ export function useStripe(): UseStripeReturn {
     try {
       return await stripeService.createPaymentMethod(cardElement, billingDetails);
     } catch (err) {
-      const errorMessage = (err as any)?.name === 'StripeServiceError'
+      const errorMessage = (err as Error)?.name === 'StripeServiceError'
         ? (err as Error).message 
         : 'Failed to create payment method';
       
@@ -119,7 +119,7 @@ export function useStripe(): UseStripeReturn {
     try {
       return await stripeService.confirmPayment(clientSecret, paymentMethodId);
     } catch (err) {
-      const errorMessage = (err as any)?.name === 'StripeServiceError'
+      const errorMessage = (err as Error)?.name === 'StripeServiceError'
         ? (err as Error).message 
         : 'Failed to confirm payment';
       
@@ -176,7 +176,7 @@ export function useStripePayment(): UseStripePaymentReturn {
         return false;
       }
     } catch (err) {
-      const errorMessage = (err as any)?.name === 'StripeServiceError'
+      const errorMessage = (err as Error)?.name === 'StripeServiceError'
         ? (err as Error).message 
         : 'Payment processing failed';
       
@@ -188,8 +188,8 @@ export function useStripePayment(): UseStripePaymentReturn {
   }, [initialized, stripe]);
 
   const createPaymentMethod = useCallback(async (
-    cardElement: any,
-    billingDetails?: any
+    cardElement: import('@stripe/stripe-js').StripeCardElement,
+    billingDetails?: Record<string, unknown>
   ): Promise<StripePaymentMethod | null> => {
     if (!initialized || !stripe) {
       setError('Stripe not initialized');
@@ -208,7 +208,7 @@ export function useStripePayment(): UseStripePaymentReturn {
         return null;
       }
     } catch (err) {
-      const errorMessage = (err as any)?.name === 'StripeServiceError'
+      const errorMessage = (err as Error)?.name === 'StripeServiceError'
         ? (err as Error).message 
         : 'Failed to create payment method';
       

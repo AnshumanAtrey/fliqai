@@ -22,7 +22,7 @@ const SunIcon = (
 export default function AcademicSteps() {
   const router = useRouter();
   const { user, loading } = useAuth();
-  
+
   // Form state
   const [formData, setFormData] = useState({
     firstName: '',
@@ -32,7 +32,7 @@ export default function AcademicSteps() {
     fieldOfStudy: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // theme: 'light' | 'dark'
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
@@ -112,7 +112,7 @@ export default function AcademicSteps() {
   return (
     <DotPatternBackground>
       <div className="min-h-screen flex flex-col items-center justify-center p-24 relative">
-        
+
         {/* Theme Toggle Button */}
         <button
           aria-label="Toggle theme"
@@ -125,17 +125,17 @@ export default function AcademicSteps() {
 
         {/* Fliq Logo Above Box */}
         <div className="mb-8">
-          <Image 
-            src="/fliq-logo.svg" 
-            alt="Fliq Logo" 
-            width={120} 
-            height={48} 
+          <Image
+            src="/fliq-logo.svg"
+            alt="Fliq Logo"
+            width={120}
+            height={48}
             priority
           />
         </div>
 
         {/* Academic Steps Card */}
-        <div className={`max-w-xl w-full ${cardBg} p-12 ${cardText}`} style={{border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000', boxShadow: '4px 4px 0px 0px #000'}}> 
+        <div className={`max-w-xl w-full ${cardBg} p-12 ${cardText}`} style={{ border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000', boxShadow: '4px 4px 0px 0px #000' }}>
           <div className="flex flex-col items-center gap-6">
             <div className="text-center w-full mb-4">
               <h2 className={`text-[32px] font-bold mb-8 mt-2 font-outfit leading-normal ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>
@@ -145,16 +145,16 @@ export default function AcademicSteps() {
                 Tell us about your academic background to get personalized recommendations.
               </p>
             </div>
-            
+
             <form className="w-full space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <label className={`block text-[14px] font-outfit font-medium leading-5 ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>
                     First Name
-                    <input 
-                      type="text" 
-                      className={`w-full mt-1 p-4 ${cardText}`} 
-                      style={{background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000'}}
+                    <input
+                      type="text"
+                      className={`w-full mt-1 p-4 ${cardText}`}
+                      style={{ background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000' }}
                       placeholder="John"
                       value={formData.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
@@ -162,13 +162,13 @@ export default function AcademicSteps() {
                       required
                     />
                   </label>
-                  
+
                   <label className={`block text-[14px] font-outfit font-medium leading-5 ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>
                     Last Name
-                    <input 
-                      type="text" 
-                      className={`w-full mt-1 p-4 ${cardText}`} 
-                      style={{background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000'}}
+                    <input
+                      type="text"
+                      className={`w-full mt-1 p-4 ${cardText}`}
+                      style={{ background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000' }}
                       placeholder="Doe"
                       value={formData.lastName}
                       onChange={(e) => handleInputChange('lastName', e.target.value)}
@@ -180,22 +180,22 @@ export default function AcademicSteps() {
 
                 <label className={`block text-[14px] font-outfit font-medium leading-5 ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>
                   Date of Birth
-                  <input 
-                    type="date" 
-                    className={`w-full mt-1 p-4 ${cardText}`} 
-                    style={{background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000'}}
+                  <input
+                    type="date"
+                    className={`w-full mt-1 p-4 ${cardText}`}
+                    style={{ background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000' }}
                     value={formData.dateOfBirth}
                     onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
                     disabled={isSubmitting}
                     required
                   />
                 </label>
-                
+
                 <label className={`block text-[14px] font-outfit font-medium leading-5 ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>
                   Academic Level
-                  <select 
-                    className={`w-full mt-1 p-4 ${cardText}`} 
-                    style={{background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000'}}
+                  <select
+                    className={`w-full mt-1 p-4 ${cardText}`}
+                    style={{ background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000' }}
                     value={formData.academicLevel}
                     onChange={(e) => handleInputChange('academicLevel', e.target.value)}
                     disabled={isSubmitting}
@@ -211,10 +211,10 @@ export default function AcademicSteps() {
 
                 <label className={`block text-[14px] font-outfit font-medium leading-5 ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>
                   Field of Study
-                  <input 
-                    type="text" 
-                    className={`w-full mt-1 p-4 ${cardText}`} 
-                    style={{background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000'}}
+                  <input
+                    type="text"
+                    className={`w-full mt-1 p-4 ${cardText}`}
+                    style={{ background: theme === 'dark' ? 'rgb(var(--dark-tertiary))' : 'rgb(var(--light-bg))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000' }}
                     placeholder="e.g., Computer Science, Business, Medicine"
                     value={formData.fieldOfStudy}
                     onChange={(e) => handleInputChange('fieldOfStudy', e.target.value)}
@@ -223,11 +223,11 @@ export default function AcademicSteps() {
                   />
                 </label>
               </div>
-              
-              <button 
-                type="submit" 
+
+              <button
+                type="submit"
                 className="w-full py-4 text-black text-[16px] font-outfit font-medium leading-normal hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{background:'rgb(var(--accent))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000'}}
+                style={{ background: 'rgb(var(--accent))', border: theme === 'dark' ? '1px solid #F9F4DA' : '1px solid #000' }}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
@@ -241,8 +241,8 @@ export default function AcademicSteps() {
               </button>
 
               <div className="text-center mt-4">
-                <Link 
-                  href="/login" 
+                <Link
+                  href="/login"
                   className="text-[#EF622F] hover:underline text-[14px] font-outfit font-medium"
                 >
                   Back to Login

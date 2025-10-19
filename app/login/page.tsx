@@ -120,7 +120,7 @@ function Login() {
 
   return (
     <DotPatternBackground>
-    <div className="min-h-screen flex flex-col items-center justify-center p-24 relative">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative">
       
       {/* Theme Toggle Button */}
       <button
@@ -149,7 +149,7 @@ function Login() {
           <div className="text-center w-full mb-4">
             <h2 className={`text-[32px] font-bold mb-8 mt-2 font-outfit leading-normal ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-black'}`}>Welcome back</h2>
             <p className={`text-[18px] font-outfit font-normal leading-normal text-center ${theme === 'dark' ? 'text-[rgb(var(--dark-text))]' : 'text-[#5D5237]'}`}>
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link href="/signup" className="hover:underline text-[#EF622F] font-outfit text-[18px] font-medium leading-normal">
                 Sign up
               </Link>

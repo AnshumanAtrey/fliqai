@@ -15,12 +15,13 @@ import PreferencesStep from './components/PreferencesStep';
 import DreamSchoolsStep from './components/DreamSchoolsStep';
 
 interface OnboardingFormData {
-  basicInfo: Record<string, any>;
-  academicPerformance: Record<string, any>;
-  testing: Record<string, any>;
-  activitiesInterests: Record<string, any>;
-  preferences: Record<string, any>;
-  dreamSchools: Record<string, any>;
+  basicInfo: Record<string, unknown>;
+  academicPerformance: Record<string, unknown>;
+  testing: Record<string, unknown>;
+  activitiesInterests: Record<string, unknown>;
+  preferences: Record<string, unknown>;
+  dreamSchools: Record<string, unknown>;
+  [key: string]: Record<string, unknown>;
 }
 
 const STEPS = [
@@ -48,6 +49,12 @@ function OnboardingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  const CurrentStepComponent = useMemo(() => STEPS[currentStep - 1]?.component, [currentStep]);
+
+  // Track internal question state for back button visibility
+  const [hasInternalBack, setHasInternalBack] = useState(false);
+  const [internalBackHandler, setInternalBackHandler] = useState<(() => void) | null>(null);
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!loading && !user) {
@@ -55,7 +62,7 @@ function OnboardingPage() {
     }
   }, [user, loading, router]);
 
-  const updateFormData = useCallback((section: string, data: Record<string, any>) => {
+  const updateFormData = useCallback((section: string, data: Record<string, unknown>) => {
     setFormData(prev => ({
       ...prev,
       [section as keyof OnboardingFormData]: { ...prev[section as keyof OnboardingFormData], ...data }
@@ -71,10 +78,20 @@ function OnboardingPage() {
   };
 
   const handleBack = () => {
-    if (currentStep > 1) {
+    // If there's an internal back handler (for questions within a step), use it first
+    if (hasInternalBack && internalBackHandler) {
+      internalBackHandler();
+    } else if (currentStep > 1) {
+      // Otherwise, go back to previous main step
       setCurrentStep(currentStep - 1);
     }
   };
+
+  // Function for components to register their internal back state
+  const registerInternalBack = useCallback((hasBack: boolean, backHandler: (() => void) | null) => {
+    setHasInternalBack(hasBack);
+    setInternalBackHandler(() => backHandler);
+  }, []);
 
   const handleSubmit = async () => {
     if (!user) return;
@@ -92,8 +109,9 @@ function OnboardingPage() {
       console.log('Original grade:', formData.basicInfo?.grade);
 
       // Helper function to map frontend GPA values to backend expected values
-      const mapGPAValue = (frontendGPA: string): string => {
-        switch (frontendGPA) {
+      const mapGPAValue = (frontendGPA: unknown): string => {
+        const gpaString = String(frontendGPA || '');
+        switch (gpaString) {
           case '4.0+ (unweighted)': return '4.0+ (unweighted)';
           case '3.5–3.9': return '3.5–3.9';
           case '3.0–3.4': return '3.0–3.4';
@@ -104,11 +122,12 @@ function OnboardingPage() {
       };
 
       // Helper function to map frontend test values to backend expected values
-      const mapTestValues = (frontendTests: string[]): string[] => {
-        if (!frontendTests || frontendTests.length === 0) return ['None'];
+      const mapTestValues = (frontendTests: unknown): string[] => {
+        if (!Array.isArray(frontendTests) || frontendTests.length === 0) return ['None'];
 
-        return frontendTests.map(test => {
-          switch (test) {
+        return frontendTests.map((test: unknown) => {
+          const testString = String(test || '');
+          switch (testString) {
             case 'SAT': return 'SAT';
             case 'ACT': return 'ACT';
             case 'PSAT': return 'PSAT';
@@ -120,12 +139,13 @@ function OnboardingPage() {
       };
 
       // Helper function to map frontend activities to backend expected values
-      const mapActivities = (frontendActivities: string[]): string[] => {
-        if (!frontendActivities || frontendActivities.length === 0) return ['Other'];
+      const mapActivities = (frontendActivities: unknown): string[] => {
+        if (!Array.isArray(frontendActivities) || frontendActivities.length === 0) return ['Other'];
 
-        return frontendActivities.map(activity => {
+        return frontendActivities.map((activity: unknown) => {
+          const activityString = String(activity || '');
           // Direct mapping based on frontend values to backend expected values
-          switch (activity) {
+          switch (activityString) {
             case 'Academic clubs (Science Olympiad, Debate, Math Team)':
               return 'Academic clubs (Science Olympiad, Debate, Math Team)';
             case 'Sports/Athletics':
@@ -153,12 +173,12 @@ function OnboardingPage() {
           graduationYear: formData.basicInfo?.graduationYear === 'Other' ? '2026' : (formData.basicInfo?.graduationYear || '2026')
         },
         academics: {
-          currentGPA: mapGPAValue(formData.academicPerformance?.gpa || ''),
+          currentGPA: mapGPAValue(formData.academicPerformance?.gpa),
           courseRigor: 'Mix of Honors/AP/IB', // Default
           advancedCourses: ['AP'] // Default
         },
         testing: {
-          standardizedTests: mapTestValues(formData.testing?.standardizedTests || []),
+          standardizedTests: mapTestValues(formData.testing?.standardizedTests),
           satScore: (() => {
             const satScore = formData.testing?.satScore;
             if (!satScore) return 'Not taken';
@@ -222,46 +242,52 @@ function OnboardingPage() {
                 return 'none';
             }
           })(),
-          interestedMajors: formData.activitiesInterests?.interestedMajors?.map((major: string) => {
-            // Direct mapping based on frontend values to backend expected values
-            switch (major) {
-              case 'STEM (Engineering, Computer Science, Math)':
-                return 'stem';
-              case 'Health/Medicine':
-                return 'health';
-              case 'Business/Economics':
-                return 'business';
-              case 'Social Sciences':
-                return 'social';
-              case 'Arts/Humanities':
-                return 'arts';
-              case 'Undecided':
-                return 'undecided';
-              default:
-                return 'undecided'; // fallback
-            }
-          }) || ['undecided']
+          interestedMajors: Array.isArray(formData.activitiesInterests?.interestedMajors) 
+            ? formData.activitiesInterests.interestedMajors.map((major: unknown) => {
+                const majorString = String(major || '');
+                // Direct mapping based on frontend values to backend expected values
+                switch (majorString) {
+                  case 'STEM (Engineering, Computer Science, Math)':
+                    return 'stem';
+                  case 'Health/Medicine':
+                    return 'health';
+                  case 'Business/Economics':
+                    return 'business';
+                  case 'Social Sciences':
+                    return 'social';
+                  case 'Arts/Humanities':
+                    return 'arts';
+                  case 'Undecided':
+                    return 'undecided';
+                  default:
+                    return 'undecided'; // fallback
+                }
+              })
+            : ['undecided']
         },
         preferences: {
-          collegeTypes: formData.preferences?.collegeTypes?.map((type: string) => {
-            // Direct mapping based on frontend values to backend expected values
-            switch (type) {
-              case 'Large universities':
-                return 'large';
-              case 'Small liberal arts colleges':
-                return 'small';
-              case 'Public/state schools':
-                return 'public';
-              case 'Private schools':
-                return 'private';
-              case 'Highly selective (Ivy/Top 20)':
-                return 'selective';
-              case 'Specialized (art, tech, etc.)':
-                return 'specialized';
-              default:
-                return 'public'; // fallback
-            }
-          }) || ['public'],
+          collegeTypes: Array.isArray(formData.preferences?.collegeTypes)
+            ? formData.preferences.collegeTypes.map((type: unknown) => {
+                const typeString = String(type || '');
+                // Direct mapping based on frontend values to backend expected values
+                switch (typeString) {
+                  case 'Large universities':
+                    return 'large';
+                  case 'Small liberal arts colleges':
+                    return 'small';
+                  case 'Public/state schools':
+                    return 'public';
+                  case 'Private schools':
+                    return 'private';
+                  case 'Highly selective (Ivy/Top 20)':
+                    return 'selective';
+                  case 'Specialized (art, tech, etc.)':
+                    return 'specialized';
+                  default:
+                    return 'public'; // fallback
+                }
+              })
+            : ['public'],
           mostImportant: (() => {
             const importance = formData.preferences?.mostImportant;
             // Direct mapping based on frontend values to backend expected values
@@ -326,7 +352,7 @@ function OnboardingPage() {
 
         // Log each validation error in detail
         if (result.errors && Array.isArray(result.errors)) {
-          result.errors.forEach((error: any, index: number) => {
+          result.errors.forEach((error: { path?: string; message?: string; value?: unknown }, index: number) => {
             console.error(`Validation Error ${index + 1}:`, error);
             if (error.path) console.error(`  Field path: ${error.path}`);
             if (error.message) console.error(`  Message: ${error.message}`);
@@ -354,90 +380,185 @@ function OnboardingPage() {
     return null;
   }
 
-  const CurrentStepComponent = useMemo(() => STEPS[currentStep - 1]?.component, [currentStep]);
-
   return (
     <DotPatternBackground>
       <div className="min-h-screen flex flex-col">
-        {/* Main Content Container - Figma spacing: padding 126px 242px 330px 242px, gap 22px */}
-        <div className="flex-1 inline-flex flex-col items-center pt-[126px] px-4 sm:px-8 md:px-16 lg:px-60 xl:px-80 2xl:px-[242px] pb-[330px] gap-[22px]">
-          {/* Header with Logo */}
-          <Image
-            src="/fliq-logo.svg"
-            alt="FLIQ Logo"
-            width={80}
-            height={32}
-            priority
-          />
-          <div className="flex gap-[22px] w-full max-w-none">
+        {/* Main Content Container - Responsive padding with proper centering */}
+        <div className="flex-1 flex flex-col items-center justify-center pt-16 sm:pt-20 md:pt-24 lg:pt-[126px] px-4 sm:px-6 md:px-8 lg:px-16 xl:px-32 2xl:px-[242px] pb-8 sm:pb-16 md:pb-32 lg:pb-[330px]">
 
-            {/* Left Sidebar - Step Navigation */}
-            <div className="w-80 flex-shrink-0">
-              <div className="bg-light-bg dark:bg-dark-bg border border-light-text dark:border-dark-text p-6" style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}>
-                <div className="space-y-[22px]">
-                  {STEPS.map((step, index) => {
-                    const isActive = currentStep === step.id;
-                    const isCompleted = currentStep > step.id;
+          {/* Header with Logo - Better mobile spacing */}
+          <div className="w-full flex justify-center mb-8 sm:mb-10 md:mb-6 lg:mb-[22px]">
+            <Image
+              src="/fliq-logo.svg"
+              alt="FLIQ Logo"
+              width={80}
+              height={32}
+              priority
+            />
+          </div>
 
-                    return (
-                      <div key={step.id} className="relative flex items-center">
-                        {/* Step Circle */}
-                        <div className={`w-12 h-12 border-2 border-light-text dark:border-dark-text flex items-center justify-center flex-shrink-0 ${isActive
-                          ? 'bg-[#FF9269] text-white'
-                          : isCompleted
-                            ? 'bg-[#FF9269] text-white'
-                            : 'bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text'
-                          }`} style={{ boxShadow: '2px 2px 0 0 rgba(0,0,0,0.8)' }}>
-                          <Image
-                            src={step.icon}
-                            alt={step.name}
-                            width={24}
-                            height={24}
-                            className={isActive || isCompleted ? 'filter brightness-0 invert' : ''}
-                          />
-                        </div>
+          {/* Mobile Step Indicator - Only visible on mobile */}
+          <div className="w-full max-w-md mx-auto mb-6 md:hidden">
+            <div className="bg-light-bg dark:bg-dark-bg border border-light-text dark:border-dark-text p-4" style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}>
+              <div className="flex items-center">
+                <div className="w-10 h-10 border-2 border-light-text dark:border-dark-text flex items-center justify-center flex-shrink-0 bg-[#FF9269] text-white" style={{ boxShadow: '2px 2px 0 0 rgba(0,0,0,0.8)' }}>
+                  <Image
+                    src={STEPS[currentStep - 1]?.icon}
+                    alt={STEPS[currentStep - 1]?.name}
+                    width={20}
+                    height={20}
+                    className="filter brightness-0 invert"
+                  />
+                </div>
+                <div className="ml-3 flex-1">
+                  <div className="text-sm font-outfit font-semibold text-light-text dark:text-dark-text">
+                    {currentStep}. {STEPS[currentStep - 1]?.name} ({currentStep}/{STEPS.length})
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                        {/* Step Info */}
-                        <div className="ml-4 flex-1">
-                          <div className={`text-base font-outfit font-semibold ${isActive ? 'text-light-text dark:text-dark-text' : isCompleted ? 'text-light-text dark:text-dark-text' : 'text-gray-400'
-                            }`}>
-                            {step.id}. {step.name}
+          {/* Main Content Layout - Properly centered with fixed dimensions */}
+          <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-[22px] w-full max-w-none">
+
+            {/* Desktop: Centered container with fixed total width */}
+            <div className="hidden md:flex md:justify-center md:w-full">
+              <div className="flex gap-[22px]">
+
+                {/* Left Sidebar - Step Navigation */}
+                <div className="w-80 flex-shrink-0">
+                  <div className="bg-light-bg dark:bg-dark-bg border border-light-text dark:border-dark-text p-4 lg:p-6" style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}>
+                    <div className="space-y-4 lg:space-y-[22px]">
+                      {STEPS.map((step, index) => {
+                        const isActive = currentStep === step.id;
+                        const isCompleted = currentStep > step.id;
+
+                        return (
+                          <div key={step.id} className="relative flex items-center">
+                            {/* Step Circle */}
+                            <div className={`w-10 h-10 lg:w-12 lg:h-12 border-2 border-light-text dark:border-dark-text flex items-center justify-center flex-shrink-0 ${isActive
+                              ? 'bg-[#FF9269] text-white'
+                              : isCompleted
+                                ? 'bg-[#FF9269] text-white'
+                                : 'bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text'
+                              }`} style={{ boxShadow: '2px 2px 0 0 rgba(0,0,0,0.8)' }}>
+                              <Image
+                                src={step.icon}
+                                alt={step.name}
+                                width={20}
+                                height={20}
+                                className={isActive || isCompleted ? 'filter brightness-0 invert' : ''}
+                              />
+                            </div>
+
+                            {/* Step Info */}
+                            <div className="ml-3 lg:ml-4 flex-1">
+                              <div className={`text-sm lg:text-base font-outfit font-semibold ${isActive ? 'text-light-text dark:text-dark-text' : isCompleted ? 'text-light-text dark:text-dark-text' : 'text-gray-400'
+                                }`}>
+                                {step.id}. {step.name}
+                              </div>
+                            </div>
+
+                            {/* Connecting Line */}
+                            {index < STEPS.length - 1 && (
+                              <div className="absolute left-5 lg:left-6 top-[50px] lg:top-[70px] w-0.5 h-4 lg:h-[22px] bg-gray-300"></div>
+                            )}
                           </div>
-                        </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
 
-                        {/* Connecting Line */}
-                        {index < STEPS.length - 1 && (
-                          <div className="absolute left-6 top-[70px] w-0.5 h-[22px] bg-gray-300"></div>
-                        )}
+                {/* Right Content Area - Fixed width to match Figma */}
+                <div className="w-[600px] flex-shrink-0">
+                  <div className="bg-light-bg dark:bg-dark-bg border border-light-text dark:border-dark-text min-h-[500px] flex flex-col" style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}>
+
+                    {/* Back Button - Show for internal questions OR main step navigation */}
+                    {(hasInternalBack || currentStep > 1) && (
+                      <div className="p-4 sm:p-6 pb-0">
+                        <button
+                          onClick={handleBack}
+                          className="flex items-center gap-2 text-light-text dark:text-dark-text border border-light-text dark:border-dark-text px-3 sm:px-4 py-2 sm:py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-outfit font-medium"
+                          style={{ boxShadow: '2px 2px 0 0 rgba(0,0,0,0.8)' }}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </svg>
+                          <span className="hidden sm:inline">Back to previous question</span>
+                          <span className="sm:hidden">Back</span>
+                        </button>
                       </div>
-                    );
-                  })}
+                    )}
+
+                    {/* Step Content - Responsive padding */}
+                    <div className="flex-1 p-4 sm:p-6 lg:p-8">
+                      {CurrentStepComponent && (
+                        <CurrentStepComponent
+                          data={formData}
+                          updateData={updateFormData}
+                          theme="light"
+                          onNext={handleNext}
+                          onBack={handleBack}
+                          registerInternalBack={registerInternalBack}
+                        />
+                      )}
+                    </div>
+
+                    {/* Footer with Continue Button */}
+                    <div className="p-4 sm:p-6 pt-0 flex items-center justify-between">
+                      <div className="text-light-text dark:text-dark-text text-xs sm:text-sm font-outfit">
+                        <span className="hidden sm:inline">Step {currentStep} of {STEPS.length}</span>
+                        <span className="sm:hidden">{currentStep}/{STEPS.length}</span>
+                      </div>
+
+                      {/* Final Submit Button - Only show on last step */}
+                      {currentStep === STEPS.length && (
+                        <button
+                          onClick={handleSubmit}
+                          disabled={isSubmitting}
+                          className="bg-[#FF9269] text-white px-4 sm:px-6 py-3 text-sm sm:text-base font-outfit font-medium hover:bg-[#e5825a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-light-text dark:border-dark-text"
+                          style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}
+                        >
+                          {isSubmitting ? 'Submitting...' : 'Complete Profile'}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Error Display */}
+                    {error && (
+                      <div className="mx-4 sm:mx-6 mb-4 sm:mb-6 p-3 sm:p-4 bg-red-100 border border-red-400 text-red-700 text-xs sm:text-sm">
+                        {error}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Content Area - Fixed width like Figma */}
-            <div className="w-[600px] flex-shrink-0">
+            {/* Mobile: Full width content */}
+            <div className="md:hidden w-full max-w-md mx-auto">
               <div className="bg-light-bg dark:bg-dark-bg border border-light-text dark:border-dark-text min-h-[500px] flex flex-col" style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}>
 
-                {/* Back Button */}
-                {currentStep > 1 && (
-                  <div className="p-6 pb-0">
+                {/* Back Button - Show for internal questions OR main step navigation */}
+                {(hasInternalBack || currentStep > 1) && (
+                  <div className="p-4 pb-0">
                     <button
                       onClick={handleBack}
-                      className="flex items-center gap-2 text-light-text dark:text-dark-text border border-light-text dark:border-dark-text px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-outfit font-medium"
+                      className="flex items-center gap-2 text-light-text dark:text-dark-text border border-light-text dark:border-dark-text px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-outfit font-medium"
                       style={{ boxShadow: '2px 2px 0 0 rgba(0,0,0,0.8)' }}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
-                      Back to previous question
+                      <span>Back</span>
                     </button>
                   </div>
                 )}
 
-                {/* Step Content - Proper padding and spacing */}
-                <div className="flex-1 p-8">
+                {/* Step Content - Mobile padding */}
+                <div className="flex-1 p-4 sm:p-6">
                   {CurrentStepComponent && (
                     <CurrentStepComponent
                       data={formData}
@@ -445,14 +566,15 @@ function OnboardingPage() {
                       theme="light"
                       onNext={handleNext}
                       onBack={handleBack}
+                      registerInternalBack={registerInternalBack}
                     />
                   )}
                 </div>
 
                 {/* Footer with Continue Button */}
-                <div className="p-6 pt-0 flex items-center justify-between">
-                  <div className="text-light-text dark:text-dark-text text-sm font-outfit">
-                    Step {currentStep} of {STEPS.length}
+                <div className="p-4 pt-0 flex items-center justify-between">
+                  <div className="text-light-text dark:text-dark-text text-xs font-outfit">
+                    {currentStep}/{STEPS.length}
                   </div>
 
                   {/* Final Submit Button - Only show on last step */}
@@ -460,7 +582,7 @@ function OnboardingPage() {
                     <button
                       onClick={handleSubmit}
                       disabled={isSubmitting}
-                      className="bg-[#FF9269] text-white px-6 py-3 text-base font-outfit font-medium hover:bg-[#e5825a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-light-text dark:border-dark-text"
+                      className="bg-[#FF9269] text-white px-4 py-3 text-sm font-outfit font-medium hover:bg-[#e5825a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-light-text dark:border-dark-text"
                       style={{ boxShadow: '4px 4px 0 0 rgba(0,0,0,0.8)' }}
                     >
                       {isSubmitting ? 'Submitting...' : 'Complete Profile'}
@@ -470,7 +592,7 @@ function OnboardingPage() {
 
                 {/* Error Display */}
                 {error && (
-                  <div className="mx-6 mb-6 p-4 bg-red-100 border border-red-400 text-red-700 text-sm">
+                  <div className="mx-4 mb-4 p-3 bg-red-100 border border-red-400 text-red-700 text-xs">
                     {error}
                   </div>
                 )}

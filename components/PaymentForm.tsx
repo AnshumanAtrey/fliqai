@@ -17,7 +17,12 @@ interface PaymentPlan {
 
 interface PaymentFormProps {
   plan: PaymentPlan;
-  onSuccess: (result: any) => void;
+  onSuccess: (result: {
+    paymentIntent?: string | object;
+    creditsAdded: number;
+    newBalance: number;
+    plan: Partial<PaymentPlan> & { credits?: number; price?: number; name?: string };
+  }) => void;
   onCancel: () => void;
 }
 
@@ -66,14 +71,14 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ plan, onSuccess, onCan
     try {
       // Process the complete payment flow
       const result = await purchaseCredits(plan, paymentData);
-      
+
       if (result.success) {
         // Refresh credits in the header
         await fetchCredits();
-        
+
         // Calculate new balance (current credits + added credits)
         const newBalance = credits + result.creditsAdded;
-        
+
         // Call success callback
         onSuccess({
           paymentIntent: result.paymentIntent,
@@ -82,9 +87,9 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({ plan, onSuccess, onCan
           plan: result.plan
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Payment error:', err);
-      setError(err.message || 'Payment failed. Please try again.');
+      setError(err instanceof Error ? err.message : 'Payment failed. Please try again.');
     } finally {
       setProcessing(false);
     }

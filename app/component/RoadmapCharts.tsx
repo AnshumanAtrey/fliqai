@@ -3,25 +3,25 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 
-interface ChartDataItem {
-  name: string;
-  value: number;
-  color: string;
-}
+// interface ChartDataItem {
+//   name: string;
+//   value: number;
+//   color: string;
+// }
 
 interface LabelProps {
-  cx: number;
-  cy: number;
-  midAngle: number;
-  innerRadius: number;
-  outerRadius: number;
-  percent: number;
+  cx?: number;
+  cy?: number;
+  midAngle?: number;
+  innerRadius?: number;
+  outerRadius?: number;
+  percent?: number;
 }
 
 interface LegendProps {
-  payload?: Array<{
-    value: string;
-    color: string;
+  payload?: ReadonlyArray<{
+    value?: string;
+    color?: string;
   }>;
 }
 
@@ -55,7 +55,7 @@ const chartTitles = {
 };
 
 const renderCustomizedLabel = (props: LabelProps) => {
-  const { cx, cy, midAngle, innerRadius, outerRadius, percent } = props;
+  const { cx = 0, cy = 0, midAngle = 0, innerRadius = 0, outerRadius = 0, percent = 0 } = props;
   const RADIAN = Math.PI / 180;
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -80,14 +80,14 @@ const renderLegend = (props: LegendProps) => {
   
   return (
     <div className="flex flex-wrap justify-center gap-4 mt-4">
-      {payload.map((entry: any, index: number) => (
+      {payload.map((entry: { value?: string; color?: string }, index: number) => (
         <div key={`legend-${index}`} className="flex items-center">
           <div
             className="w-3 h-3 rounded-full mr-2"
-            style={{ backgroundColor: entry.color }}
+            style={{ backgroundColor: entry.color || '#000' }}
           />
           <span className="text-sm text-gray-700">
-            {entry.value}
+            {entry.value || ''}
           </span>
         </div>
       ))}

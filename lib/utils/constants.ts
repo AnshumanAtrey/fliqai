@@ -334,31 +334,36 @@ export type ValidationSchema = typeof VALIDATION_SCHEMAS;
 /**
  * Utility function to get nested configuration values
  */
-export function getConfigValue(obj: any, path: string): any {
-  return path.split('.').reduce((current, key) => current?.[key], obj);
+export function getConfigValue(obj: Record<string, unknown>, path: string): unknown {
+  return path.split('.').reduce((current: unknown, key) => {
+    if (current && typeof current === 'object' && !Array.isArray(current)) {
+      return (current as Record<string, unknown>)[key];
+    }
+    return undefined;
+  }, obj);
 }
 
 /**
  * Utility function to validate object against schema
  */
-export function validateSchema(data: any, schema: any): { valid: boolean; errors: string[] } {
+export function validateSchema(data: Record<string, unknown>, schema: Record<string, unknown>): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
   
   // Check required fields
-  if (schema.required) {
+  if (schema.required && Array.isArray(schema.required)) {
     for (const field of schema.required) {
-      if (!(field in data)) {
+      if (typeof field === 'string' && !(field in data)) {
         errors.push(`Missing required field: ${field}`);
       }
     }
   }
   
   // Check properties
-  if (schema.properties) {
-    for (const [key, propSchema] of Object.entries(schema.properties)) {
+  if (schema.properties && typeof schema.properties === 'object' && !Array.isArray(schema.properties)) {
+    for (const [key, propSchema] of Object.entries(schema.properties as Record<string, unknown>)) {
       if (key in data) {
         const value = data[key];
-        const prop = propSchema as any;
+        const prop = propSchema as Record<string, unknown>;
         
         // Type validation
         if (prop.type && prop.type !== 'any') {
@@ -370,27 +375,29 @@ export function validateSchema(data: any, schema: any): { valid: boolean; errors
         
         // String validations
         if (prop.type === 'string' && typeof value === 'string') {
-          if (prop.minLength && value.length < prop.minLength) {
+          if (typeof prop.minLength === 'number' && value.length < prop.minLength) {
             errors.push(`Field ${key} should have minimum length ${prop.minLength}`);
           }
-          if (prop.pattern && !prop.pattern.test(value)) {
-            errors.push(`Field ${key} does not match required pattern`);
+          if (prop.pattern && typeof prop.pattern === 'object' && 'test' in prop.pattern && typeof prop.pattern.test === 'function') {
+            if (!prop.pattern.test(value)) {
+              errors.push(`Field ${key} does not match required pattern`);
+            }
           }
         }
         
         // Number validations
         if (prop.type === 'number' && typeof value === 'number') {
-          if (prop.minimum && value < prop.minimum) {
+          if (typeof prop.minimum === 'number' && value < prop.minimum) {
             errors.push(`Field ${key} should be at least ${prop.minimum}`);
           }
-          if (prop.maximum && value > prop.maximum) {
+          if (typeof prop.maximum === 'number' && value > prop.maximum) {
             errors.push(`Field ${key} should be at most ${prop.maximum}`);
           }
         }
         
         // Nested object validation
-        if (prop.properties) {
-          const nestedResult = validateSchema(value, prop);
+        if (prop.properties && typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          const nestedResult = validateSchema(value as Record<string, unknown>, prop);
           errors.push(...nestedResult.errors.map(err => `${key}.${err}`));
         }
       }
@@ -427,9 +434,11 @@ export function getEnvironmentConfig() {
   switch (env) {
     case 'production':
       return ENVIRONMENT_CONFIG.PRODUCTION;
-    case 'staging':
-      return ENVIRONMENT_CONFIG.STAGING;
     default:
+      // Check for staging environment using custom env var or fallback
+      if (process.env.ENVIRONMENT === 'staging') {
+        return ENVIRONMENT_CONFIG.STAGING;
+      }
       return ENVIRONMENT_CONFIG.DEVELOPMENT;
   }
 }

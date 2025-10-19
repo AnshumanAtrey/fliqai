@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/app/context/ThemeContext';
 import { ConfigProvider, ConfigErrorBoundary, ConfigLoading } from '@/lib/contexts/ConfigContext';
 import { AuthProvider, AuthErrorBoundary, AuthLoading } from '@/lib/contexts/AuthContext';
 import ThemeBackground from './components/ThemeBackground';
-import smoothScroll from './utils/smooth-scroll';
+
 
 export default function ClientLayout({
   children,
@@ -13,9 +13,6 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   useEffect(() => {
-    // Initialize smooth scrolling
-    smoothScroll();
-    
     // This runs only on the client side after hydration
     const cleanUpAttributes = () => {
       // Remove common extension-added attributes

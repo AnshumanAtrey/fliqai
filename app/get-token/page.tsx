@@ -19,8 +19,8 @@ export default function GetTokenPage() {
         } else {
           setError('No user signed in. Please sign in first.');
         }
-      } catch (err: any) {
-        setError(err.message || 'Failed to get token');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Failed to get token');
       }
     };
 
