@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 const AcademicsSection = () => {
   // GPA values (out of 4.0)
@@ -98,9 +99,11 @@ const AcademicsSection = () => {
           {/* Profile Image */}
           <div className="flex justify-start mb-6">
             <div className="w-14 h-14 rounded-full overflow-hidden">
-              <img 
+              <Image 
                 src="/profile-pic-1.jpg"
                 alt="Profile"
+                width={56}
+                height={56}
                 className="w-full h-full object-cover"
               />
             </div>

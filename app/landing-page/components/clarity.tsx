@@ -62,11 +62,11 @@ export default function ClarityHitsSection() {
               <div className="w-full h-[2px] border-b-2 border-dotted border-[#FF9269]"></div>
             </div>
             
-            {timelineSteps.map((step, idx) => (
-              <div key={step.circle} className="flex flex-col items-center min-w-[210px] relative">
+            {timelineSteps.map((item) => (
+              <div key={item.circle} className="flex flex-col items-center min-w-[210px] relative">
                 <div className="flex px-4 py-2 rounded-full bg-[#F3EAE1] justify-center items-center mb-2">
                   <span className="text-[#191919] text-center font-outfit text-[20px] font-medium leading-[150%]">
-                    {step.circle}
+                    {item.circle}
                   </span>
                 </div>
               </div>
@@ -75,22 +75,22 @@ export default function ClarityHitsSection() {
 
           {/* Timeline card boxes */}
           <div className="relative w-full flex flex-col md:flex-row justify-between items-start gap-6 md:gap-[40px]">
-            {timelineSteps.map((step, idx) => (
-              <div key={step.circle}
+            {timelineSteps.map((item) => (
+              <div key={item.circle}
                    className="bg-[#F3EAE1] rounded-[24px] flex flex-col items-center px-6 md:px-8 py-5 md:py-6 gap-4 md:gap-6 w-full md:min-w-[320px] md:max-w-[330px] shadow"
               >
                 {/* Mobile timeline label */}
                 <div className="md:hidden flex px-4 py-2 rounded-full bg-white justify-center items-center">
                   <span className="text-[#191919] text-center font-outfit text-base font-medium leading-[150%]">
-                    {step.circle}
+                    {item.circle}
                   </span>
                 </div>
                 
                 <div className="w-full text-[#191919] text-center font-outfit text-xl md:text-[24px] font-semibold mb-2 leading-[150%]">
-                  {step.box.title}
+                  {item.box.title}
                 </div>
                 <ul className="flex flex-col w-full gap-3 md:gap-4 items-start justify-center">
-                  {step.box.bullets.map((bullet, bIdx) => (
+                  {item.box.bullets.map((bullet: string, bIdx: number) => (
                     <li key={bIdx} className="flex flex-row items-center gap-2 text-[#191919] font-outfit text-base md:text-[18px] font-normal leading-[150%]">
                       <span className="flex items-center justify-center min-w-[19.5px] mr-2"><TickIcon /></span>
                       <span>{bullet}</span>

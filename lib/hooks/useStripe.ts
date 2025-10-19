@@ -4,12 +4,9 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Stripe, StripeError } from '@stripe/stripe-js';
+import { Stripe } from '@stripe/stripe-js';
 import { 
   stripeService, 
-  StripeService, 
-  StripeServiceError,
-  StripePaymentIntent,
   StripePaymentMethod 
 } from '../services/stripe';
 import { StripeConfig } from '../api/types';

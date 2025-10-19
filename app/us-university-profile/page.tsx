@@ -56,7 +56,7 @@ type University = {
 };
 
 function UniversityProfile() {
-  const { user, refreshToken } = useAuth();
+  const { } = useAuth();
 
   useEffect(() => {
     // Add custom radio button styles
@@ -624,10 +624,10 @@ function UniversityProfile() {
               {activeTab === 'collegeInfo' && <AdmissionsSection university={university} />}
 
               {/* Financial Breakdown Section */}
-              {activeTab === 'collegeInfo' && <FinancialBreakdown university={university} />}
+              {activeTab === 'collegeInfo' && <FinancialBreakdown />}
 
               {/* Campus Life Section */}
-              {activeTab === 'collegeInfo' && <CampusLife university={university} />}
+              {activeTab === 'collegeInfo' && <CampusLife />}
 
               {activeTab === 'collegeInfo' && (
                 <>

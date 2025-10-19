@@ -2,10 +2,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 
-interface CreditBalance {
-  credits: number;
-  lastUpdated: string;
-}
+// interface CreditBalance {
+//   credits: number;
+//   lastUpdated: string;
+// }
 
 interface CreditTransaction {
   id: string;

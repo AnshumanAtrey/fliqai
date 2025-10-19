@@ -1,19 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 
-interface UniversityProps {
-  university: {
-    name: string;
-    location: string;
-    stats: {
-      acceptanceRate: number;
-      students: number;
-      international: number;
-    };
-  };
-}
-
-const CampusLife = ({ university }: UniversityProps) => {
+const CampusLife = () => {
   return (
     <div className="w-full  py-20 mb-10">
       <div className="w-[90%] mx-auto">

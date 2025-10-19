@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../component/header';
 import { DotPatternBackground } from '../component/DotPatternBackground';
@@ -40,7 +40,6 @@ function DiscoverStudentsPage() {
 
   // State management
   const [students, setStudents] = useState<Student[]>([]);
-  const [studentsData, setStudentsData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -130,7 +129,7 @@ function DiscoverStudentsPage() {
   ];
 
   // Fetch students data from backend
-  const fetchStudentsData = async () => {
+  const fetchStudentsData = useCallback(async () => {
     if (!user) {
       console.log('❌ No user found, using fallback data');
       setStudents(fallbackStudents);
@@ -167,22 +166,21 @@ function DiscoverStudentsPage() {
 
       const data = await response.json();
       console.log('✅ API Data received:', data);
-      setStudentsData(data);
 
       if (data.success && data.data?.students) {
         setStudents(data.data.students);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('❌ Failed to fetch students:', err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Failed to fetch students');
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, currentPage]);
 
   useEffect(() => {
     fetchStudentsData();
-  }, [user, currentPage]);
+  }, [user, currentPage, fetchStudentsData]);
 
   // Filter handlers
   const handleGPAChange = (min: number, max: number) => {

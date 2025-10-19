@@ -7,7 +7,7 @@ import StripeProvider from '../../components/StripeProvider';
 import { PaymentForm } from '../../components/PaymentForm';
 import { PaymentSuccessModal } from '../../components/PaymentSuccessModal';
 import { usePayment } from '../../lib/hooks/usePayment';
-import { useCredits } from '../../lib/hooks/useCredits';
+// import { useCredits } from '../../lib/hooks/useCredits';
 import { useAuth } from '../../lib/hooks/useAuth';
 import { withAuthProtection } from '@/lib/hooks/useAuthProtection';
 

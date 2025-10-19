@@ -47,8 +47,6 @@ export const FilterModals: React.FC<FilterModalsProps> = ({
   gpaMin,
   gpaMax,
   onGPAChange,
-  showSATFilter,
-  setShowSATFilter,
   showMajorFilter,
   setShowMajorFilter,
   selectedMajors,

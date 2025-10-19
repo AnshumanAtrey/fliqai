@@ -1,6 +1,6 @@
 "use client";
 import { useState, useCallback } from 'react';
-import { loadStripe, Stripe, StripeElements, PaymentIntent } from '@stripe/stripe-js';
+import { PaymentIntent } from '@stripe/stripe-js';
 import { useStripe, useElements } from '@stripe/react-stripe-js';
 import { useAuth } from './useAuth';
 import { useSecureConfig } from './useSecureConfig';

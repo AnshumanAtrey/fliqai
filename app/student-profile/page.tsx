@@ -10,9 +10,7 @@ import AwardsSection from "@/components/AwardsSection";
 import EssaysSection from "@/components/EssaysSection";
 import QuestionsAnswersSection from "@/components/QuestionsAnswersSection";
 import { DotPatternBackground } from "../component/DotPatternBackground";
-import { useApiGet } from "../../lib/hooks/useApi";
 import { useAuth } from "../../lib/hooks/useAuth";
-import {auth} from '../firebase/config';
 import { withAuthProtection } from '@/lib/hooks/useAuthProtection';
 // Student profile interface
 interface StudentProfile {
@@ -42,6 +40,14 @@ interface StudentProfile {
     current: number;
     average: number;
   };
+}
+
+interface Essay {
+  id?: string;
+  title: string;
+  content: string;
+  wordCount?: number;
+  submittedFor?: string;
 }
 
 // Fallback data
@@ -87,7 +93,7 @@ const fallbackProfile: StudentProfile = {
 
 function StudentProfile() {
   const [profile, setProfile] = useState<StudentProfile>(fallbackProfile);
-  const [essays, setEssays] = useState<any[]>([]);
+  const [essays, setEssays] = useState<Array<Essay>>([]);
   const searchParams = useSearchParams();
   const studentId = searchParams.get('id') || '1';
 
@@ -189,7 +195,8 @@ function StudentProfile() {
 
   useEffect(() => {
     fetchProfileData();
-  }, [user, studentId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [studentId]);
   return (
     <div>
       <DotPatternBackground>

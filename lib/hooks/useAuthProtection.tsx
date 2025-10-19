@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '../contexts/AuthContext';
-import { User } from 'firebase/auth';
+// import { User } from 'firebase/auth';
 
 interface ProfileStatus {
   profileCompleted: boolean;
@@ -27,17 +27,15 @@ export function useAuthProtection(options: {
   requireAuth?: boolean;
   requireProfile?: boolean;
   redirectTo?: string;
-  allowedRoutes?: string[];
 } = {}): AuthProtectionState {
   const {
     requireAuth = true,
     requireProfile = true,
     redirectTo = '/login',
-    allowedRoutes = ['/login', '/signup', '/onboarding']
   } = options;
 
   const { user, loading: authLoading } = useAuthContext();
-  const router = useRouter();
+  // const router = useRouter();
   const [profileStatus, setProfileStatus] = useState<ProfileStatus>({
     profileCompleted: false,
     loading: true,
@@ -165,7 +163,6 @@ export function withAuthProtection<P extends object>(
     requireAuth?: boolean;
     requireProfile?: boolean;
     redirectTo?: string;
-    allowedRoutes?: string[];
   } = {}
 ) {
   return function ProtectedComponent(props: P) {
@@ -196,6 +193,7 @@ export function withAuthProtection<P extends object>(
     }, [authState.shouldRedirect, authState.redirectTo, authState.isLoading, router]);
 
     // Show loading while checking authentication and profile
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     if (authState.isLoading) {
       return (
         <div className="flex items-center justify-center min-h-screen bg-gray-50">

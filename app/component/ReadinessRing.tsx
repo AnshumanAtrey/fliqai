@@ -66,6 +66,7 @@ const ReadinessRingSection = () => {
     if (canvasRef2.current) {
       drawDonutChart(canvasRef2.current, youData);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const Label = ({ text, position }: { text: string; position: string }) => (

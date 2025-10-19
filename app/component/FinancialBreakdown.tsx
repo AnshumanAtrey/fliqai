@@ -2,18 +2,7 @@
 
 import React, { useRef, useEffect } from 'react';
 
-interface UniversityProps {
-  university: {
-    name: string;
-    stats: {
-      acceptanceRate: number;
-      students: number;
-      international: number;
-    };
-  };
-}
-
-const FinancialBreakdown = ({ university }: UniversityProps) => {
+const FinancialBreakdown = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {

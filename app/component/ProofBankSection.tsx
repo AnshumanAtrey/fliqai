@@ -132,8 +132,8 @@ const ProofBankSection: React.FC<ProofBankSectionProps> = ({ students = [] }) =>
         id: student.id || `student-${index}`,
         name: student.name || `Student ${index + 1}`,
         admissionYear: student.admissionYear || 2023,
-        major: typeof student.major === 'string' ? student.major : (student.major as any)?.name || 'Undeclared',
-        description: (student.bio as string) || (student.discoveryInfo as any)?.description || 'Click to view full profile',
+        major: typeof student.major === 'string' ? student.major : (student.major as { name?: string })?.name || 'Undeclared',
+        description: (student.bio as string) || (student.discoveryInfo as { description?: string })?.description || 'Click to view full profile',
         imageUrl: student.profileImage || fallbackProfiles[index % fallbackProfiles.length].imageUrl,
       }))
     : fallbackProfiles;

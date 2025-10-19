@@ -67,6 +67,7 @@ const drawDonutChart = (canvas: HTMLCanvasElement, data: ChartData) => {
     if (canvasRef2.current) {
       drawDonutChart(canvasRef2.current, asuData);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const Label = ({ text, position }: { text: string; position: string }) => (

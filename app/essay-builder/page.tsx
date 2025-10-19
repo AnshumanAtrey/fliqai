@@ -42,19 +42,17 @@ const EssayBuilderPage = () => {
   const { refreshToken } = useAuth();
   const [analysisData, setAnalysisData] = useState<EssayAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // API call to analyze essay
   const handleAnalyzeEssay = async (essay: string, prompt: string) => {
     setIsAnalyzing(true);
-    setError(null);
 
     try {
       // Get auth token from the auth context
       let token = null;
       try {
         token = await refreshToken();
-      } catch (authError) {
+      } catch {
         console.warn('Could not get auth token, proceeding without authentication for development');
       }
 
@@ -85,7 +83,6 @@ const EssayBuilderPage = () => {
       }
     } catch (err) {
       console.error('Essay analysis error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to analyze essay');
 
       // For demo purposes, use sample data if API fails
       const sampleData: EssayAnalysis = {

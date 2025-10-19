@@ -5,7 +5,6 @@ import CircularCarousel from './CircularCarousel';
 import Image from 'next/image';
 
 // Import footer images
-import logo from '../assets/logos/logo-f.svg';
 import FooterImg1 from '../assets/Footer/0cdf514a4b069b761062b51c694f333e9c1697f2.jpg';
 import FooterImg2 from '../assets/Footer/1db2b8ad88ae181ad62d4c2c53de3b6f0bc2279e.jpg';
 import FooterImg3 from '../assets/Footer/3aea1d813bf318f1504de9d46124d58a897f86d0.jpg';

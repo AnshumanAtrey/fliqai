@@ -50,7 +50,7 @@ type University = {
 };
 
 function UniversityProfile() {
-  const { user, refreshToken } = useAuth();
+  const { refreshToken } = useAuth();
 
   useEffect(() => {
     // Add custom radio button styles

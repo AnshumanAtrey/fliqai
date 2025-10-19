@@ -38,7 +38,7 @@ export default function ScaleOfFliqSection() {
 
       {/* Stat Boxes */}
       <div className="flex flex-col md:flex-row gap-6 md:gap-[40px] justify-center w-full max-w-[1320px]">
-        {scaleStats.map((item, idx) => (
+        {scaleStats.map((item) => (
           <div
             key={item.label}
             className="bg-[#F3EAE1] rounded-[24px] flex flex-col p-[24px] md:p-[30px] items-start gap-12 md:gap-[80px] flex-1 min-w-[230px] md:max-w-[300px]"

@@ -84,7 +84,7 @@ export const EssayStyleSection = ({ essayData }: EssayStyleSectionProps) => {
 
       currentAngle += sliceAngle;
     });
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   // Create donut slice path

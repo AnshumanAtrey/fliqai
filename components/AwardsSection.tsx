@@ -1,5 +1,5 @@
 import React from 'react';
-import { GraduationCap, Users, Lightbulb } from 'lucide-react';
+// import { GraduationCap, Users, Lightbulb } from 'lucide-react';
 
 const AwardsSection = () => {
   const awards = [

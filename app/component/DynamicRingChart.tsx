@@ -22,13 +22,12 @@ const DynamicRingChart: React.FC<DynamicRingChartProps> = ({
   data,
   size = 400,
   strokeWidth = 30,
-  labelRadius = 0.7,
-  centerLabel = '',
+  labelRadius = 150,
+  centerLabel,
   centerLabelSize = 24,
 }) => {
   const radius = (size - strokeWidth) / 2;
   const center = size / 2;
-  const circumference = 2 * Math.PI * radius;
   let accumulatedPercentage = 0;
 
   // Calculate the total percentage to normalize the data
@@ -41,7 +40,7 @@ const DynamicRingChart: React.FC<DynamicRingChartProps> = ({
     : data;
 
   // Generate path data for each segment
-  const segments = normalizedData.map((segment, index) => {
+  const segments = normalizedData.map((segment) => {
     const startPercentage = accumulatedPercentage;
     const endPercentage = startPercentage + segment.percentage;
     

@@ -57,6 +57,7 @@ export const GPADistribution = () => {
     if (canvasRef.current) {
       drawDonutChart(canvasRef.current, gpaData);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gpaData]);
 
   const Label = ({ text, position }: { text: string; position: string }) => (

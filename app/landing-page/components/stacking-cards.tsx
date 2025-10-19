@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 // CONFIGURATION - CHANGE VALUES HERE
 // ============================================
 const SCALE_FACTOR = 0.95; // Change: Scale down factor for stacked cards (0.9-0.99)
-const STACK_OFFSET = 40; // Change: Vertical offset for each stacked card in pixels
 // ============================================
 
 interface ContainerScrollProps extends React.HTMLProps<HTMLDivElement> {
@@ -36,7 +35,7 @@ const ContainerScroll = React.forwardRef<HTMLDivElement, ContainerScrollProps>(
 ContainerScroll.displayName = 'ContainerScroll';
 
 const StackingCard = React.forwardRef<HTMLDivElement, StackingCardProps>(
-  ({ index, baseTop = 80, children, className, style, ...props }, ref) => {
+  ({ baseTop = 80, children, className, style, ...props }, ref) => {
     const cardRef = React.useRef<HTMLDivElement>(null);
     const [scale, setScale] = React.useState(1);
 
@@ -58,8 +57,7 @@ const StackingCard = React.forwardRef<HTMLDivElement, StackingCardProps>(
           const cards = Array.from(
             card.parentElement?.querySelectorAll('[data-stacking-card]') || []
           ) as HTMLElement[];
-          const currentIndex = cards.indexOf(card);
-          const nextCard = cards[currentIndex + 1];
+          const nextCard = cards[cards.indexOf(card) + 1];
 
           if (nextCard) {
             const nextCardRect = nextCard.getBoundingClientRect();

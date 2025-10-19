@@ -20,6 +20,7 @@ export default function BasicInfoStep({ data, updateData, onNext, registerIntern
 
   useEffect(() => {
     updateData('basicInfo', formData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData]);
 
   // Register internal back state with parent
@@ -29,6 +30,7 @@ export default function BasicInfoStep({ data, updateData, onNext, registerIntern
       const backHandler = hasBack ? handleBack : null;
       registerInternalBack(hasBack, backHandler);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentQuestion, registerInternalBack]);
 
   const handleInputChange = (field: string, value: string) => {

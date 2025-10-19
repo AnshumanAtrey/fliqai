@@ -22,6 +22,7 @@ export default function PreferencesStep({ data, updateData, onNext, registerInte
 
   useEffect(() => {
     updateData('preferences', formData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData]);
 
   // Register internal back state with parent
@@ -31,6 +32,7 @@ export default function PreferencesStep({ data, updateData, onNext, registerInte
       const backHandler = hasBack ? handleBack : null;
       registerInternalBack(hasBack, backHandler);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentQuestion, registerInternalBack]);
 
   const handleInputChange = (field: string, value: string) => {
