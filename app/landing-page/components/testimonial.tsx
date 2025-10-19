@@ -84,7 +84,7 @@ const testimonials = [
 
 export default function TestimonialWallSection() {
   return (
-    <section className="w-full min-h-[600px] md:min-h-[950px] bg-[#F9F7F3] flex flex-col items-center pt-12 md:pt-[120px] pb-12 md:pb-[120px] px-4 md:px-[120px]">
+    <section className="w-full min-h-[600px] md:min-h-[950px] bg-[#FAF6F2] flex flex-col items-center pt-12 md:pt-[120px] pb-12 md:pb-[120px] px-4 md:px-[120px]">
       {/* Heading */}
       <h2 className="text-[#191919] font-outfit text-2xl md:text-[40px] font-bold leading-[110%] text-center mb-6 md:mb-9">
         We Could Brag, But It&apos;d Be<br/>Better If They Do

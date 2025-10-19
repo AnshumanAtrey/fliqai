@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
@@ -24,31 +24,45 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   onViewProfile,
 }) => {
   return (
-    <div className="border-2 border-black bg-light-bg dark:bg-dark-tertiary p-2 h-[570px] w-[350px]  flex flex-col" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-      <div className="flex items-start mb-4 flex-col">
-        <div className="w-full h-[320px] mb-4 overflow-hidden border-[1px] border-black">
-          <Image
-            src={imageUrl}
-            alt={name}
-            width={320}
-            height={320}
-            className="w-full h-full object-cover"
-            priority
-          />
+    <div className="border-2 border-black bg-light-bg dark:bg-dark-tertiary p-4 min-h-[570px] w-full max-w-[350px] flex flex-col" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+      {/* Image Section - Fixed Height */}
+      <div className="w-full h-[280px] mb-4 overflow-hidden border border-black flex-shrink-0">
+        <Image
+          src={imageUrl}
+          alt={name}
+          width={320}
+          height={280}
+          className="w-full h-full object-cover"
+          priority
+        />
+      </div>
+      
+      {/* Content Section - Flexible */}
+      <div className="flex flex-col flex-grow">
+        {/* Header Info - Fixed Height */}
+        <div className="mb-4 flex-shrink-0">
+          <h3 className="text-lg font-bold leading-tight mb-1 line-clamp-2">{name}</h3>
+          <p className="text-sm text-light-p dark:text-dark-text leading-tight">
+            Admitted {admissionYear} • {major}
+          </p>
         </div>
-        <div className="flex flex-col">
-          <h3 className="text-lg font-bold">{name}</h3>
-          <p className="text-sm text-light-p dark:text-dark-text">Admitted {admissionYear} • {major}</p>
+        
+        {/* Description - Flexible Height with Consistent Line Height */}
+        <div className="flex-grow flex flex-col justify-between">
+          <p className="text-light-p dark:text-dark-text text-sm leading-relaxed mb-4 line-clamp-4">
+            {description}
+          </p>
+          
+          {/* Button - Always at Bottom */}
+          <button
+            onClick={() => studentId && onViewProfile(studentId)}
+            className="bg-[#FF9169] text-black hover:bg-black hover:text-[#FF9169] transition-colors w-full border-2 border-black px-4 py-2 text-sm font-medium flex-shrink-0"
+            style={{ boxShadow: '2px 2px 0 0 #000' }}
+          >
+            Full student profile
+          </button>
         </div>
       </div>
-      <p className="text-light-p dark:text-dark-text mb-4 text-sm flex-grow">{description}</p>
-      <button
-        onClick={() => studentId && onViewProfile(studentId)}
-        className="mt-auto bg-[#FF9169] text-black hover:bg-black hover:text-[#FF9169] transition-colors w-full border-2 border-black px-4 py-2 text-sm font-medium self-start"
-        style={{ boxShadow: '2px 2px 0 0 #000' }}
-      >
-        Full student profile
-      </button>
     </div>
   );
 };
@@ -69,6 +83,33 @@ interface ProofBankSectionProps {
 
 const ProofBankSection: React.FC<ProofBankSectionProps> = ({ students = [] }) => {
   const router = useRouter();
+
+  useEffect(() => {
+    // Add line-clamp CSS if not already present
+    const style = document.createElement('style');
+    style.textContent = `
+      .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .line-clamp-4 {
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      // Clean up the style element when component unmounts
+      if (document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
+    };
+  }, []);
 
   const handleViewProfile = (studentId: string | number) => {
     router.push(`/student-profile?id=${studentId}`);
@@ -139,26 +180,27 @@ const ProofBankSection: React.FC<ProofBankSectionProps> = ({ students = [] }) =>
     : fallbackProfiles;
 
   return (
-    <div className="py-12 px-[80px] max-w-7xl mx-auto">
-      <div >
-        <h2 className="text-3xl font-bold text-light-text dark:text-dark-text mb-10">Proof Bank</h2>
-        <p className="text-light-p dark:text-dark-text mb-10">
+    <div className="py-12 px-4 sm:px-6 lg:px-[80px] max-w-7xl mx-auto">
+      <div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-light-text dark:text-dark-text mb-6 sm:mb-10">Proof Bank</h2>
+        <p className="text-light-p dark:text-dark-text mb-6 sm:mb-10">
           Here are some achievements achieved by admits at this university which you can draw inspiration from
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-light-text dark:text-dark-text">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-light-text dark:text-dark-text items-start">
         {displayProfiles.map((profile, index) => (
-          <ProfileCard
-            key={index}
-            name={profile.name}
-            admissionYear={profile.admissionYear}
-            major={profile.major}
-            description={profile.description}
-            imageUrl={profile.imageUrl}
-            studentId={profile.id}
-            onViewProfile={handleViewProfile}
-          />
+          <div key={index} className="flex justify-center">
+            <ProfileCard
+              name={profile.name}
+              admissionYear={profile.admissionYear}
+              major={profile.major}
+              description={profile.description}
+              imageUrl={profile.imageUrl}
+              studentId={profile.id}
+              onViewProfile={handleViewProfile}
+            />
+          </div>
         ))}
       </div>
       <button className="group mt-10 bg-[#FF9169] text-black hover:bg-black hover:text-[#FF9169] transition-colors flex items-center gap-2 border-2 border-black px-4 py-2 text-sm font-medium self-start"

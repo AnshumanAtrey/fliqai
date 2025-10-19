@@ -80,18 +80,18 @@ const drawDonutChart = (canvas: HTMLCanvasElement, data: ChartData) => {
   );
 
   return (
-    <div className='border-b-[1px] border-light-text dark:border-dark-text' style={{ margin: '56px' }}>
+    <div className="py-12 px-4 sm:px-6 lg:px-[80px] max-w-7xl mx-auto border-b-[1px] border-light-text dark:border-dark-text">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold text-light-text dark:text-dark-text mb-4">Scholarships & Rewards</h2>
-        <p className="text-light-p dark:text-dark-text text-base leading-relaxed W-1/2">
+        <h2 className="text-2xl sm:text-3xl font-bold text-light-text dark:text-dark-text mb-4">Scholarships & Rewards</h2>
+        <p className="text-light-p dark:text-dark-text text-base leading-relaxed w-full sm:w-3/4 lg:w-1/2">
         Here’s how admits at this university rank in terms of scholarships and awards on average
         </p>
       </div>
 
-      <div className="flex items-center justify-between gap-10 p-10">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-10 p-4 sm:p-6 lg:p-10">
         {/* Average ASU Student Chart */}
         <div className="flex flex-col items-center text-black">
-          <div className="relative w-[420px] h-[420px] mb-4">
+          <div className="relative w-full max-w-[320px] sm:max-w-[420px] h-[320px] sm:h-[420px] mb-4">
             <canvas 
               ref={canvasRef1} 
               width={420} 
@@ -109,7 +109,7 @@ const drawDonutChart = (canvas: HTMLCanvasElement, data: ChartData) => {
 
 
         {/* Right Section - Info Card */}
-        <div className="flex-[0_0_45%] w-[45%] h-full border-[1px] p-6 border-black bg-light-bg dark:bg-dark-tertiary" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+        <div className="w-full lg:flex-[0_0_45%] lg:w-[45%] h-auto lg:h-full border-[1px] p-4 sm:p-6 border-black bg-light-bg dark:bg-dark-tertiary mt-6 lg:mt-0" style={{ boxShadow: '4px 4px 0 0 #000' }}>
           {/* Light bulb icon */}
           <div className="mb-6 ">
             <span className="text-6xl ">💡</span>

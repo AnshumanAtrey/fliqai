@@ -32,7 +32,7 @@ const mobileMentors = [
 
 export default function ShareGotYouInSection() {
   return (
-    <section className="relative w-full bg-[#F9F7F3] min-h-[600px] md:min-h-[900px] pb-10 md:pb-[100px] flex justify-center overflow-visible">
+    <section className="relative w-full bg-[#FAF6F2] min-h-[600px] md:min-h-[900px] pb-10 md:pb-[100px] flex justify-center overflow-visible">
       {/* Floating mentor images - only on desktop, positioned absolutely */}
       <div className="hidden md:block">
         {mentors.map((m, i) => (

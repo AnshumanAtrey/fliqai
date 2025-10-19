@@ -19,7 +19,7 @@ const Carousel = () => {
   const duplicatedLogos = [...logos, ...logos, ...logos, ...logos]; // Quadrupled for smooth infinite scroll
 
   return (
-    <section className="py-8 md:py-16 bg-white">
+    <section className="py-8 md:py-16 bg-[#FAF6F2]">
       <div className="max-w-[1440px] mx-auto px-4 md:px-10">
         {/* Carousel container */}
         <div className="flex flex-col items-center gap-4 md:gap-6">

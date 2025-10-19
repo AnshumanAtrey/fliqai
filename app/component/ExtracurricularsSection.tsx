@@ -96,20 +96,20 @@ const ExtracurricularsSection = () => {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto pb-20 border-b-[1px] border-light-text dark:border-dark-text " style={{ margin: '56px'}}>
-      <h2 className="text-[32px] font-bold text-light-text dark:text-dark-text mb-4">Extracurriculars</h2>
+    <div className="py-12 px-4 sm:px-6 lg:px-[80px] max-w-7xl mx-auto border-b-[1px] border-light-text dark:border-dark-text">
+      <h2 className="text-2xl sm:text-3xl font-bold text-light-text dark:text-dark-text mb-4">Extracurriculars</h2>
       <p className="text-light-p dark:text-dark-text mb-6">Here&apos;s how your extracurriculars stack against a typical graduate from this uni.</p>
       
-      {/* 3x2 Grid */}
-      <div className="grid grid-cols-3 gap-6 mb-8 p-2">
+      {/* Responsive Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 p-2">
         {extracurriculars.map((item) => (
           <div 
             key={item.id} 
-            className={`border-[1px] ${getBorderColor(item.status)} bg-light-bg dark:bg-dark-tertiary w-[350px] h-[450px] p-2 flex flex-col gap-2`} 
+            className={`border-[1px] ${getBorderColor(item.status)} bg-light-bg dark:bg-dark-tertiary w-full max-w-[350px] h-auto min-h-[400px] sm:min-h-[450px] p-2 flex flex-col gap-2 mx-auto`} 
             style={{ boxShadow: getBoxShadow(item.status) }}
           >
             {/* Image */}
-            <div className="w-full h-[250px] mb-4 overflow-hidden border-[1px] border-black">
+            <div className="w-full h-[200px] sm:h-[250px] mb-4 overflow-hidden border-[1px] border-black">
               <Image 
                 src={item.image} 
                 alt={item.title}
@@ -143,9 +143,9 @@ const ExtracurricularsSection = () => {
 
       {/* Bottom Case Study Card */}
       <div className="w-full border-[1px] border-black mt-6 p-4 bg-light-bg dark:bg-dark-tertiary" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-        <div className=" flex items-center gap-[75px]">
+        <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-[75px]">
           {/* Left Image */}
-          <div className="w-[350px] h-[350px] overflow-hidden flex-shrink-0">
+          <div className="w-full max-w-[350px] h-[250px] sm:h-[300px] lg:h-[350px] overflow-hidden flex-shrink-0">
             <Image 
               src="/maya.jpg"
               alt="Maya"
@@ -157,7 +157,7 @@ const ExtracurricularsSection = () => {
           </div>
           
           {/* Right Content */}
-          <div className="flex-1 p-8 flex flex-col justify-center">
+          <div className="flex-1 p-4 sm:p-6 lg:p-8 flex flex-col justify-center text-center lg:text-left">
             <h3 className="text-2xl font-bold text-light-text dark:text-dark-text mb-2 leading-tight">
               Worried about your lack of athletics involvement? Here&apos;s how Maya overcame it
             </h3>

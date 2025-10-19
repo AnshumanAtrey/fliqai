@@ -30,12 +30,12 @@ const AcademicsSection = () => {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto pt-20 pb-20 border-b-[1px] border-t-[1px] border-light-text dark:border-dark-text " style={{ margin: '56px' }}>
-      <h2 className="text-[32px] font-bold text-light-text dark:text-dark-text mb-10">Academics</h2>
+    <div className="py-12 px-4 sm:px-6 lg:px-[80px] max-w-7xl mx-auto border-b-[1px] border-t-[1px] border-light-text dark:border-dark-text">
+      <h2 className="text-2xl sm:text-3xl font-bold text-light-text dark:text-dark-text mb-6 sm:mb-10">Academics</h2>
       
-      <div className="flex gap-14">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-14">
         {/* Left Section - 60% */}
-        <div className="flex-[0_0_60%] bg-light-bg dark:bg-dark-tertiary border-2 border-black p-10" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+        <div className="w-full lg:flex-[0_0_60%] bg-light-bg dark:bg-dark-tertiary border-2 border-black p-4 sm:p-6 lg:p-10" style={{ boxShadow: '4px 4px 0 0 #000' }}>
           {/* GPA Section */}
           <div className="mb-8">
             <div className="mb-4">
@@ -95,7 +95,7 @@ const AcademicsSection = () => {
         </div>
 
         {/* Right Section - 35% */}
-        <div className="flex-[0_0_35%] h-[300px] bg-light-bg dark:bg-dark-tertiary border-2 border-black p-6" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+        <div className="w-full lg:flex-[0_0_35%] h-auto lg:h-[300px] bg-light-bg dark:bg-dark-tertiary border-2 border-black p-4 sm:p-6 mt-6 lg:mt-0" style={{ boxShadow: '4px 4px 0 0 #000' }}>
           {/* Profile Image */}
           <div className="flex justify-start mb-6">
             <div className="w-14 h-14 rounded-full overflow-hidden">

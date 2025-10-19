@@ -4,7 +4,7 @@ import heroImage from '../assets/hero.png';
 
 const HeroSection = () => {
   return (
-    <section className="flex py-10 md:py-20 px-4 md:px-10 bg-white ">
+    <section className="flex py-10 md:py-20 px-4 md:px-10 bg-[#FAF6F2] overflow-hidden ">
       <div className="flex flex-col md:flex-row items-center gap-8 md:gap-32 max-w-[1440px] mx-auto w-full">
         {/* Left content - Centered on mobile */}
         <div className="flex flex-col items-center md:items-start gap-8 md:gap-12 w-full md:w-auto md:mb-8">

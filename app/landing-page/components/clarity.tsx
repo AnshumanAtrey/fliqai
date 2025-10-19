@@ -43,7 +43,7 @@ const timelineSteps = [
 
 export default function ClarityHitsSection() {
   return (
-    <section className="w-full flex justify-center items-center bg-[#F9F7F3] py-16 md:py-[200px] px-4 md:px-[200px]">
+    <section className="w-full flex justify-center items-center bg-[#FAF6F2] py-16 md:py-[200px] px-4 md:px-[200px]">
       <div className="relative w-full max-w-[1200px] flex flex-col items-center">
         {/* Heading */}
         <h2 className="text-[#191919] text-center font-outfit text-2xl md:text-[40px] font-bold leading-[110%] capitalize mb-3 md:mb-4 mx-auto w-full md:w-[546px]">

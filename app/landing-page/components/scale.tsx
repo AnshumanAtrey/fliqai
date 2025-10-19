@@ -27,7 +27,7 @@ const scaleStats = [
 
 export default function ScaleOfFliqSection() {
   return (
-    <section className="w-full flex flex-col items-center justify-center bg-[#F9F7F3] py-10 md:py-[80px] px-4 md:px-[100px]">
+    <section className="w-full flex flex-col items-center justify-center bg-[#FAF6F2] py-10 md:py-[80px] px-4 md:px-[100px]">
       {/* Headings */}
       <h2 className="text-[#191919] font-outfit text-2xl md:text-[40px] font-bold leading-[110%] capitalize text-center mb-2">
         Scale Of Fliq

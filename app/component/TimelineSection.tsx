@@ -2,17 +2,17 @@ import React from 'react';
 
 export const TimelineSection = () => {
   return (
-    <div className="p-8 max-w-7xl mx-auto border-b-[1px] border-t-[1px] border-light-text dark:border-dark-text" style={{ margin: '56px' }}>
-      <h2 className="text-[32px] font-bold text-light-text dark:text-dark-text mb-10 mt-10">Timeline</h2>
+    <div className="py-12 px-4 sm:px-6 lg:px-[80px] max-w-7xl mx-auto border-b-[1px] border-t-[1px] border-light-text dark:border-dark-text">
+      <h2 className="text-2xl sm:text-3xl font-bold text-light-text dark:text-dark-text mb-6 sm:mb-10">Timeline</h2>
 
       <div className="space-y-6">
-        <p className="text-[18px] text-light-p dark:text-dark-text leading-relaxed w-[623px]">
+        <p className="text-base sm:text-lg text-light-p dark:text-dark-text leading-relaxed max-w-full sm:max-w-[623px]">
           Top admits don’t stop at the minimum, they try to stretch as far as they can. Check the timeline below to spot the tests you can do to close the gap.
         </p>
 
         {/* Graph Container */}
-        <div className="w-full h-96 flex items-center justify-center">
-          <div className="main-container w-[1120px] h-[177px] relative mx-auto my-0">
+        <div className="w-full h-64 sm:h-80 lg:h-96 flex items-center justify-center overflow-x-auto">
+          <div className="main-container w-full max-w-[1120px] min-w-[800px] h-[177px] relative mx-auto my-0">
             <div className="w-[688px] h-[70px] relative z-[57] mt-0 mr-0 mb-0 ml-[28px]">
               <div className="flex w-[147px] h-[70px] pt-[8px] pr-[16px] pb-[8px] pl-[16px] gap-[10px] justify-center items-center flex-nowrap bg-light-bg dark:bg-dark-tertiary border-solid border border-[#000] absolute top-0 left-[186px] z-[53]">
                 <span className="flex w-[115px] h-[54px] justify-start items-start shrink-0 font-['Outfit'] text-[18px] font-semibold leading-[27px] text-light-text dark:text-dark-text relative text-left z-[54]">

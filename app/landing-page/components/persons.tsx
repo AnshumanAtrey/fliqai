@@ -13,7 +13,7 @@ import R3 from '../assets/persons/R3.png';
 
 const PersonsSection = () => {
   return (
-    <section className="w-full py-10 md:py-20 bg-white">
+    <section className="w-full py-10 md:py-20 bg-[#FAF6F2]">
       <div className="flex w-full px-4 md:px-[92px] pt-10 md:pt-[120px] pb-10 md:pb-[120px] flex-col items-center mx-auto">
         {/* Heading Container */}
         <div className="flex flex-col items-center w-full md:w-[546px] mb-6 md:mb-[24px] px-4">

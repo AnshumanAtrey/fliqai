@@ -20,7 +20,7 @@ import LogoImg from '../assets/logos/Whitelogo.svg';
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-[#F9F7F3] relative">
+    <footer className="w-full bg-[#F9F7F3] relative overflow-hidden">
       {/* Hero Section with Circular Carousel */}
       <div className="relative w-full">
         {/* Circular Carousel Background - Responsive */}
@@ -172,10 +172,10 @@ export default function Footer() {
       </div>
 
       {/* Bottom Section - Outside dark background */}
-      <div className="w-full bg-[#F9F7F3] py-6 md:py-8 bottom-0">
-        <div className="max-w-[1408px] mx-auto px-4 md:px-[99px]">
+      <div className="w-full bg-[#FAF6F2] py-6 md:py-8 bottom-0 relative z-50">
+        <div className="max-w-[1408px] mx-auto px-4 md:px-[99px] bg-[#FAF6F2] relative z-50">
           {/* Bottom Links */}
-          <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6 bg-[#FAF6F2] relative z-50 py-2">
             <span className="text-[#5D5237] font-outfit text-sm md:text-base font-normal text-center">
               © Copyright Fliq 2025
             </span>

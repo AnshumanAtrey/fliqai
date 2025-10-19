@@ -44,7 +44,7 @@ export default function FaqAccordionSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="w-full bg-[#F9F7F3] flex flex-col items-center justify-center py-12 md:py-[120px] px-4 md:px-[24px]">
+    <section className="w-full bg-[#FAF6F2] flex flex-col items-center justify-center py-12 md:py-[120px] px-4 md:px-[24px]">
       <h2 className="text-[#191919] font-outfit text-2xl md:text-[40px] font-bold text-center leading-[110%] mb-6 md:mb-[44px]">
         Frequently Asked Questions
       </h2>

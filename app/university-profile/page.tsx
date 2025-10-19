@@ -490,7 +490,7 @@ function UniversityProfile() {
                       </div>
 
                       {/* Bottom Section - Bar Chart and Quote */}
-                      <div className="flex flex-1 justify-between gap-[290px]">
+                      <div className="flex flex-1 justify-between gap-7">
                         {/* Bar Chart */}
                         <div className="flex w-[236px] justify-between items-end">
                           {university.chartData.map((value: number, index: number) => {
@@ -501,10 +501,10 @@ function UniversityProfile() {
                               <div key={index} className="flex flex-col items-center gap-2">
                                 {/* Percentage Label with color matching graph */}
                                 <span
-                                  className="text-center font-bold text-sm leading-normal"
+                                  className="text-center font-bold leading-normal"
                                   style={{
                                     color: colors[index],
-                                    fontFamily: 'Figtree',
+                                    fontFamily: 'Outfit',
                                     fontSize: '14px'
                                   }}
                                 >
@@ -520,13 +520,7 @@ function UniversityProfile() {
                                   }}
                                 ></div>
                                 {/* Category Label */}
-                                <span
-                                  className="text-center font-medium leading-[140%] text-light-text dark:text-dark-text"
-                                  style={{
-                                    fontFamily: 'Outfit',
-                                    fontSize: '12px'
-                                  }}
-                                >
+                                <span className="text-center font-outfit font-medium text-xs leading-[140%] text-light-text dark:text-dark-text">
                                   {labels[index]}
                                 </span>
                               </div>
@@ -535,9 +529,9 @@ function UniversityProfile() {
                         </div>
 
                         {/* Quote Section */}
-                        <div className="flex-1">
-                          <div className="h-full w-[350px] py-4 px-6 flex flex-col justify-between border border-black bg-light-secondary dark:bg-dark-tertiary" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                            <p className="text-light-text dark:text-dark-text text-right font-outfit text-base font-normal leading-[140%]">
+                        <div className="flex-1 max-w-[350px]">
+                          <div className="h-full w-full py-4 px-6 flex flex-col justify-between border border-black bg-light-secondary dark:bg-dark-tertiary" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                            <p className="text-light-text dark:text-dark-text text-right font-outfit text-base font-normal leading-[140%] break-words">
                               &quot;{university.quote}&quot;
                             </p>
 

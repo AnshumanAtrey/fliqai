@@ -23,12 +23,12 @@ export const TestScoresSection = () => {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto  " style={{ margin: '56px'}}>
-      <h2 className="text-[32] font-bold text-light-text dark:text-dark-text mb-10">Test Scores</h2>
+    <div className="py-12 px-4 sm:px-6 lg:px-[80px] max-w-7xl mx-auto">
+      <h2 className="text-2xl sm:text-3xl font-bold text-light-text dark:text-dark-text mb-6 sm:mb-10">Test Scores</h2>
       
-      <div className="flex gap-10 text-light-text dark:text-dark-text">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 text-light-text dark:text-dark-text">
         {/* Left Section - 65% */}
-        <div className="flex-[0_0_55%] bg-light-bg dark:bg-dark-tertiary border-4  border-black p-6" style={{ boxShadow: '6px 6px 0 0 #000' }}>
+        <div className="w-full lg:flex-[0_0_55%] bg-light-bg dark:bg-dark-tertiary border-2 lg:border-4 border-black p-4 sm:p-6" style={{ boxShadow: '4px 4px 0 0 #000' }}>
           {/* Test Scores Table */}
           <div className="mb-6">
             <div className="flex justify-between items-center pb-4 border-b-2 border-black mb-6">
@@ -57,7 +57,7 @@ export const TestScoresSection = () => {
         </div>
 
         {/* Right Section - 30% */}
-        <div className="flex-[0_0_40%] bg-light-bg dark:bg-dark-tertiary h-full border-4 border-black p-6" style={{ boxShadow: '6px 6px 0 0 #000' }}>
+        <div className="w-full lg:flex-[0_0_40%] bg-light-bg dark:bg-dark-tertiary h-auto lg:h-full border-2 lg:border-4 border-black p-4 sm:p-6 mt-6 lg:mt-0" style={{ boxShadow: '4px 4px 0 0 #000' }}>
           {/* Profile Images */}
           <div className="flex -space-x-2 mb-6">
             <div className="w-14 h-14 rounded-full overflow-hidden z-10 border-[1px] border-black">
