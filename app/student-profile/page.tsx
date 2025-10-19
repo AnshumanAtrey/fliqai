@@ -12,6 +12,7 @@ import QuestionsAnswersSection from "@/components/QuestionsAnswersSection";
 import { DotPatternBackground } from "../component/DotPatternBackground";
 import { useAuth } from "../../lib/hooks/useAuth";
 import { withAuthProtection } from '@/lib/hooks/useAuthProtection';
+import { ProfileLockedModal } from './components/ProfileLockedModal';
 // Student profile interface
 interface StudentProfile {
   id: number;
@@ -101,8 +102,192 @@ function StudentProfile() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLocked, setIsLocked] = useState(true);
+  const [isUnlocking, setIsUnlocking] = useState(false);
+  const [userCredits, setUserCredits] = useState(0);
 
-  // Fetch student profile data from backend
+  // Fetch user credits
+  const fetchUserCredits = async () => {
+    if (!user) return;
+    
+    try {
+      let token = localStorage.getItem('token');
+      if (!token && user && 'getIdToken' in user && typeof user.getIdToken === 'function') {
+        token = await user.getIdToken();
+      }
+      
+      if (!token) return;
+      
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
+      const response = await fetch(`${backendUrl}/api/profile/credits`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setUserCredits(data.data.credits || 0);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch credits:', err);
+    }
+  };
+
+  // Fetch student profile preview (no credits required)
+  const fetchProfilePreview = async () => {
+    if (!user || !studentId) {
+      console.log('❌ No user or student ID found, using fallback data');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      let token = localStorage.getItem('token');
+      if (!token && user && 'getIdToken' in user && typeof user.getIdToken === 'function') {
+        token = await user.getIdToken();
+        if (token) {
+          localStorage.setItem('token', token);
+        }
+      }
+      
+      if (!token) {
+        throw new Error('Authentication required. Please login again.');
+      }
+
+      console.log('🔄 Fetching profile preview for student:', studentId);
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
+      const response = await fetch(`${backendUrl}/api/students/${studentId}/preview`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch preview: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Preview Data received:', data);
+
+      if (data.success && data.data) {
+        const apiProfile = data.data;
+        const transformedProfile: StudentProfile = {
+          id: apiProfile.id || parseInt(studentId),
+          name: apiProfile.name || fallbackProfile.name,
+          university: apiProfile.university || fallbackProfile.university,
+          graduationYear: apiProfile.graduationYear || fallbackProfile.graduationYear,
+          bio: apiProfile.bio || fallbackProfile.bio,
+          profileImage: apiProfile.profileImage || fallbackProfile.profileImage,
+          backgroundImage: apiProfile.backgroundImage || fallbackProfile.backgroundImage,
+          badges: apiProfile.badges || fallbackProfile.badges,
+          admissions: fallbackProfile.admissions,
+          stats: apiProfile.stats || fallbackProfile.stats,
+          personalInfo: fallbackProfile.personalInfo,
+          grades: fallbackProfile.grades,
+          gpa: fallbackProfile.gpa
+        };
+        setProfile(transformedProfile);
+        setIsLocked(true); // Profile is locked by default
+      }
+    } catch (err: unknown) {
+      console.error('❌ Failed to fetch preview:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch preview');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Unlock profile (deducts 15 credits)
+  const unlockProfile = async () => {
+    if (!user || !studentId) return;
+    
+    setIsUnlocking(true);
+    
+    try {
+      let token = localStorage.getItem('token');
+      if (!token && user && 'getIdToken' in user && typeof user.getIdToken === 'function') {
+        token = await user.getIdToken();
+      }
+      
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      console.log('🔓 Unlocking profile for student:', studentId);
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
+      const response = await fetch(`${backendUrl}/api/students/${studentId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        if (response.status === 403) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Insufficient credits');
+        }
+        throw new Error(`Failed to unlock profile: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ Full Profile Data received:', data);
+      
+      if (data.success && data.data) {
+        const apiProfile = data.data;
+        const transformedProfile: StudentProfile = {
+          id: apiProfile.id || parseInt(studentId),
+          name: apiProfile.name || fallbackProfile.name,
+          university: apiProfile.university?.name || apiProfile.university || fallbackProfile.university,
+          graduationYear: apiProfile.graduationYear || fallbackProfile.graduationYear,
+          bio: apiProfile.bio || apiProfile.discoveryInfo?.description || fallbackProfile.bio,
+          profileImage: apiProfile.profileImage || fallbackProfile.profileImage,
+          backgroundImage: apiProfile.backgroundImage || fallbackProfile.backgroundImage,
+          badges: apiProfile.badges || fallbackProfile.badges,
+          admissions: fallbackProfile.admissions,
+          stats: {
+            awards: apiProfile.awards?.length || apiProfile.stats?.awards || 0,
+            activities: apiProfile.extracurriculars?.length || apiProfile.stats?.activities || 0,
+            qas: apiProfile.qas?.length || apiProfile.stats?.qas || 0,
+            apIbs: apiProfile.courses?.length || apiProfile.stats?.apIbs || 0
+          },
+          personalInfo: {
+            race: apiProfile.personalInfo?.ethnicity || fallbackProfile.personalInfo.race,
+            gender: apiProfile.personalInfo?.gender || fallbackProfile.personalInfo.gender,
+            schoolType: apiProfile.personalInfo?.schoolType || fallbackProfile.personalInfo.schoolType,
+            legacy: apiProfile.personalInfo?.legacy || fallbackProfile.personalInfo.legacy
+          },
+          grades: apiProfile.grades || fallbackProfile.grades,
+          gpa: {
+            current: apiProfile.gpa?.current || fallbackProfile.gpa.current,
+            average: apiProfile.gpa?.average || fallbackProfile.gpa.average
+          }
+        };
+        setProfile(transformedProfile);
+        
+        if (apiProfile.essays && Array.isArray(apiProfile.essays)) {
+          setEssays(apiProfile.essays);
+        }
+        
+        setIsLocked(false); // Unlock the profile
+        await fetchUserCredits(); // Refresh credits
+      }
+    } catch (err: unknown) {
+      console.error('❌ Failed to unlock profile:', err);
+      alert(err instanceof Error ? err.message : 'Failed to unlock profile');
+    } finally {
+      setIsUnlocking(false);
+    }
+  };
+
+  // Fetch student profile data from backend (OLD - keeping for reference)
   const fetchProfileData = async () => {
     if (!user || !studentId) {
       console.log('❌ No user or student ID found, using fallback data');
@@ -194,7 +379,8 @@ function StudentProfile() {
   };
 
   useEffect(() => {
-    fetchProfileData();
+    fetchProfilePreview();
+    fetchUserCredits();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [studentId]);
   return (
@@ -360,10 +546,32 @@ function StudentProfile() {
           </div>
 
           {/* Academics Section */}
-          <div className="bg-white dark:bg-dark-tertiary border border-black dark:border-dark-text  p-8 mb-12">
+          <div className="px-[90px] bg-light-bg dark:bg-dark-bg">
             <h2 className="font-outfit text-3xl font-bold text-black dark:text-white pt-10 pl-8 pb-8">Academics</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-8">
+            {isLocked ? (
+              <div className="p-8">
+                {/* Blurred preview content */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 blur-sm pointer-events-none opacity-50">
+                  <div className="bg-[#FFC3A9] dark:bg-[#FFA07A] p-6 border border-black dark:border-dark-text h-64"></div>
+                  <div className="bg-[#FFE3D4] dark:bg-dark-card p-6 border border-black dark:border-dark-text h-64"></div>
+                  <div className="space-y-4">
+                    <div className="bg-[#FFE3D4] dark:bg-dark-card p-4 border border-black dark:border-dark-text h-28"></div>
+                    <div className="bg-[#FFE3D4] dark:bg-dark-card p-4 border border-black dark:border-dark-text h-28"></div>
+                  </div>
+                </div>
+                
+                {/* Locked Modal - Positioned over the blurred content */}
+                <div className="relative -mt-48">
+                  <ProfileLockedModal 
+                    onUnlock={unlockProfile}
+                    isUnlocking={isUnlocking}
+                    userCredits={userCredits}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-8">
               {/* Personal Information */}
               <div className="bg-[#FFC3A9] dark:bg-[#FFA07A] p-6 border border-black dark:border-dark-text  text-black dark:text-black">
                 <h3 className="font-outfit font-bold text-xl mb-6 pb-2 border-b border-black dark:border-dark-text ">Personal Information</h3>
@@ -430,25 +638,26 @@ function StudentProfile() {
                 </div>
               </div>
             </div>
+            )}
           </div>
 
           {/* Exam Timeline Section */}
-          <div className="mt-12 mb-16">
+          <div className={`mt-12 mb-16 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
             <ExamTimeline />
           </div>
 
           {/* Extracurriculars Dashboard */}
-          <div className="mt-12 mb-16">
+          <div className={`mt-12 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
             <ExtracurricularsDashboard />
           </div>
 
           {/* Awards Section */}
-          <div className="mt-12">
+          <div className={`mt-12 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
             <AwardsSection />
           </div>
 
           {/* Essays Section */}
-          <div className="mt-12">
+          <div className={`mt-12 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
             <EssaysSection 
               essays={essays}
               studentName={profile.name}
@@ -457,7 +666,7 @@ function StudentProfile() {
           </div>
 
           {/* Questions & Answers Section */}
-          <div className="mt-12">
+          <div className={`mt-12 mb-20 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
             <QuestionsAnswersSection />
           </div>
         </main>
