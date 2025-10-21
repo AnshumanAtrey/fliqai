@@ -53,8 +53,13 @@ function SubscriptionPage() {
   });
   const [recommendedPlan, setRecommendedPlan] = useState<PaymentPlan | null>(null);
 
+  // Cart state management
+  const [selectedPlans, setSelectedPlans] = useState<Set<string>>(new Set());
+  const [cartTotal, setCartTotal] = useState(0);
+  const [cartCredits, setCartCredits] = useState(0);
+
   // Default plans (fallback) - matching backend structure
-  const defaultPlans: PaymentPlan[] = [
+  const defaultPlans: PaymentPlan[] = React.useMemo(() => [
     // Student Profiles
     {
       planId: 'student_profiles_50',
@@ -112,7 +117,7 @@ function SubscriptionPage() {
       packageType: 'essay_revisions',
       revisionsUnlocked: 35
     }
-  ];
+  ], []);
 
   useEffect(() => {
     // Try to fetch plans from API, fall back to defaults
@@ -134,6 +139,36 @@ function SubscriptionPage() {
     loadPlans();
   }, [fetchPlans]);
 
+  // Set default selection (second plan - popular one) when plans are loaded
+  const [hasInitialized, setHasInitialized] = useState(false);
+  
+  useEffect(() => {
+    if (plans.length > 0 && !hasInitialized) {
+      // Find the popular plan (second one) and select it by default
+      const popularPlan = plans.find(p => p.popular) || defaultPlans.find(p => p.popular);
+      if (popularPlan) {
+        setSelectedPlans(new Set([popularPlan.planId]));
+      }
+      setHasInitialized(true);
+    }
+  }, [plans, hasInitialized, defaultPlans]);
+
+  // Calculate cart total whenever selected plans change
+  useEffect(() => {
+    const total = Array.from(selectedPlans).reduce((sum, planId) => {
+      const plan = plans.find(p => p.planId === planId);
+      return sum + (plan?.price || 0);
+    }, 0);
+
+    const credits = Array.from(selectedPlans).reduce((sum, planId) => {
+      const plan = plans.find(p => p.planId === planId);
+      return sum + (plan?.credits || 0);
+    }, 0);
+
+    setCartTotal(total);
+    setCartCredits(credits);
+  }, [selectedPlans, plans]);
+
   const handlePlanSelect = (plan: PaymentPlan) => {
     if (!user) {
       // Redirect to login if not authenticated
@@ -141,8 +176,30 @@ function SubscriptionPage() {
       return;
     }
 
-    setSelectedPlan(plan);
-    setShowPaymentForm(true);
+    // Toggle plan selection in cart
+    const newSelectedPlans = new Set(selectedPlans);
+    if (newSelectedPlans.has(plan.planId)) {
+      newSelectedPlans.delete(plan.planId);
+    } else {
+      newSelectedPlans.add(plan.planId);
+    }
+    setSelectedPlans(newSelectedPlans);
+  };
+
+  const handleBuyNow = () => {
+    if (selectedPlans.size === 0) {
+      return; // No plans selected
+    }
+
+    // For now, we'll process the first selected plan
+    // You might want to modify your backend to handle multiple plans
+    const firstSelectedPlanId = Array.from(selectedPlans)[0];
+    const firstSelectedPlan = plans.find(p => p.planId === firstSelectedPlanId);
+
+    if (firstSelectedPlan) {
+      setSelectedPlan(firstSelectedPlan);
+      setShowPaymentForm(true);
+    }
   };
 
   const handlePaymentSuccess = (result: {
@@ -251,7 +308,12 @@ function SubscriptionPage() {
 
                 <div className="flex gap-2">
                   {studentProfilePlans.map((plan) => (
-                    <PlanCard key={plan.planId} plan={plan} onSelect={handlePlanSelect} />
+                    <PlanCard
+                      key={plan.planId}
+                      plan={plan}
+                      onSelect={handlePlanSelect}
+                      isSelected={selectedPlans.has(plan.planId)}
+                    />
                   ))}
                 </div>
               </div>
@@ -265,7 +327,12 @@ function SubscriptionPage() {
 
                 <div className="flex gap-2">
                   {essayRevisionPlans.map((plan) => (
-                    <PlanCard key={plan.planId} plan={plan} onSelect={handlePlanSelect} />
+                    <PlanCard
+                      key={plan.planId}
+                      plan={plan}
+                      onSelect={handlePlanSelect}
+                      isSelected={selectedPlans.has(plan.planId)}
+                    />
                   ))}
                 </div>
               </div>
@@ -275,14 +342,32 @@ function SubscriptionPage() {
 
               {/* Total and Buy Section */}
               <div className="flex items-center justify-between p-2.5 bg-light-bg dark:bg-dark-secondary border border-solid border-black">
-                <p className="[font-family:'Outfit-Bold',Helvetica] text-base">
-                  <span className="font-bold text-black">Total: </span>
-                  <span className="[font-family:'Outfit-Medium',Helvetica] font-medium text-light-p dark:text-dark-text">₹6299 (You saved</span>
-                  <span className="font-bold text-[#10a95b]"> 10%</span>
-                  <span className="[font-family:'Outfit-Medium',Helvetica] font-medium text-light-p dark:text-dark-text">)</span>
-                </p>
-                <button className="inline-flex items-center justify-center px-4 py-2 bg-[#ff9068] border border-solid border-black shadow-[2px_2px_0px_#000000] hover:shadow-[1px_1px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] transition-all duration-150">
-                  <div className="[font-family:'Outfit-SemiBold',Helvetica] font-semibold text-sm text-black">Buy now</div>
+                <div className="flex flex-col gap-1">
+                  <p className="[font-family:'Outfit-Bold',Helvetica] text-base">
+                    <span className="font-bold text-black">Total: ₹{cartTotal.toLocaleString('en-IN')}</span>
+                    {selectedPlans.size > 0 && (
+                      <span className="[font-family:'Outfit-Medium',Helvetica] font-medium text-light-p dark:text-dark-text ml-2">
+                        ({cartCredits} credits)
+                      </span>
+                    )}
+                  </p>
+                  {selectedPlans.size === 0 && (
+                    <p className="[font-family:'Outfit-Medium',Helvetica] font-medium text-light-p dark:text-dark-text text-sm">
+                      Select plans to see total
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={handleBuyNow}
+                  disabled={selectedPlans.size === 0}
+                  className={`inline-flex items-center justify-center px-4 py-2 border border-solid border-black shadow-[2px_2px_0px_#000000] transition-all duration-150 ${selectedPlans.size === 0
+                    ? 'bg-gray-300 cursor-not-allowed'
+                    : 'bg-[#ff9068] hover:shadow-[1px_1px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px]'
+                    }`}
+                >
+                  <div className="[font-family:'Outfit-SemiBold',Helvetica] font-semibold text-sm text-black">
+                    {selectedPlans.size === 0 ? 'Select plans' : 'Buy now'}
+                  </div>
                 </button>
               </div>
             </div>
@@ -310,7 +395,12 @@ function SubscriptionPage() {
 
               <div className="flex flex-col sm:flex-row gap-3">
                 {studentProfilePlans.map((plan) => (
-                  <PlanCard key={plan.planId} plan={plan} onSelect={handlePlanSelect} />
+                  <PlanCard
+                    key={plan.planId}
+                    plan={plan}
+                    onSelect={handlePlanSelect}
+                    isSelected={selectedPlans.has(plan.planId)}
+                  />
                 ))}
               </div>
             </div>
@@ -324,7 +414,12 @@ function SubscriptionPage() {
 
               <div className="flex flex-col sm:flex-row gap-3">
                 {essayRevisionPlans.map((plan) => (
-                  <PlanCard key={plan.planId} plan={plan} onSelect={handlePlanSelect} />
+                  <PlanCard
+                    key={plan.planId}
+                    plan={plan}
+                    onSelect={handlePlanSelect}
+                    isSelected={selectedPlans.has(plan.planId)}
+                  />
                 ))}
               </div>
             </div>
@@ -334,14 +429,32 @@ function SubscriptionPage() {
 
             {/* Total and Buy Section */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-light-bg dark:bg-dark-secondary border border-solid border-black">
-              <p className="[font-family:'Outfit-Bold',Helvetica] text-base sm:text-lg">
-                <span className="font-bold text-black">Total: </span>
-                <span className="[font-family:'Outfit-Medium',Helvetica] font-medium text-light-p dark:text-dark-text">₹6299 (You saved</span>
-                <span className="font-bold text-[#10a95b]"> 10%</span>
-                <span className="[font-family:'Outfit-Medium',Helvetica] font-medium text-light-p dark:text-dark-text">)</span>
-              </p>
-              <button className="inline-flex items-center justify-center px-6 py-3 bg-[#ff9068] border border-solid border-black shadow-[2px_2px_0px_#000000] hover:shadow-[1px_1px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px] transition-all duration-150 w-full sm:w-auto">
-                <div className="[font-family:'Outfit-SemiBold',Helvetica] font-semibold text-base text-black">Buy now</div>
+              <div className="flex flex-col gap-1">
+                <p className="[font-family:'Outfit-Bold',Helvetica] text-base sm:text-lg">
+                  <span className="font-bold text-black">Total: ₹{cartTotal.toLocaleString('en-IN')}</span>
+                  {selectedPlans.size > 0 && (
+                    <span className="[font-family:'Outfit-Medium',Helvetica] font-medium text-light-p dark:text-dark-text ml-2">
+                      ({cartCredits} credits)
+                    </span>
+                  )}
+                </p>
+                {selectedPlans.size === 0 && (
+                  <p className="[font-family:'Outfit-Medium',Helvetica] font-medium text-light-p dark:text-dark-text text-sm">
+                    Select plans to see total
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={handleBuyNow}
+                disabled={selectedPlans.size === 0}
+                className={`inline-flex items-center justify-center px-6 py-3 border border-solid border-black shadow-[2px_2px_0px_#000000] transition-all duration-150 w-full sm:w-auto ${selectedPlans.size === 0
+                  ? 'bg-gray-300 cursor-not-allowed'
+                  : 'bg-[#ff9068] hover:shadow-[1px_1px_0px_#000000] hover:translate-x-[1px] hover:translate-y-[1px]'
+                  }`}
+              >
+                <div className="[font-family:'Outfit-SemiBold',Helvetica] font-semibold text-base text-black">
+                  {selectedPlans.size === 0 ? 'Select plans' : 'Buy now'}
+                </div>
               </button>
             </div>
           </div>

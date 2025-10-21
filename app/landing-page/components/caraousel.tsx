@@ -3,19 +3,30 @@
 import React from 'react';
 import Image from 'next/image';
 
-// Import all logos with updated names
-import logo1 from '../assets/logos/logo-f.svg';
-import logo2 from '../assets/logos/bath.png';
-import logo3 from '../assets/logos/caltech.png';
-import logo4 from '../assets/logos/harvard.svg';
-import logo5 from '../assets/logos/imperial.svg';
-import logo6 from '../assets/logos/mit.svg';
-import logo7 from '../assets/logos/oxford.png';
-import logo8 from '../assets/logos/ucl.png';
+// Import all logos except Whitelogo.svg
+import bathLogo from '../assets/logos/bath.png';
+import bostonLogo from '../assets/logos/boston.png';
+import caltechLogo from '../assets/logos/caltech.png';
+import cornellLogo from '../assets/logos/cornell.png';
+import harvardLogo from '../assets/logos/harvard.svg';
+import imperialLogo from '../assets/logos/imperial.svg';
+import mitLogo from '../assets/logos/mit.svg';
+import oxfordLogo from '../assets/logos/oxford.png';
+import uclLogo from '../assets/logos/ucl.png';
 
 const Carousel = () => {
   // Duplicate logos for infinite scroll effect
-  const logos = [logo1, logo2, logo3, logo4, logo5, logo6, logo7, logo8];
+  const logos = [
+    bathLogo,
+    bostonLogo, 
+    caltechLogo,
+    cornellLogo,
+    harvardLogo,
+    imperialLogo,
+    mitLogo,
+    oxfordLogo,
+    uclLogo
+  ];
   const duplicatedLogos = [...logos, ...logos, ...logos, ...logos]; // Quadrupled for smooth infinite scroll
 
   return (
@@ -25,7 +36,7 @@ const Carousel = () => {
         <div className="flex flex-col items-center gap-4 md:gap-6">
           {/* Title */}
           <h2 className="text-[#191919] font-outfit text-base md:text-lg font-normal leading-[150%]">
-            Featuring 50+ universities
+            Featuring 3000+ universities
           </h2>
           
           {/* Carousel track */}

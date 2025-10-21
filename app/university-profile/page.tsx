@@ -479,9 +479,9 @@ function UniversityProfile() {
                     <div className="flex-1 flex flex-col">
                       {/* Top Section - University Info */}
                       <div className="border-b border-black pb-6 mb-6">
-                        <div>
+                        <div className="pr-4">
                           {/* University Name */}
-                          <h3 className="text-light-text dark:text-dark-text font-outfit text-[32px] font-bold leading-normal mb-2">{university.name}</h3>
+                          <h3 className="text-light-text dark:text-dark-text font-outfit text-[32px] font-bold leading-normal mb-2 max-w-[calc(100%-200px)]">{university.name}</h3>
 
                           {/* Location and Ranking */}
                           <p className="text-light-text dark:text-dark-text font-outfit text-lg font-normal leading-[150%] mb-2">{university.location}</p>

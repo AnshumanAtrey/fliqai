@@ -59,7 +59,7 @@ export const ProfileLockedModal: React.FC<ProfileLockedModalProps> = ({
         {/* Benefits */}
         <div className="mb-4">
           <p className="text-xs font-semibold text-black dark:text-dark-text mb-2">
-            Get Access to Rebecca's:
+            Get Access to Rebecca&apos;s:
           </p>
           <ul className="space-y-1.5">
             {['essays', 'academic results', 'extracurriculars and general advice'].map((item, index) => (

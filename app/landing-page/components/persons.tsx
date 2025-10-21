@@ -51,7 +51,7 @@ const PersonsSection = () => {
               </div>
               <div className="flex flex-col items-center gap-[8px]">
                 <h4 className="text-black text-center font-outfit text-base md:text-[24px] font-semibold leading-[150%]">
-                  expensive guidance
+                  Expensive Guidance
                 </h4>
                 <p className="text-black text-opacity-70 text-center font-outfit text-xs md:text-[13px] font-normal leading-[150%] max-w-[140px] md:max-w-[200px]">
                   You pay for counselling advice that sounds smart but looks the same for everyone
@@ -71,10 +71,10 @@ const PersonsSection = () => {
               </div>
               <div className="flex flex-col items-center gap-[8px]">
                 <h4 className="text-black text-center font-outfit text-base md:text-[24px] font-semibold leading-[150%]">
-                  Personalized Strategy
+                  Study the winners
                 </h4>
                 <p className="text-black text-opacity-70 text-center font-outfit text-xs md:text-[13px] font-normal leading-[150%] max-w-[140px] md:max-w-[200px]">
-                  Tailored approach based on your unique profile and goals
+                  See the essays, ECs, and timelines from successful admits. Learn from proven data
                 </p>
               </div>
             </div>
@@ -94,10 +94,10 @@ const PersonsSection = () => {
               </div>
               <div className="flex flex-col items-center gap-[8px]">
                 <h4 className="text-black text-center font-outfit text-base md:text-[24px] font-semibold leading-[150%]">
-                  Generic Templates
+                  Endless googling
                 </h4>
                 <p className="text-black text-opacity-70 text-center font-outfit text-xs md:text-[13px] font-normal leading-[150%] max-w-[140px] md:max-w-[200px]">
-                  Essays and applications that blend in with thousands of others
+                  You bounce between Reddit, YouTube and blogs - everyone says something different
                 </p>
               </div>
             </div>
@@ -114,10 +114,10 @@ const PersonsSection = () => {
               </div>
               <div className="flex flex-col items-center gap-[8px]">
                 <h4 className="text-black text-center font-outfit text-base md:text-[24px] font-semibold leading-[150%]">
-                  Standout Applications
+                  College-specific playbooks
                 </h4>
                 <p className="text-black text-opacity-70 text-center font-outfit text-xs md:text-[13px] font-normal leading-[150%] max-w-[140px] md:max-w-[200px]">
-                  Unique narratives that showcase your authentic story
+                  Every college has a playbook that admits followed. Use this data and create winning application
                 </p>
               </div>
             </div>
@@ -137,10 +137,10 @@ const PersonsSection = () => {
               </div>
               <div className="flex flex-col items-center gap-[8px]">
                 <h4 className="text-black text-center font-outfit text-base md:text-[24px] font-semibold leading-[150%]">
-                  Unclear Pathways
+                  Constant Guesswork
                 </h4>
                 <p className="text-black text-opacity-70 text-center font-outfit text-xs md:text-[13px] font-normal leading-[150%] max-w-[140px] md:max-w-[200px]">
-                  Confusion about which colleges match your profile and interests
+                  You apply without knowing what colleges actually care about
                 </p>
               </div>
             </div>
@@ -157,10 +157,10 @@ const PersonsSection = () => {
               </div>
               <div className="flex flex-col items-center gap-[8px]">
                 <h4 className="text-black text-center font-outfit text-base md:text-[24px] font-semibold leading-[150%]">
-                  Clear Direction
+                  Guess less. Win faster.
                 </h4>
                 <p className="text-black text-opacity-70 text-center font-outfit text-xs md:text-[13px] font-normal leading-[150%] max-w-[140px] md:max-w-[200px]">
-                  Data-driven insights to find your best-fit universities
+                  Find your blind spots and fix them with data backed winning strategies
                 </p>
               </div>
             </div>

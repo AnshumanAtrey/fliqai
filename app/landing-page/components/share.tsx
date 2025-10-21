@@ -95,16 +95,21 @@ export default function ShareGotYouInSection() {
 
         {/* Button */}
         <div className="mt-8 md:mt-12 flex justify-center w-full mb-12 md:mb-0">
-          <button className="px-6 py-4 rounded-xl bg-[#191919] border border-[#191919] text-white font-outfit text-base font-medium hover:bg-[#333] transition-colors w-full md:w-auto">
+          <a
+            href="https://tally.so/r/mOWKbM"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-4 rounded-xl bg-[#191919] border border-[#191919] text-white font-outfit text-base font-medium hover:bg-[#333] transition-colors w-full md:w-auto text-center inline-block"
+          >
             Upload your profile
-          </button>
+          </a>
         </div>
 
         {/* Mobile mentor images - Grid layout below button with same styling as desktop */}
         <div className="md:hidden grid grid-cols-2 gap-4 w-full max-w-[343px] mx-auto">
           {mobileMentors.map((m, i) => (
             <div key={`mobile-${m.name}`} className="w-full h-[150px]">
-              <div 
+              <div
                 className="relative w-full h-full"
                 style={{
                   borderRadius: 12,
@@ -210,7 +215,7 @@ function FeatureCard({ icon, title, desc }: {
 }) {
   return (
     <div className="flex flex-col items-start gap-[12px] w-full px-4 md:px-6 py-3 md:py-4 rounded-[12px] bg-[#F4EAE1]">
-      <span className="flex items-center justify-center text-2xl w-8 h-8" style={{width:"32px",height:"32px"}}>{icon}</span>
+      <span className="flex items-center justify-center text-2xl w-8 h-8" style={{ width: "32px", height: "32px" }}>{icon}</span>
       <div className="w-full text-[#191919] font-outfit text-lg md:text-[20px] font-medium leading-[150%]">
         {title}
       </div>

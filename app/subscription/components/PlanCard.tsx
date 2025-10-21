@@ -18,26 +18,22 @@ interface PaymentPlan {
 interface PlanCardProps {
   plan: PaymentPlan;
   onSelect: (plan: PaymentPlan) => void;
+  isSelected?: boolean;
 }
 
-export const PlanCard: React.FC<PlanCardProps> = ({ plan, onSelect }) => {
+export const PlanCard: React.FC<PlanCardProps> = ({ plan, onSelect, isSelected = false }) => {
   const isStudentProfile = plan.packageType === 'student_profiles';
   const profilesCount = plan.profilesUnlocked || Math.floor(plan.credits / 10);
   const revisionsCount = plan.revisionsUnlocked || Math.floor(plan.credits / 15);
   const isPopular = plan.popular;
 
   return (
-    <div 
-      className={`flex flex-col gap-6 p-2 flex-1 bg-light-bg dark:bg-dark-secondary border border-solid border-black ${
-        isPopular ? 'shadow-[0px_0px_0px_2px_#ff9068] relative' : ''
-      }`}
+    <div
+      className={`flex flex-col gap-6 p-2 flex-1 bg-light-bg dark:bg-dark-secondary border border-solid border-black relative ${isSelected ? 'shadow-[0px_0px_0px_2px_#ff9068]' : ''
+        }`}
     >
-      {isPopular && (
-        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#FF9269] text-white px-3 py-1 text-sm font-medium border border-black">
-          POPULAR
-        </div>
-      )}
-      
+
+
       <div className="flex flex-col">
         <div className="flex items-center gap-1">
           <Image src="/Coins.svg" alt="Coins" width={20} height={11} />
@@ -47,23 +43,21 @@ export const PlanCard: React.FC<PlanCardProps> = ({ plan, onSelect }) => {
         </div>
         <div className="[font-family:'Outfit-SemiBold',Helvetica] font-semibold text-light-text dark:text-dark-text text-base">CREDITS</div>
       </div>
-      
+
       <p className="[font-family:'Outfit-Medium',Helvetica] font-normal text-light-text dark:text-dark-text text-sm">
         <span className="font-medium">Unlock </span>
         <span className="[font-family:'Outfit-Bold',Helvetica] font-bold">
           {isStudentProfile ? `${profilesCount} profiles` : `${revisionsCount} revisions`}
         </span>
       </p>
-      
-      <button 
+
+      <button
         onClick={() => onSelect(plan)}
-        className={`flex px-6 py-3 justify-center items-center gap-2.5 self-stretch border border-solid border-black shadow-[2px_2px_0px_0px_#000000] transition-colors ${
-          plan.selected ? 'bg-gray-300 cursor-not-allowed' : 'bg-[#FF9169] hover:bg-[#ff8050]'
-        }`}
-        disabled={plan.selected}
+        className={`flex px-6 py-3 justify-center items-center gap-2.5 self-stretch border border-solid border-black shadow-[2px_2px_0px_0px_#000000] transition-colors ${isSelected ? 'bg-[#FF9269] hover:bg-[#ff8050]' : 'bg-[#FF9169] hover:bg-[#ff8050]'
+          }`}
       >
         <span className="text-light-text font-outfit text-sm font-semibold leading-normal whitespace-nowrap">
-          {plan.selected ? 'Selected' : `Select for ₹${plan.price.toLocaleString('en-IN')}`}
+          {isSelected ? 'Selected' : `Select for ₹${plan.price.toLocaleString('en-IN')}`}
         </span>
       </button>
     </div>

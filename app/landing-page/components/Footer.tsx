@@ -165,7 +165,7 @@ export default function Footer() {
           {/* Support Email */}
           <div className="flex justify-center mb-8 md:mb-20 md:absolute md:bottom-0 md:left-1/2 md:transform md:-translate-x-1/2">
             <span className="text-white font-outfit text-lg md:text-[32px] font-normal leading-[28px] md:leading-[40px]">
-              support@fliq.app
+              support@fliqai.co
             </span>
           </div>
         </div>
