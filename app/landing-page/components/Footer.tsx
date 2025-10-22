@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import CircularCarousel from './CircularCarousel';
 import Image from 'next/image';
 
@@ -19,6 +20,8 @@ import FooterImg11 from '../assets/Footer/eb7b2e78a073b7d28ca0335f39b7e50002f32c
 import LogoImg from '../assets/logos/Whitelogo.svg';
 
 export default function Footer() {
+  const router = useRouter();
+
   return (
     <footer className="w-full bg-[#F9F7F3] relative overflow-hidden">
       {/* Hero Section with Circular Carousel */}
@@ -90,7 +93,10 @@ export default function Footer() {
                 Utilize hundreds of thousands of essays, profiles, and colleges to get into your dream university
               </p>
             </div>
-            <button className="px-4 py-3 bg-[#191919] rounded-xl border border-[#191919] text-white font-outfit text-base font-medium hover:bg-[#333] transition-colors">
+            <button 
+              onClick={() => router.push('/signup')}
+              className="px-4 py-3 bg-[#191919] rounded-xl border border-[#191919] text-white font-outfit text-base font-medium hover:bg-[#333] transition-colors"
+            >
               Start Exploring
             </button>
           </div>
@@ -142,7 +148,10 @@ export default function Footer() {
             </div>
 
             {/* Sign Up Button */}
-            <button className="px-4 py-3 bg-[#FAF6F2] rounded-xl border border-[#191919] text-black font-outfit text-sm md:text-base font-medium hover:bg-white transition-colors">
+            <button 
+              onClick={() => router.push('/signup')}
+              className="px-4 py-3 bg-[#FAF6F2] rounded-xl border border-[#191919] text-black font-outfit text-sm md:text-base font-medium hover:bg-white transition-colors"
+            >
               Sign up
             </button>
           </div>

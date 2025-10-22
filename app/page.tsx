@@ -26,11 +26,14 @@ const Page = () => {
       <Carousel />
 
       {/* Persons Section */}
-      <PersonsSection />
+      <div id="about">
+        <PersonsSection />
+      </div>
 
       {/* Stacks Section */}
-      <StacksSection />
-
+      <div id="features">
+        <StacksSection />
+      </div>
 
       {/* Share What Got You In Section */}
       <ShareGotYouInSection />
@@ -38,12 +41,16 @@ const Page = () => {
       {/* Clarity Hits Section */}
       <ClarityHitsSection />
 
-      <ScaleOfFliqSection />
+      <div id="scale">
+        <ScaleOfFliqSection />
+      </div>
 
       {/* Testimonial Wall Section */}
       <TestimonialWallSection />
 
-      <FaqAccordionSection />
+      <div id="faqs">
+        <FaqAccordionSection />
+      </div>
 
       <Footer />
     </div>

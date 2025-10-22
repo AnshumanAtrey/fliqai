@@ -10,8 +10,9 @@ const Header = () => {
   const router = useRouter();
 
   return (
-    <header className="sticky top-0 z-50 flex w-full max-w-[1640px] px-4 md:px-10 lg:px-[120px] py-4 justify-between items-center border-b border-[#F3EAE1] bg-[#FAF6F2]">
-      <div className="flex items-center justify-between w-full">
+    <header className="sticky top-0 z-50 w-full border-b border-[#F3EAE1] bg-[#FAF6F2]">
+      <div className="flex w-full max-w-[1640px] mx-auto px-4 md:px-10 lg:px-[120px] py-4 justify-between items-center">
+        <div className="flex items-center justify-between w-full">
         {/* Logo */}
         <div className="flex-shrink-0">
           <Image src={logo} alt="Fliq Logo" width={80} height={32} className="md:w-[120px] md:h-[48px]" />
@@ -59,6 +60,7 @@ const Header = () => {
             </svg>
           )}
         </button>
+        </div>
       </div>
 
       {/* Mobile Dropdown Menu */}

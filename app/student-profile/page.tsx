@@ -59,7 +59,7 @@ const fallbackProfile: StudentProfile = {
   graduationYear: "'27",
   bio: "Hey there! I'm Rebecca, a final-year Psychology student at the University of Bath. I'm passionate about understanding how people think, learn, and connect, which is why I've spent the last three years diving into research projects, volunteering with local schools, and leading our campus Mental Health Awareness Society. My long term goal? To combine psychology and technology to build better tools for learning and wellbeing.",
   profileImage: "/profile-pic-1.jpg",
-  backgroundImage: "/bath_profile.png",
+  backgroundImage: "/student-profile/uni-bg-for-student-profile.png",
   badges: ["International Student", "Low Income", "Recruited Athlete"],
   admissions: [
     { id: 'mit', src: '/mit.png', name: 'MIT' },
@@ -109,15 +109,15 @@ function StudentProfile() {
   // Fetch user credits
   const fetchUserCredits = async () => {
     if (!user) return;
-    
+
     try {
       let token = localStorage.getItem('token');
       if (!token && user && 'getIdToken' in user && typeof user.getIdToken === 'function') {
         token = await user.getIdToken();
       }
-      
+
       if (!token) return;
-      
+
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
       const response = await fetch(`${backendUrl}/api/profile/credits`, {
         headers: {
@@ -125,7 +125,7 @@ function StudentProfile() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.data) {
@@ -157,7 +157,7 @@ function StudentProfile() {
           localStorage.setItem('token', token);
         }
       }
-      
+
       if (!token) {
         throw new Error('Authentication required. Please login again.');
       }
@@ -209,19 +209,19 @@ function StudentProfile() {
   // Unlock profile (deducts 15 credits)
   const unlockProfile = async () => {
     if (!user || !studentId) return;
-    
+
     setIsUnlocking(true);
-    
+
     try {
       let token = localStorage.getItem('token');
       if (!token && user && 'getIdToken' in user && typeof user.getIdToken === 'function') {
         token = await user.getIdToken();
       }
-      
+
       if (!token) {
         throw new Error('Authentication required');
       }
-      
+
       console.log('🔓 Unlocking profile for student:', studentId);
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
       const response = await fetch(`${backendUrl}/api/students/${studentId}`, {
@@ -230,7 +230,7 @@ function StudentProfile() {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         if (response.status === 403) {
           const errorData = await response.json();
@@ -238,10 +238,10 @@ function StudentProfile() {
         }
         throw new Error(`Failed to unlock profile: ${response.statusText}`);
       }
-      
+
       const data = await response.json();
       console.log('✅ Full Profile Data received:', data);
-      
+
       if (data.success && data.data) {
         const apiProfile = data.data;
         const transformedProfile: StudentProfile = {
@@ -273,11 +273,11 @@ function StudentProfile() {
           }
         };
         setProfile(transformedProfile);
-        
+
         if (apiProfile.essays && Array.isArray(apiProfile.essays)) {
           setEssays(apiProfile.essays);
         }
-        
+
         setIsLocked(false); // Unlock the profile
         await fetchUserCredits(); // Refresh credits
       }
@@ -309,7 +309,7 @@ function StudentProfile() {
           console.log('✅ Got fresh token for student profile');
         }
       }
-      
+
       if (!token) {
         throw new Error('Authentication required. Please login again.');
       }
@@ -366,7 +366,7 @@ function StudentProfile() {
           }
         };
         setProfile(transformedProfile);
-        
+
         // Extract essays from API response
         if (apiProfile.essays && Array.isArray(apiProfile.essays)) {
           setEssays(apiProfile.essays);
@@ -393,7 +393,7 @@ function StudentProfile() {
 
         {/* Back to Student Catalogue */}
         <div className="px-[90px] pt-12 pb-2">
-          <button 
+          <button
             className="flex items-center gap-2 text-[#5D5237] dark:text-dark-text hover:opacity-80 transition-opacity cursor-pointer"
             onClick={() => window.location.href = '/discover-students'}
           >
@@ -416,7 +416,7 @@ function StudentProfile() {
               </defs>
             </svg>
 
-            <span 
+            <span
               className="font-outfit text-sm"
               onClick={() => window.location.href = '/discover-students'}
             >
@@ -460,242 +460,242 @@ function StudentProfile() {
           {/* Profile Content - Only show when loaded */}
           {!loading && !error && profile && (
             <>
-          {/* University Header */}
-          <div className="mb-8 flex justify-center">
-            <div className="w-full h-[374px]">
-              <Image
-                src={profile.backgroundImage}
-                alt={profile.university}
-                width={1286}
-                height={374}
-                className="w-full h-full object-fill"
-                priority
-              />
-            </div>
-          </div>
+              {/* University Header */}
+              <div className="mb-8 flex justify-center">
+                <div className="w-full h-[374px] overflow-hidden">
+                  <Image
+                    src="/student-profile/uni-bg-for-student-profile.png"
+                    alt={profile.university}
+                    width={1286}
+                    height={374}
+                    className="w-full h-full object-cover"
+                    priority
+                  />
+                </div>
+              </div>
 
-          {/* Profile Section */}
-          <div className="bg-white dark:bg-dark-tertiary border border-black dark:border-dark-text p-4 sm:p-6 lg:p-12 mb-8">
-            <div className="flex flex-col lg:flex-row gap-6 lg:gap-12">
-              {/* Left Section - Text Content */}
-              <div className="flex-1">
-                <div className="space-y-6">
-                  {/* Name and University */}
-                  <div>
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white font-outfit mb-2 break-words">{profile.name}</h1>
-                    <p className="text-base sm:text-lg font-bold text-gray-600 dark:text-gray-300 break-words">{profile.university} {profile.graduationYear}</p>
-                  </div>
+              {/* Profile Section */}
+              <div className="bg-white dark:bg-dark-tertiary border border-black dark:border-dark-text p-4 sm:p-6 lg:p-12 mb-8">
+                <div className="flex flex-col lg:flex-row gap-6 lg:gap-12">
+                  {/* Left Section - Text Content */}
+                  <div className="flex-1">
+                    <div className="space-y-6">
+                      {/* Name and University */}
+                      <div>
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white font-outfit mb-2 break-words">{profile.name}</h1>
+                        <p className="text-base sm:text-lg font-bold text-gray-600 dark:text-gray-300 break-words">{profile.university} {profile.graduationYear}</p>
+                      </div>
 
-                  {/* Badges */}
-                  <div className="flex flex-wrap gap-2">
-                    <span className="bg-[#FFC3A9] dark:bg-[#FFA07A] text-black text-sm font-medium px-4 py-1.5 border border-black dark:border-dark-text  flex items-center">
-                      International Student
-                    </span>
-                    <span className="bg-[#FFC3A9] dark:bg-[#FFA07A] text-black text-sm font-medium px-4 py-1.5 border border-black dark:border-dark-text  flex items-center">
-                      Low Income
-                    </span>
-                    <span className="bg-[#FFC3A9] dark:bg-[#FFA07A] text-black text-sm font-medium px-4 py-1.5 border border-black dark:border-dark-text  flex items-center">
-                      Recruited Athlete
-                    </span>
-                  </div>
+                      {/* Badges */}
+                      <div className="flex flex-wrap gap-2">
+                        <span className="bg-[#FFC3A9] dark:bg-[#FFA07A] text-black text-sm font-medium px-4 py-1.5 border border-black dark:border-dark-text  flex items-center">
+                          International Student
+                        </span>
+                        <span className="bg-[#FFC3A9] dark:bg-[#FFA07A] text-black text-sm font-medium px-4 py-1.5 border border-black dark:border-dark-text  flex items-center">
+                          Low Income
+                        </span>
+                        <span className="bg-[#FFC3A9] dark:bg-[#FFA07A] text-black text-sm font-medium px-4 py-1.5 border border-black dark:border-dark-text  flex items-center">
+                          Recruited Athlete
+                        </span>
+                      </div>
 
-                  {/* Bio */}
-                  <div className="w-full max-w-[550px] space-y-2">
-                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed break-words">
-                      {profile.bio}
-                    </p>
-                  </div>
+                      {/* Bio */}
+                      <div className="w-full max-w-[550px] space-y-2">
+                        <p className="text-gray-600 dark:text-gray-300 leading-relaxed break-words">
+                          {profile.bio}
+                        </p>
+                      </div>
 
-                  {/* University Admissions */}
-                  <div className="pt-2">
-                    <h3 className="font-outfit font-semibold text-gray-900 dark:text-white text-lg mb-3">{profile.name.split(' ')[0]}&apos;s Admissions:</h3>
-                    <div className="flex items-center gap-4">
-                      {profile.admissions && profile.admissions.length > 0 ? (
-                        <>
-                          {profile.admissions.slice(0, 4).map((uni, index) => (
-                            <div
-                              key={uni.id}
-                              className="w-[70px] h-[70px] shrink-0 relative"
-                            >
-                              <Image
-                                src={uni.src}
-                                alt={uni.name}
-                                width={70}
-                                height={70}
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
-                          ))}
-                          {profile.admissions.length > 4 && (
-                            <span className="text-gray-400 dark:text-gray-400 text-sm font-medium ml-2">
-                              +{profile.admissions.length - 4} more
-                            </span>
+                      {/* University Admissions */}
+                      <div className="pt-2">
+                        <h3 className="font-outfit font-semibold text-gray-900 dark:text-white text-lg mb-3">{profile.name.split(' ')[0]}&apos;s Admissions:</h3>
+                        <div className="flex items-center gap-4">
+                          {profile.admissions && profile.admissions.length > 0 ? (
+                            <>
+                              {profile.admissions.slice(0, 4).map((uni, index) => (
+                                <div
+                                  key={uni.id}
+                                  className="w-[70px] h-[70px] shrink-0 relative"
+                                >
+                                  <Image
+                                    src={uni.src}
+                                    alt={uni.name}
+                                    width={70}
+                                    height={70}
+                                    className="w-full h-full object-contain"
+                                  />
+                                </div>
+                              ))}
+                              {profile.admissions.length > 4 && (
+                                <span className="text-gray-400 dark:text-gray-400 text-sm font-medium ml-2">
+                                  +{profile.admissions.length - 4} more
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <p className="text-gray-400 dark:text-gray-400 text-sm">No admissions data available</p>
                           )}
-                        </>
-                      ) : (
-                        <p className="text-gray-400 dark:text-gray-400 text-sm">No admissions data available</p>
-                      )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Section - Profile Photo */}
+                  <div className="lg:w-80 flex-shrink-0 flex items-center justify-center">
+                    <div className="relative w-full max-w-[455px] h-[455px] overflow-hidden border-2 border-black dark:border-dark-text ">
+                      <Image
+                        src={profile.profileImage}
+                        alt={profile.name}
+                        fill
+                        className="object-cover"
+                        priority
+                      />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Right Section - Profile Photo */}
-              <div className="lg:w-80 flex-shrink-0 flex items-center justify-center">
-                <div className="relative w-full max-w-[455px] h-[455px] overflow-hidden border-2 border-black dark:border-dark-text ">
-                  <Image
-                    src={profile.profileImage}
-                    alt={profile.name}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats Section - Full Width */}
-          <div className="mt-6 sm:mt-8 pt-3 mb-8 sm:mb-16 px-4 sm:px-0">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-              {[
-                { value: profile.stats.awards.toString(), label: 'Awards' },
-                { value: profile.stats.activities.toString(), label: 'Activities' },
-                { value: profile.stats.qas.toString(), label: 'Q&As' },
-                { value: profile.stats.apIbs.toString(), label: 'AP/IBs' }
-              ].map((stat, index) => (
-                <div key={index} className="bg-[#FFE3D4] dark:bg-dark-card border border-black dark:border-dark-text p-3 sm:p-4 h-[120px] sm:h-[150px] flex flex-col justify-center items-center gap-1 sm:gap-2">
-                  <div className="text-3xl sm:text-4xl font-bold text-black dark:text-black font-outfit">{stat.value}</div>
-                  <div className="text-black dark:text-black text-base sm:text-xl font-medium">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Academics Section */}
-          <div className="px-4 sm:px-8 lg:px-[90px] bg-light-bg dark:bg-dark-bg">
-            <h2 className="font-outfit text-2xl sm:text-3xl font-bold text-black dark:text-white pt-6 sm:pt-10 pb-6 sm:pb-8">Academics</h2>
-
-            {isLocked ? (
-              <div className="p-4 sm:p-8">
-                {/* Blurred preview content */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 blur-sm pointer-events-none opacity-50">
-                  <div className="bg-[#FFC3A9] dark:bg-[#FFA07A] p-6 border border-black dark:border-dark-text h-64"></div>
-                  <div className="bg-[#FFE3D4] dark:bg-dark-card p-6 border border-black dark:border-dark-text h-64"></div>
-                  <div className="space-y-4">
-                    <div className="bg-[#FFE3D4] dark:bg-dark-card p-4 border border-black dark:border-dark-text h-28"></div>
-                    <div className="bg-[#FFE3D4] dark:bg-dark-card p-4 border border-black dark:border-dark-text h-28"></div>
-                  </div>
-                </div>
-                
-                {/* Locked Modal - Positioned over the blurred content */}
-                <div className="relative -mt-48">
-                  <ProfileLockedModal 
-                    onUnlock={unlockProfile}
-                    isUnlocking={isUnlocking}
-                    userCredits={userCredits}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 p-4 sm:p-6 lg:p-8">
-              {/* Personal Information */}
-              <div className="bg-[#FFC3A9] dark:bg-[#FFA07A] p-4 sm:p-6 border border-black dark:border-dark-text text-black dark:text-black">
-                <h3 className="font-outfit font-bold text-lg sm:text-xl mb-4 sm:mb-6 pb-2 border-b border-black dark:border-dark-text">Personal Information</h3>
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="flex justify-between items-start gap-2">
-                    <span className="font-medium text-sm sm:text-base">Race:</span>
-                    <span className="font-bold text-sm sm:text-base text-right break-words">{profile.personalInfo.race}</span>
-                  </div>
-                  <div className="flex justify-between items-start gap-2">
-                    <span className="font-medium text-sm sm:text-base">Gender:</span>
-                    <span className="font-bold text-sm sm:text-base text-right break-words">{profile.personalInfo.gender}</span>
-                  </div>
-                  <div className="flex justify-between items-start gap-2">
-                    <span className="font-medium text-sm sm:text-base">School Type:</span>
-                    <span className="font-bold text-sm sm:text-base text-right break-words">{profile.personalInfo.schoolType}</span>
-                  </div>
-                  <div className="flex justify-between items-start gap-2">
-                    <span className="font-medium text-sm sm:text-base">Legacy:</span>
-                    <span className="font-bold text-sm sm:text-base text-right break-words">{profile.personalInfo.legacy}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Rebecca's Grades */}
-              <div className="bg-[#FFE3D4] dark:bg-dark-card p-4 sm:p-6 border border-black dark:border-dark-text text-black dark:text-black">
-                <h3 className="font-outfit font-bold text-lg sm:text-xl mb-4 sm:mb-6 pb-2 border-b border-black dark:border-dark-text">{profile.name.split(' ')[0]}&apos;s Grades</h3>
-                <div className="space-y-2 sm:space-y-3">
-                  {profile.grades.map((grade, index) => (
-                    <div key={index} className="flex justify-between items-center gap-2">
-                      <span className="text-sm sm:text-base">{grade.subject}</span>
-                      <span className="font-semibold text-sm sm:text-base">{grade.grade}</span>
+              {/* Stats Section - Full Width */}
+              <div className="mt-6 sm:mt-8 pt-3 mb-8 sm:mb-16 px-4 sm:px-0">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                  {[
+                    { value: profile.stats.awards.toString(), label: 'Awards' },
+                    { value: profile.stats.activities.toString(), label: 'Activities' },
+                    { value: profile.stats.qas.toString(), label: 'Q&As' },
+                    { value: profile.stats.apIbs.toString(), label: 'AP/IBs' }
+                  ].map((stat, index) => (
+                    <div key={index} className="bg-[#FFE3D4] dark:bg-dark-card border border-black dark:border-dark-text p-3 sm:p-4 h-[120px] sm:h-[150px] flex flex-col justify-center items-center gap-1 sm:gap-2">
+                      <div className="text-3xl sm:text-4xl font-bold text-black dark:text-black font-outfit">{stat.value}</div>
+                      <div className="text-black dark:text-black text-base sm:text-xl font-medium">{stat.label}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* GPA Information */}
-              <div className="space-y-3 sm:space-y-4">
-                {/* Average GPA */}
-                <div className="bg-[#FFE3D4] dark:bg-dark-card p-3 sm:p-4 border border-black dark:border-dark-text text-black dark:text-black">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-light text-sm sm:text-base">Average GPA</span>
+              {/* Academics Section */}
+              <div className="px-4 sm:px-8 lg:px-[90px] bg-light-bg dark:bg-dark-bg">
+                <h2 className="font-outfit text-2xl sm:text-3xl font-bold text-black dark:text-white pt-6 sm:pt-10 pb-6 sm:pb-8">Academics</h2>
+
+                {isLocked ? (
+                  <div className="p-4 sm:p-8">
+                    {/* Blurred preview content */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 blur-sm pointer-events-none opacity-50">
+                      <div className="bg-[#FFC3A9] dark:bg-[#FFA07A] p-6 border border-black dark:border-dark-text h-64"></div>
+                      <div className="bg-[#FFE3D4] dark:bg-dark-card p-6 border border-black dark:border-dark-text h-64"></div>
+                      <div className="space-y-4">
+                        <div className="bg-[#FFE3D4] dark:bg-dark-card p-4 border border-black dark:border-dark-text h-28"></div>
+                        <div className="bg-[#FFE3D4] dark:bg-dark-card p-4 border border-black dark:border-dark-text h-28"></div>
+                      </div>
+                    </div>
+
+                    {/* Locked Modal - Positioned over the blurred content */}
+                    <div className="relative -mt-48">
+                      <ProfileLockedModal
+                        onUnlock={unlockProfile}
+                        isUnlocking={isUnlocking}
+                        userCredits={userCredits}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full h-[25px] sm:h-[30px] flex flex-row gap-2 items-center">
-                    <div className="bg-white border-[1px] border-black dark:border-dark-text h-full" style={{ width: '74.2%', boxShadow: '2px 2px 0 0 #000' }}></div>
-                    <span className="font-bold text-sm sm:text-base whitespace-nowrap">{profile.gpa.average}</span>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 p-4 sm:p-6 lg:p-8">
+                    {/* Personal Information */}
+                    <div className="bg-[#FFC3A9] dark:bg-[#FFA07A] p-4 sm:p-6 border border-black dark:border-dark-text text-black dark:text-black">
+                      <h3 className="font-outfit font-bold text-lg sm:text-xl mb-4 sm:mb-6 pb-2 border-b border-black dark:border-dark-text">Personal Information</h3>
+                      <div className="space-y-3 sm:space-y-4">
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="font-medium text-sm sm:text-base">Race:</span>
+                          <span className="font-bold text-sm sm:text-base text-right break-words">{profile.personalInfo.race}</span>
+                        </div>
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="font-medium text-sm sm:text-base">Gender:</span>
+                          <span className="font-bold text-sm sm:text-base text-right break-words">{profile.personalInfo.gender}</span>
+                        </div>
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="font-medium text-sm sm:text-base">School Type:</span>
+                          <span className="font-bold text-sm sm:text-base text-right break-words">{profile.personalInfo.schoolType}</span>
+                        </div>
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="font-medium text-sm sm:text-base">Legacy:</span>
+                          <span className="font-bold text-sm sm:text-base text-right break-words">{profile.personalInfo.legacy}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Rebecca's Grades */}
+                    <div className="bg-[#FFE3D4] dark:bg-dark-card p-4 sm:p-6 border border-black dark:border-dark-text text-black dark:text-black">
+                      <h3 className="font-outfit font-bold text-lg sm:text-xl mb-4 sm:mb-6 pb-2 border-b border-black dark:border-dark-text">{profile.name.split(' ')[0]}&apos;s Grades</h3>
+                      <div className="space-y-2 sm:space-y-3">
+                        {profile.grades.map((grade, index) => (
+                          <div key={index} className="flex justify-between items-center gap-2">
+                            <span className="text-sm sm:text-base">{grade.subject}</span>
+                            <span className="font-semibold text-sm sm:text-base">{grade.grade}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* GPA Information */}
+                    <div className="space-y-3 sm:space-y-4">
+                      {/* Average GPA */}
+                      <div className="bg-[#FFE3D4] dark:bg-dark-card p-3 sm:p-4 border border-black dark:border-dark-text text-black dark:text-black">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-light text-sm sm:text-base">Average GPA</span>
+                        </div>
+                        <div className="w-full h-[25px] sm:h-[30px] flex flex-row gap-2 items-center">
+                          <div className="bg-white border-[1px] border-black dark:border-dark-text h-full" style={{ width: '74.2%', boxShadow: '2px 2px 0 0 #000' }}></div>
+                          <span className="font-bold text-sm sm:text-base whitespace-nowrap">{profile.gpa.average}</span>
+                        </div>
+                      </div>
+                      {/* Rebecca's GPA */}
+                      <div className="bg-[#FFE3D4] dark:bg-dark-card p-3 sm:p-4 border border-black dark:border-dark-text text-black dark:text-black">
+                        <div className="flex justify-between items-center mb-2 gap-2">
+                          <span className="font-light text-sm sm:text-base">{profile.name.split(' ')[0]}&apos;s GPA</span>
+                        </div>
+                        <div className="w-full h-[25px] sm:h-[30px] flex flex-row gap-2 items-center">
+                          <div className="bg-[#FF8C42] dark:bg-[#FF9F6E] border-[1px] border-black dark:border-dark-text h-full" style={{ width: '78.4%', boxShadow: '2px 2px 0 0 #000' }}></div>
+                          <span className="font-bold text-sm sm:text-base whitespace-nowrap">{profile.gpa.current}</span>
+                        </div>
+                      </div>
+                      {/* GPA Comparison */}
+                      <div className="bg-[#FFE3D4] dark:bg-dark-card p-3 sm:p-4 border border-black dark:border-dark-text text-black dark:text-black">
+                        <p className="text-xs sm:text-sm break-words">
+                          {profile.name.split(' ')[0]}&apos;s GPA is {profile.gpa.current > profile.gpa.average ? 'higher' : 'lower'} than the average GPA of admits at this uni
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                {/* Rebecca's GPA */}
-                <div className="bg-[#FFE3D4] dark:bg-dark-card p-3 sm:p-4 border border-black dark:border-dark-text text-black dark:text-black">
-                  <div className="flex justify-between items-center mb-2 gap-2">
-                    <span className="font-light text-sm sm:text-base">{profile.name.split(' ')[0]}&apos;s GPA</span>
-                  </div>
-                  <div className="w-full h-[25px] sm:h-[30px] flex flex-row gap-2 items-center">
-                    <div className="bg-[#FF8C42] dark:bg-[#FF9F6E] border-[1px] border-black dark:border-dark-text h-full" style={{ width: '78.4%', boxShadow: '2px 2px 0 0 #000' }}></div>
-                    <span className="font-bold text-sm sm:text-base whitespace-nowrap">{profile.gpa.current}</span>
-                  </div>
-                </div>
-                {/* GPA Comparison */}
-                <div className="bg-[#FFE3D4] dark:bg-dark-card p-3 sm:p-4 border border-black dark:border-dark-text text-black dark:text-black">
-                  <p className="text-xs sm:text-sm break-words">
-                    {profile.name.split(' ')[0]}&apos;s GPA is {profile.gpa.current > profile.gpa.average ? 'higher' : 'lower'} than the average GPA of admits at this uni
-                  </p>
-                </div>
+                )}
               </div>
-            </div>
-            )}
-          </div>
 
-          {/* Exam Timeline Section */}
-          <div className={`mt-12 mb-16 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
-            <ExamTimeline />
-          </div>
+              {/* Exam Timeline Section */}
+              <div className={`mt-12 mb-16 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
+                <ExamTimeline />
+              </div>
 
-          {/* Extracurriculars Dashboard */}
-          <div className={`mt-12 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
-            <ExtracurricularsDashboard />
-          </div>
+              {/* Extracurriculars Dashboard */}
+              <div className={`mt-12 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
+                <ExtracurricularsDashboard />
+              </div>
 
-          {/* Awards Section */}
-          <div className={`mt-12 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
-            <AwardsSection />
-          </div>
+              {/* Awards Section */}
+              <div className={`mt-12 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
+                <AwardsSection />
+              </div>
 
-          {/* Essays Section */}
-          <div className={`mt-12 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
-            <EssaysSection 
-              essays={essays}
-              studentName={profile.name}
-              studentImage={profile.profileImage}
-            />
-          </div>
+              {/* Essays Section */}
+              <div className={`mt-12 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
+                <EssaysSection
+                  essays={essays}
+                  studentName={profile.name}
+                  studentImage={profile.profileImage}
+                />
+              </div>
 
-          {/* Questions & Answers Section */}
-          <div className={`mt-12 mb-20 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
-            <QuestionsAnswersSection />
-          </div>
+              {/* Questions & Answers Section */}
+              <div className={`mt-12 mb-20 ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
+                <QuestionsAnswersSection />
+              </div>
             </>
           )}
         </main>

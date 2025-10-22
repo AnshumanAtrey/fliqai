@@ -78,7 +78,7 @@ const EssayBuilderPage = () => {
 
       const result = await response.json();
       console.log('📊 API Response:', result);
-      
+
       if (result.success && result.data) {
         // Ensure essayStyle has the correct structure
         if (result.data.essayStyle && !result.data.essayStyle.segments) {
@@ -144,35 +144,37 @@ const EssayBuilderPage = () => {
 
                 {/* Main Content Container - Responsive Flexbox Layout */}
                 <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 mt-8 lg:mt-16 lg:items-start">
-                  
+
                   {/* Left Section - Essay Input */}
                   <div className="w-full lg:w-1/2 xl:w-3/5 lg:sticky lg:top-6">
                     <EssayInputSection onAnalyze={handleAnalyzeEssay} isAnalyzing={isAnalyzing} />
                   </div>
 
-                  {/* Right Section - Analysis */}
-                  <div className="w-full lg:w-1/2 xl:w-2/5 p-4 sm:p-6 bg-light-bg dark:bg-dark-secondary border border-black dark:border-dark-text" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                    
-                    {/* Personality Traits Section */}
-                    <PersonalityTraitsSection 
-                      analysisData={analysisData} 
-                      isAnalyzing={isAnalyzing} 
-                    />
+                  {/* Right Section Container */}
+                  <div className="w-full lg:w-1/2 xl:w-2/5 flex flex-col gap-4 lg:gap-6">
+                    {/* Essay Analysis Section */}
+                    <div className="p-4 sm:p-6 bg-light-bg dark:bg-dark-secondary border border-black dark:border-dark-text" style={{ boxShadow: '4px 4px 0 0 #000' }}>
 
-                    {/* Strengths and Gaps Section */}
-                    <StrengthsGapsSection 
-                      analysisData={analysisData} 
-                      isAnalyzing={isAnalyzing} 
-                    />
+                      {/* Personality Traits Section */}
+                      <PersonalityTraitsSection
+                        analysisData={analysisData}
+                        isAnalyzing={isAnalyzing}
+                      />
 
-                    {/* Actionable Suggestions Section */}
-                    <ActionableSuggestionsSection 
-                      analysisData={analysisData} 
-                      isAnalyzing={isAnalyzing} 
-                    />
+                      {/* Strengths and Gaps Section */}
+                      <StrengthsGapsSection
+                        analysisData={analysisData}
+                        isAnalyzing={isAnalyzing}
+                      />
 
-                    {/* Essay Style Section - Dynamic Donut Chart */}
-                    <EssayStyleSection
+                      {/* Actionable Suggestions Section */}
+                      <ActionableSuggestionsSection
+                        analysisData={analysisData}
+                        isAnalyzing={isAnalyzing}
+                      />
+
+                      {/* Essay Style Section - Dynamic Donut Chart */}
+                      <EssayStyleSection
                         essayData={analysisData?.essayStyle?.segments ? {
                           narrative: analysisData.essayStyle.segments.find(s => s.label.toLowerCase().includes('narrative') || s.label.toLowerCase().includes('personal'))?.value || 0,
                           reflection: analysisData.essayStyle.segments.find(s => s.label.toLowerCase().includes('reflection') && !s.label.toLowerCase().includes('narrative'))?.value || 0,
@@ -181,13 +183,10 @@ const EssayBuilderPage = () => {
                           voice: analysisData.essayStyle.segments.find(s => s.label.toLowerCase().includes('voice') || s.label.toLowerCase().includes('style') || s.label.toLowerCase().includes('creative') || s.label.toLowerCase().includes('professional'))?.value || 0
                         } : undefined}
                       />
+                    </div>
 
-                    {/* Student Profiles Section - Only show after analysis is complete */}
-                    {analysisData && !isAnalyzing && (
-                      <div className="mt-16 sm:mt-20 w-full">
-                        <StudentProfilesSection />
-                      </div>
-                    )}
+                    {/* Student Profiles Section - Separate div in right column */}
+                    <StudentProfilesSection />
                   </div>
                 </div>
               </div>

@@ -1,8 +1,11 @@
 import React from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import heroImage from '../assets/hero.png';
 
 const HeroSection = () => {
+  const router = useRouter();
+
   return (
     <section className="flex py-10 md:py-20 px-4 md:px-10 bg-[#FAF6F2] overflow-hidden ">
       <div className="flex flex-col md:flex-row items-center gap-8 md:gap-32 max-w-[1440px] mx-auto w-full">
@@ -31,14 +34,20 @@ const HeroSection = () => {
           {/* Buttons - Reversed order on mobile */}
           <div className="flex flex-col md:flex-row gap-2 md:gap-4 w-full md:w-auto">
             {/* Secondary Button - Shows first on mobile */}
-            <button className="flex py-3 px-4 md:px-6 md:py-4 gap-2.5 justify-center items-center rounded-xl md:rounded-xl bg-white hover:bg-gray-50 transition-colors border border-gray-200 w-full md:w-auto order-2 md:order-1">
+            <button 
+              onClick={() => router.push('/discover-students')}
+              className="flex py-3 px-4 md:px-6 md:py-4 gap-2.5 justify-center items-center rounded-xl md:rounded-xl bg-white hover:bg-gray-50 transition-colors border border-gray-200 w-full md:w-auto order-2 md:order-1"
+            >
               <span className="text-[#191919] font-outfit text-[14px] md:text-base font-medium leading-[17.64px] md:leading-normal whitespace-nowrap">
                 View FREE Student Profiles
               </span>
             </button>
 
             {/* Primary Button - Shows second on mobile */}
-            <button className="flex py-3 px-4 md:px-8 md:py-4 gap-2.5 justify-center items-center rounded-xl md:rounded-xl border border-[#191919] bg-[#191919] hover:bg-[#333333] transition-colors w-full md:w-auto order-1 md:order-2">
+            <button 
+              onClick={() => router.push('/signup')}
+              className="flex py-3 px-4 md:px-8 md:py-4 gap-2.5 justify-center items-center rounded-xl md:rounded-xl border border-[#191919] bg-[#191919] hover:bg-[#333333] transition-colors w-full md:w-auto order-1 md:order-2"
+            >
               <span className="text-white font-outfit text-[14px] md:text-base font-medium leading-[17.64px] md:leading-normal whitespace-nowrap">
                 Get your playbook
               </span>
