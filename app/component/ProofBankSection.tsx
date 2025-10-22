@@ -75,6 +75,8 @@ interface StudentProfile {
   discoveryInfo?: { description?: string };
   admissionYear?: number;
   profileImage?: string;
+  imageUrl?: string; // AI-generated image URL
+  graduationYear?: string; // e.g., "'27"
 }
 
 interface ProofBankSectionProps {
@@ -169,14 +171,22 @@ const ProofBankSection: React.FC<ProofBankSectionProps> = ({ students = [] }) =>
 
   // Use student data if available, otherwise use fallback
   const displayProfiles = students.length > 0
-    ? students.slice(0, 6).map((student, index) => ({
-        id: student.id || `student-${index}`,
-        name: student.name || `Student ${index + 1}`,
-        admissionYear: student.admissionYear || 2023,
-        major: typeof student.major === 'string' ? student.major : (student.major as { name?: string })?.name || 'Undeclared',
-        description: (student.bio as string) || (student.discoveryInfo as { description?: string })?.description || 'Click to view full profile',
-        imageUrl: student.profileImage || fallbackProfiles[index % fallbackProfiles.length].imageUrl,
-      }))
+    ? students.slice(0, 6).map((student, index) => {
+        // Parse graduation year (e.g., "'27" -> 2027)
+        const gradYear = student.graduationYear 
+          ? parseInt(`20${student.graduationYear.replace("'", "")}`)
+          : student.admissionYear || 2023;
+        
+        return {
+          id: student.id || `student-${index}`,
+          name: student.name || `Student ${index + 1}`,
+          admissionYear: gradYear,
+          major: typeof student.major === 'string' ? student.major : (student.major as { name?: string })?.name || 'Undeclared',
+          description: (student.bio as string) || (student.discoveryInfo as { description?: string })?.description || 'Click to view full profile',
+          // Prioritize AI-generated imageUrl, then profileImage, then fallback
+          imageUrl: student.imageUrl || student.profileImage || fallbackProfiles[index % fallbackProfiles.length].imageUrl,
+        };
+      })
     : fallbackProfiles;
 
   return (

@@ -16,6 +16,9 @@ import { UniversityCard } from './components/UniversityCard';
 import DotPatternBackground from '@/app/component/DotPatternBackground';
 import Header from '@/app/component/header';
 
+// Import college search data
+import collegeSearchData from '@/college_search.json';
+
 // Define interface based on backend API structure
 interface University {
   id: string;
@@ -74,14 +77,14 @@ function BrowseUniversities() {
   const [currentPage, setCurrentPage] = useState(1);
   const universitiesPerPage = 5;
 
-  // Initialize Fuse.js for fuzzy search
-  const fuse = useMemo(() => new Fuse(allUniversities, {
-    keys: ['name', 'location'],
+  // Initialize Fuse.js for fuzzy search on college names
+  const collegeFuse = useMemo(() => new Fuse(collegeSearchData.colleges, {
+    keys: ['name'],
     threshold: 0.3, // 0.0 = perfect match, 1.0 = match anything
     minMatchCharLength: 2,
     includeScore: true,
     ignoreLocation: true,
-  }), [allUniversities]);
+  }), []);
 
   // Transform API university data to match frontend structure
   const transformUniversity = (uni: { id: string; country: 'US' | 'UK'; pages?: Record<string, unknown>; location?: string;[key: string]: unknown }): University => {
@@ -322,7 +325,7 @@ function BrowseUniversities() {
     }
   }, [selectedCountry]); // Removed searchTerm from dependencies
 
-  // Search universities using dedicated backend search endpoint
+  // Search universities using Fuse.js on college_search.json, then fetch by ID
   const searchUniversitiesByName = useCallback(async (name: string) => {
     console.log('🔍 Search called with:', name);
     
@@ -339,44 +342,60 @@ function BrowseUniversities() {
       setLoading(true);
       setError(null);
       
-      console.log('🔍 Searching entire database for:', name);
+      console.log('🔍 Fuzzy searching college names for:', name);
       
-      // Use dedicated search endpoint that searches ALL universities
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com'}/api/search-universities`, {
+      // Step 1: Use Fuse.js to search college names in JSON file
+      const searchResults = collegeFuse.search(name);
+      
+      console.log(`📊 Found ${searchResults.length} name matches`);
+      
+      if (searchResults.length === 0) {
+        setError(`No universities found matching "${name}". Try different spelling or keywords.`);
+        setUniversities([]);
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: Get IDs of matched colleges (top 10)
+      const matchedIds = searchResults.slice(0, 10).map(result => result.item.id);
+      console.log('🎯 Fetching universities with IDs:', matchedIds);
+
+      // Step 3: Fetch universities by IDs from backend (batch request)
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
+      const response = await fetch(`${backendUrl}/api/search-universities`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ query: name })
+        body: JSON.stringify({ ids: matchedIds })
       });
 
-      const data = await response.json();
-      console.log('📦 Search response:', data);
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Search failed');
+      if (!response.ok) {
+        throw new Error('Failed to fetch universities');
       }
 
-      if (data.data && data.data.universities) {
-        const transformedUniversities = data.data.universities
-          .map(transformUniversity)
-          .filter((uni: University) => uni.name);
-
-        console.log(`✅ Found ${data.data.totalFound} matches (showing ${transformedUniversities.length})`);
-        console.log(`📊 Scanned ${data.data.totalScanned} universities`);
-
-        if (transformedUniversities.length === 0) {
-          setError(`No universities found matching "${name}". Try different spelling or keywords.`);
-          setUniversities([]);
-        } else {
-          setUniversities(transformedUniversities);
-          setError(null);
-          
-          // Log top 3 matches
-          console.log('✅ Top matches:', transformedUniversities.slice(0, 3).map(u => u.name));
-        }
-      } else {
+      const data = await response.json();
+      
+      if (!data.success || !data.data || !data.data.universities) {
         throw new Error('Invalid response format');
+      }
+
+      // Transform universities
+      const validUniversities = data.data.universities
+        .map(transformUniversity)
+        .filter((uni: University) => uni.name);
+
+      console.log(`✅ Successfully loaded ${validUniversities.length} universities`);
+
+      if (validUniversities.length === 0) {
+        setError(`Found matches but couldn't load university data. Please try again.`);
+        setUniversities([]);
+      } else {
+        setUniversities(validUniversities);
+        setError(null);
+        
+        // Log top matches
+        console.log('✅ Top matches:', validUniversities.slice(0, 3).map((u: University) => u.name));
       }
     } catch (err) {
       console.error('❌ Error searching universities:', err);
@@ -386,7 +405,7 @@ function BrowseUniversities() {
       setLoading(false);
       setCurrentPage(1);
     }
-  }, [transformUniversity]);
+  }, [collegeFuse, transformUniversity]);
 
   // Load universities on mount and when filters change
   useEffect(() => {

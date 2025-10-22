@@ -123,6 +123,33 @@ function UniversityProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Roadmap state
+  type StudentProfile = {
+    id: string;
+    name: string;
+    major: string;
+    gpa: number;
+    sat?: number;
+    act?: number;
+    activities: string[];
+    awards: string[];
+    essays: string[];
+    [key: string]: unknown;
+  };
+
+  const [roadmapData, setRoadmapData] = useState<{
+    students: Array<StudentProfile>;
+    generated?: boolean;
+    university?: {
+      name: string;
+      requirements: {
+        [key: string]: unknown;
+      };
+    };
+  } | null>(null);
+  const [roadmapLoading, setRoadmapLoading] = useState(false);
+  const [roadmapError, setRoadmapError] = useState<string | null>(null);
+
   // Fetch university data from API
   useEffect(() => {
     const fetchUniversity = async () => {
@@ -249,6 +276,62 @@ function UniversityProfile() {
 
     fetchUniversity();
   }, [universityId]);
+
+  // Fetch roadmap data when roadmap tab is selected
+  useEffect(() => {
+    const fetchRoadmapData = async () => {
+      if (activeTab === 'roadmap' && universityId) {
+        setRoadmapLoading(true);
+        setRoadmapError(null);
+
+        try {
+          const user = auth.currentUser;
+
+          if (!user) {
+            throw new Error('Please sign in to access university roadmaps');
+          }
+
+          const token = await user.getIdToken();
+          if (!token) {
+            throw new Error('Authentication token not available');
+          }
+
+          const response = await fetch(
+            `https://fliq-backend-bxhr.onrender.com/api/university/${universityId}/roadmap`,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            if (response.status === 403) {
+              throw new Error(data.message || 'University roadmaps require a paid subscription');
+            }
+            throw new Error(data.message || 'Failed to load university roadmap');
+          }
+
+          if (data.success) {
+            setRoadmapData(data.data);
+            console.log('✅ Roadmap data loaded:', data.data);
+          } else {
+            throw new Error(data.message || 'Failed to load roadmap data');
+          }
+        } catch (err: unknown) {
+          console.error('Error fetching roadmap:', err);
+          setRoadmapError(err instanceof Error ? err.message : 'Failed to load roadmap');
+        } finally {
+          setRoadmapLoading(false);
+        }
+      }
+    };
+
+    fetchRoadmapData();
+  }, [activeTab, universityId]);
 
   if (loading) {
     return (
@@ -420,7 +503,7 @@ function UniversityProfile() {
                       </div>
 
                       {/* Bottom Section - Bar Chart and Quote */}
-                      <div className="flex flex-1 justify-between gap-[290px]">
+                      <div className="flex flex-1 justify-between gap-6">
                         {/* Bar Chart */}
                         <div className="flex flex-col w-[236px] gap-[12px]">
                           <p className='text-light-text dark:text-dark-text pb-10'>Estimated Fit Breakdown:</p>
@@ -470,8 +553,8 @@ function UniversityProfile() {
                         </div>
 
                         {/* Quote Section */}
-                        <div className="flex-1">
-                          <div className="h-full w-[350px] py-4 px-6 flex flex-col justify-between border border-black bg-light-bg dark:bg-dark-tertiary" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                        <div className="flex-1 max-w-[350px]">
+                          <div className="h-full w-full py-4 px-6 flex flex-col justify-between border border-black bg-light-bg dark:bg-dark-tertiary" style={{ boxShadow: '2px 2px 0 0 #000' }}>
                             <p className="text-light-text dark:text-dark-text text-right font-outfit text-base font-normal leading-[140%]">
                               &quot;{university.quote}&quot;
                             </p>
@@ -739,14 +822,59 @@ function UniversityProfile() {
 
               {activeTab === 'roadmap' && (
                 <div className="p-4 sm:p-6 lg:p-8">
-                  <ReadinessRing />
-                  <CaseStudyCard />
-                  <AcademicsSection />
-                  <TestScoresSection />
-                  <TimelineSection />
-                  <ExtracurricularsSection />
-                  <ScholarshipsAwardsSection />
-                  <ProofBankSection />
+                  {roadmapLoading && (
+                    <div className="flex items-center justify-center py-20">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF9169] mx-auto mb-4"></div>
+                        <p className="text-light-text dark:text-dark-text">Loading university roadmap...</p>
+                        <p className="text-sm text-light-p dark:text-dark-text mt-2">
+                          {roadmapData?.generated ? 'Generating student profiles...' : 'Preparing roadmap data...'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {roadmapError && (
+                    <div className="bg-red-50 border border-red-200 rounded p-6 mb-8">
+                      <div className="flex items-center mb-4">
+                        <svg className="w-6 h-6 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <h3 className="text-red-800 font-semibold">Access Required</h3>
+                      </div>
+                      <p className="text-red-700 mb-4">{roadmapError}</p>
+                      <button
+                        onClick={() => window.location.href = '/subscription'}
+                        className="bg-[#FF9169] text-white px-6 py-2 rounded border border-black hover:bg-black hover:text-[#FF9169] transition-colors"
+                        style={{ boxShadow: '2px 2px 0 0 #000' }}
+                      >
+                        Upgrade to Access Roadmaps
+                      </button>
+                    </div>
+                  )}
+
+                  {roadmapData && !roadmapLoading && (
+                    <div>
+                      {/* Student Profiles Section */}
+                      {/* Original Roadmap Components */}
+                      <ReadinessRing />
+                      <CaseStudyCard />
+                      <AcademicsSection />
+                      <TestScoresSection />
+                      <TimelineSection />
+                      <ExtracurricularsSection />
+                      <ScholarshipsAwardsSection />
+                      <ProofBankSection students={roadmapData.students || []} />
+                    </div>
+                  )}
+
+                  {!roadmapLoading && !roadmapError && !roadmapData && (
+                    <div className="text-center py-20">
+                      <p className="text-light-text dark:text-dark-text">
+                        Click the roadmap tab to load university roadmap data
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
