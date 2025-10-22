@@ -283,7 +283,7 @@ function UniversityProfile() {
           }
 
           const response = await fetch(
-            `https://fliq-backend-bxhr.onrender.com/api/university/${universityId}/roadmap`,
+            `https://fliq-backend-bxhr.onrender.com/api/university/${universityId}/roadmap?regenerate=true`,
             {
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -296,7 +296,11 @@ function UniversityProfile() {
 
           if (!response.ok) {
             if (response.status === 403) {
-              throw new Error(data.message || 'University roadmaps require a paid subscription');
+              // Check if it's a credit issue
+              if (data.message && data.message.includes('credit')) {
+                throw new Error(data.message);
+              }
+              throw new Error('You need 10 credits to access this university roadmap');
             }
             throw new Error(data.message || 'Failed to load university roadmap');
           }
@@ -930,21 +934,30 @@ function UniversityProfile() {
                 )}
 
                 {roadmapError && (
-                  <div className="bg-red-50 border border-red-200 rounded p-6 mb-8">
+                  <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded p-6 mb-8">
                     <div className="flex items-center mb-4">
-                      <svg className="w-6 h-6 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <svg className="w-6 h-6 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <h3 className="text-red-800 font-semibold">Access Required</h3>
+                      <h3 className="text-orange-800 dark:text-orange-300 font-semibold">Credits Required</h3>
                     </div>
-                    <p className="text-red-700 mb-4">{roadmapError}</p>
-                    <button
-                      onClick={() => window.location.href = '/subscription'}
-                      className="bg-[#FF9169] text-white px-6 py-2 rounded border border-black hover:bg-black hover:text-[#FF9169] transition-colors"
-                      style={{ boxShadow: '2px 2px 0 0 #000' }}
-                    >
-                      Upgrade to Access Roadmaps
-                    </button>
+                    <p className="text-orange-700 dark:text-orange-400 mb-4">{roadmapError}</p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => window.location.href = '/credits'}
+                        className="bg-[#FF9169] text-white px-6 py-2 rounded border border-black hover:bg-black hover:text-[#FF9169] transition-colors"
+                        style={{ boxShadow: '2px 2px 0 0 #000' }}
+                      >
+                        Get Credits
+                      </button>
+                      <button
+                        onClick={() => window.location.href = '/subscription'}
+                        className="bg-white dark:bg-dark-secondary text-black dark:text-white px-6 py-2 rounded border border-black hover:bg-gray-100 dark:hover:bg-dark-tertiary transition-colors"
+                        style={{ boxShadow: '2px 2px 0 0 #000' }}
+                      >
+                        View Plans
+                      </button>
+                    </div>
                   </div>
                 )}
 

@@ -79,19 +79,19 @@ const ReadinessRingSection = () => {
   );
 
   return (
-    <div style={{ margin: '56px' }}>
-      <div className="mb-8">
-        <h2 className="text-[32px] font-bold text-light-text dark:text-dark-text mb-4">Readiness Ring</h2>
-        <p className="text-light-p dark:text-dark-text text-base leading-relaxed max-w-2xl">
-          Based on 192 students who got into ASU with similar backgrounds this<br />
+    <div className="px-4 sm:px-8 lg:px-14 py-8 sm:py-10 lg:py-14">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl lg:text-[32px] font-bold text-light-text dark:text-dark-text mb-3 sm:mb-4">Readiness Ring</h2>
+        <p className="text-light-p dark:text-dark-text text-sm sm:text-base leading-relaxed max-w-2xl">
+          Based on 192 students who got into ASU with similar backgrounds this
           is how we think you match ASU
         </p>
       </div>
 
-      <div className="flex items-center justify-center gap-20">
-        {/* Average ASU Student Chart */}
+      <div className="hidden lg:flex items-center justify-center gap-20">
+        {/* Average ASU Student Chart - Desktop Only */}
         <div className="flex flex-col items-center text-black">
-          <div className="relative w-[400px] h-[400px] mb-4">
+          <div className="relative w-[350px] h-[350px] xl:w-[400px] xl:h-[400px] mb-4">
             <canvas 
               ref={canvasRef1} 
               width={400} 
@@ -113,9 +113,9 @@ const ReadinessRingSection = () => {
           VS
         </div>
 
-        {/* You Chart */}
+        {/* You Chart - Desktop Only */}
         <div className="flex flex-col items-center text-black">
-          <div className="relative w-[400px] h-[400px] mb-4">
+          <div className="relative w-[350px] h-[350px] xl:w-[400px] xl:h-[400px] mb-4">
             <canvas 
               ref={canvasRef2} 
               width={400} 
@@ -130,6 +130,35 @@ const ReadinessRingSection = () => {
             <Label text="Test Scores - 55%" position="top-12 left-1" />
           </div>
           <h3 className="text-xl font-bold text-light-p dark:text-dark-text">You</h3>
+        </div>
+      </div>
+
+      {/* Mobile View - Show text summary instead of charts */}
+      <div className="lg:hidden space-y-6">
+        <div className="bg-light-bg dark:bg-dark-tertiary border-2 border-black p-4" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+          <h3 className="text-lg font-bold text-light-text dark:text-dark-text mb-4">Average ASU Student</h3>
+          <div className="space-y-2">
+            {asuData.segments.map((segment, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <div className="w-4 h-4 border border-black" style={{ backgroundColor: segment.color }}></div>
+                <span className="text-sm text-light-p dark:text-dark-text">{segment.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="text-center text-lg font-bold text-light-text dark:text-dark-text">VS</div>
+
+        <div className="bg-light-bg dark:bg-dark-tertiary border-2 border-black p-4" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+          <h3 className="text-lg font-bold text-light-text dark:text-dark-text mb-4">You</h3>
+          <div className="space-y-2">
+            {youData.segments.map((segment, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <div className="w-4 h-4 border border-black" style={{ backgroundColor: segment.color }}></div>
+                <span className="text-sm text-light-p dark:text-dark-text">{segment.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

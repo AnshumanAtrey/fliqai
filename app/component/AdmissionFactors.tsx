@@ -41,36 +41,35 @@ const AdmissionFactors = () => {
     }));
 
     return (
-        <div className="w-[90%] mx-auto py-20 border-b-[1px] border-light-text dark:border-dark-text">
-            <h2 className="text-2xl font-bold text-light-text dark:text-dark-text text-[32px] mb-10 mt-4">What Matters For Admission</h2>
+        <div className="w-full px-4 sm:w-[90%] mx-auto py-10 sm:py-20 border-b-[1px] border-light-text dark:border-dark-text">
+            <h2 className="text-xl sm:text-2xl lg:text-[32px] font-bold text-light-text dark:text-dark-text mb-6 sm:mb-10 mt-4">What Matters For Admission</h2>
 
-            <div className="border-[1px] bg-light-bg dark:bg-dark-tertiary border-black p-6">
-                <div className="space-y-6">
+            <div className="border-[1px] bg-light-bg dark:bg-dark-tertiary border-black p-4 sm:p-6">
+                <div className="space-y-4 sm:space-y-6">
                     {factors.map((factor, index) => (
-                        <div key={index} className="flex items-center gap-6">
-                            {/* Factor Name - Left Column */}
-                            <div className="w-1/3 text-light-p dark:text-dark-text text-[18px] font-medium">
+                        <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+                            {/* Factor Name */}
+                            <div className="sm:w-1/3 text-light-p dark:text-dark-text text-sm sm:text-base lg:text-[18px] font-medium">
                                 {factor.name}
                             </div>
 
-                            {/* Bar Graph - Middle Column */}
-                            <div className="relative flex flex-row gap-6 items-center" style={{ width: '50%', minWidth: '250px' }}>
+                            {/* Bar Graph and Level */}
+                            <div className="flex-1 flex flex-col sm:flex-row gap-2 sm:gap-6 items-start sm:items-center">
                                 <div
-                                    className="h-[50px] border-[1px] border-black overflow-hidden bg-light-bg dark:bg-dark-tertiary"
+                                    className="h-[40px] sm:h-[50px] border-[1px] border-black overflow-hidden bg-light-bg dark:bg-dark-tertiary"
                                     style={{
                                         width: factor.width,
                                         boxShadow: '2px 2px 0 0 #000',
                                         backgroundColor: factor.color,
-                                        minWidth: '30px' // Ensure very small bars are still visible
+                                        minWidth: '30px',
+                                        maxWidth: '100%'
                                     }}
                                 ></div>
-                                {/* Importance Level - Right Column */}
-                                <div className="w-1/4 text-light-text dark:text-dark-text font-bold text-sm">
+                                {/* Importance Level */}
+                                <div className="text-light-text dark:text-dark-text font-bold text-xs sm:text-sm whitespace-nowrap">
                                     {factor.level}
                                 </div>
                             </div>
-
-
                         </div>
                     ))}
                 </div>

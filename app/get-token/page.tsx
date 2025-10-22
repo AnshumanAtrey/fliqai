@@ -93,7 +93,7 @@ export default function GetTokenPage() {
                 </p>
                 <div className="bg-gray-900 text-green-400 p-4 rounded overflow-x-auto">
                   <pre className="text-sm">
-{`curl -X POST http://localhost:3001/api/essay/analyze \\
+{`curl -X POST https://fliq-backend-bxhr.onrender.com/api/essay/analyze \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer ${token.substring(0, 50)}..." \\
   -d '{

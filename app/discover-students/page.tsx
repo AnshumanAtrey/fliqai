@@ -21,6 +21,8 @@ import {
 interface Student {
   id: number;
   name: string;
+  university?: string;
+  graduationYear?: string;
   stats: string;
   description: string;
   background: string;
@@ -176,7 +178,7 @@ function DiscoverStudentsPage() {
     } finally {
       setLoading(false);
     }
-  }, [user, currentPage]);
+  }, [user, currentPage, searchQuery, refreshToken]);
 
   useEffect(() => {
     fetchStudentsData();
@@ -236,10 +238,9 @@ function DiscoverStudentsPage() {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setCurrentPage(1);
+    // fetchStudentsData will be triggered by useEffect when searchQuery changes
 
-    if (user) {
-      fetchStudentsData();
-    } else {
+    if (!user) {
       // Fallback to local filtering for non-authenticated users
       if (!query.trim()) {
         setStudents(fallbackStudents);

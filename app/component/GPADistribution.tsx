@@ -70,11 +70,12 @@ export const GPADistribution = () => {
   );
 
   return (
-    <div className="w-[90%] mx-auto py-10" style={{ borderBottom: '1px solid black' }}>
-      <h2 className="font-bold text-light-text dark:text-dark-text text-[32px] mb-10 mt-4">Grade Point Average Of Enrolled Freshmen</h2>
+    <div className="w-full px-4 sm:w-[90%] mx-auto py-10" style={{ borderBottom: '1px solid black' }}>
+      <h2 className="font-bold text-light-text dark:text-dark-text text-xl sm:text-2xl lg:text-[32px] mb-6 sm:mb-10 mt-4">Grade Point Average Of Enrolled Freshmen</h2>
       
-      <div className="flex items-center justify-center gap-20">
-        <div className="flex flex-col items-center text-light-text dark:text-dark-text">
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-20">
+        {/* Chart Section - Hidden on mobile, shown on desktop */}
+        <div className="hidden lg:flex flex-col items-center text-light-text dark:text-dark-text">
           <div className="relative w-[400px] h-[400px] mb-4">
             <canvas 
               ref={canvasRef} 
@@ -83,7 +84,7 @@ export const GPADistribution = () => {
               className="w-full h-full"
             ></canvas>
             
-            {/* Labels for ASU Student */}
+            {/* Labels for chart */}
             <Label text="4.00 GPA & Above" position="top-5 right-[45px]" />
             <Label text="3.75-3.99 GPA" position="top-20 right-2" />
             <Label text="3.50-3.74 GPA" position="bottom-20 right-1" />
@@ -94,20 +95,20 @@ export const GPADistribution = () => {
         </div>
 
         
-        {/* Right Section - Legend Card */}
-        <div className="w-full md:w-2/5">
-          <div className="border-[1px] border-black p-6 bg-light-bg dark:bg-dark-tertiary" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-            <div className="space-y-4">
+        {/* Legend Card - Full width on mobile, 2/5 on desktop */}
+        <div className="w-full lg:w-2/5">
+          <div className="border-[1px] border-black p-4 sm:p-6 bg-light-bg dark:bg-dark-tertiary" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+            <div className="space-y-3 sm:space-y-4">
               {gpaData.map((item, index) => (
-                <div key={index} className="flex items-center gap-4">
+                <div key={index} className="flex items-center gap-3 sm:gap-4">
                   <div 
-                    className="w-6 h-6 border-[1px] border-black flex-shrink-0"
+                    className="w-5 h-5 sm:w-6 sm:h-6 border-[1px] border-black flex-shrink-0"
                     style={{ backgroundColor: item.color }}
                   ></div>
-                  <div className="flex-1 text-light-p dark:text-dark-text font-medium text-[20px]">
+                  <div className="flex-1 text-light-p dark:text-dark-text font-medium text-sm sm:text-base lg:text-[20px]">
                     {item.label}
                   </div>
-                  <div className="text-light-text dark:text-dark-text font-bold">
+                  <div className="text-light-text dark:text-dark-text font-bold text-sm sm:text-base">
                     {item.value}%
                   </div>
                 </div>

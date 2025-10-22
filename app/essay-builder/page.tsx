@@ -8,6 +8,7 @@ import { HeaderSection } from "./components/HeaderSection";
 import { PersonalityTraitsSection } from "./components/PersonalityTraitsSection";
 import { StrengthsGapsSection } from "./components/StrengthsGapsSection";
 import { ActionableSuggestionsSection } from "./components/ActionableSuggestionsSection";
+import { StudentProfilesSection } from "./components/StudentProfilesSection";
 import Header from '../component/header';
 import { useAuth } from '../../lib/hooks/useAuth';
 import { withAuthProtection } from '@/lib/hooks/useAuthProtection';
@@ -76,7 +77,22 @@ const EssayBuilderPage = () => {
       }
 
       const result = await response.json();
+      console.log('📊 API Response:', result);
+      
       if (result.success && result.data) {
+        // Ensure essayStyle has the correct structure
+        if (result.data.essayStyle && !result.data.essayStyle.segments) {
+          console.warn('⚠️ essayStyle missing segments, using fallback structure');
+          result.data.essayStyle = {
+            segments: [
+              { label: "Personal", value: 35, color: "#FF6B35" },
+              { label: "Creative", value: 25, color: "#F7931E" },
+              { label: "Academics", value: 10, color: "#FF9269" },
+              { label: "Professional", value: 30, color: "#FFD23F" }
+            ]
+          };
+        }
+        console.log('✅ Setting analysis data:', result.data);
         setAnalysisData(result.data);
       } else {
         throw new Error('Invalid response format');
@@ -156,9 +172,8 @@ const EssayBuilderPage = () => {
                     />
 
                     {/* Essay Style Section - Dynamic Donut Chart */}
-                    <div className="mt-16 sm:mt-20 w-full">
-                      <EssayStyleSection
-                        essayData={analysisData ? {
+                    <EssayStyleSection
+                        essayData={analysisData?.essayStyle?.segments ? {
                           narrative: analysisData.essayStyle.segments.find(s => s.label.toLowerCase().includes('narrative') || s.label.toLowerCase().includes('personal'))?.value || 0,
                           reflection: analysisData.essayStyle.segments.find(s => s.label.toLowerCase().includes('reflection') && !s.label.toLowerCase().includes('narrative'))?.value || 0,
                           impact: analysisData.essayStyle.segments.find(s => s.label.toLowerCase().includes('impact'))?.value || 0,
@@ -166,7 +181,13 @@ const EssayBuilderPage = () => {
                           voice: analysisData.essayStyle.segments.find(s => s.label.toLowerCase().includes('voice') || s.label.toLowerCase().includes('style') || s.label.toLowerCase().includes('creative') || s.label.toLowerCase().includes('professional'))?.value || 0
                         } : undefined}
                       />
-                    </div>
+
+                    {/* Student Profiles Section - Only show after analysis is complete */}
+                    {analysisData && !isAnalyzing && (
+                      <div className="mt-16 sm:mt-20 w-full">
+                        <StudentProfilesSection />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

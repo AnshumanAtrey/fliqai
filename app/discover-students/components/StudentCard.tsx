@@ -3,6 +3,8 @@ import Image from 'next/image';
 interface Student {
   id: number;
   name: string;
+  university?: string;
+  graduationYear?: string;
   stats: string;
   description: string;
   background: string;
@@ -44,9 +46,16 @@ export function StudentCard({ student, onStudentClick }: StudentCardProps) {
           {/* Right Side - Student Info */}
           <div className="flex-1">
             {/* Student Name */}
-            <h3 className="text-light-text dark:text-dark-text font-outfit text-xl font-bold leading-tight mb-2 line-clamp-2" title={student.name}>
+            <h3 className="text-light-text dark:text-dark-text font-outfit text-xl font-bold leading-tight mb-1 line-clamp-2" title={student.name}>
               {student.name}
             </h3>
+            
+            {/* University and Year */}
+            {student.university && (
+              <p className="text-light-text dark:text-dark-text font-outfit text-sm font-bold mb-2">
+                {student.university} {student.graduationYear && `'${student.graduationYear.slice(-2)}`}
+              </p>
+            )}
             
             {/* Stats */}
             <p className="text-light-text dark:text-dark-text font-outfit text-xs font-normal leading-normal mb-2">
@@ -148,9 +157,16 @@ export function StudentCard({ student, onStudentClick }: StudentCardProps) {
             {/* Name and Stats */}
             <div className="flex-1">
               {/* Student Name */}
-              <h3 className="text-light-text dark:text-dark-text font-outfit text-xl lg:text-2xl font-bold leading-tight mb-2" title={student.name}>
+              <h3 className="text-light-text dark:text-dark-text font-outfit text-xl lg:text-2xl font-bold leading-tight mb-1" title={student.name}>
                 {student.name}
               </h3>
+              
+              {/* University and Year */}
+              {student.university && (
+                <p className="text-light-text dark:text-dark-text font-outfit text-base lg:text-lg font-bold mb-2">
+                  {student.university} {student.graduationYear && `'${student.graduationYear.slice(-2)}`}
+                </p>
+              )}
               
               {/* Stats */}
               <p className="text-light-text dark:text-dark-text font-outfit text-sm lg:text-base font-normal leading-normal">

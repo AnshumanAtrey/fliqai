@@ -191,24 +191,24 @@ export const EssayStyleSection = ({ essayData }: EssayStyleSectionProps) => {
   };
 
   return (
-    <div className="w-full flex flex-col gap-[8px] items-start flex-nowrap relative">
-      {/* Title and Description - Fixed to separate lines */}
-      <div className="flex flex-col gap-[8px] items-start self-stretch">
-        <span className="font-['Outfit'] text-[24px] font-semibold leading-[30px] text-light-text dark:text-dark-text">
+    <>
+      {/* Title and Description - Match other sections */}
+      <div className="flex flex-col gap-2 w-full mt-16 sm:mt-20">
+        <h2 className="font-['Outfit'] text-xl sm:text-2xl font-semibold leading-tight text-light-text dark:text-dark-text">
           Essay Style
-        </span>
-        <span className="font-['Outfit'] text-[16px] font-normal leading-[24px] text-light-p dark:text-dark-text">
+        </h2>
+        <p className="font-['Outfit'] text-sm sm:text-base font-normal leading-relaxed text-light-p dark:text-dark-text">
           A graphical analysis of the style of your current essay.
-        </span>
+        </p>
       </div>
       
       {/* Conditional rendering based on data availability */}
       {!hasData ? (
-        /* Placeholder when no data */
-        <div className="w-full mt-6 mb-6 border-2 border-black dark:border-dark-text bg-light-bg dark:bg-dark-tertiary p-12 flex items-center justify-center" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-          <p className="text-center text-light-p dark:text-dark-text font-outfit text-base">
+        // Placeholder when no data - Match other sections
+        <div className="flex justify-center items-center w-full h-24 sm:h-32 mt-6 bg-light-secondary dark:bg-dark-tertiary border border-black dark:border-dark-text">
+          <span className="font-['Outfit'] text-sm sm:text-base text-light-p dark:text-dark-text text-center px-4">
             Submit your essay to see essay style
-          </p>
+          </span>
         </div>
       ) : (
         <>
@@ -244,6 +244,6 @@ export const EssayStyleSection = ({ essayData }: EssayStyleSectionProps) => {
           </div>
         </>
       )}
-    </div>
+    </>
   );
 };

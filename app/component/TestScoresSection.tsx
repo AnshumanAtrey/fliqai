@@ -37,14 +37,14 @@ export const TestScoresSection = () => {
             </div>
             
             {testScores.map((test, index) => (
-              <div key={index} className="flex justify-between items-center py-4 ">
-                <div className="flex items-center gap-[200px] text-light-text dark:text-dark-text">
-                  <span className={`text-2xl font-bold ${getScoreColor(test.avgScore)}text-light-text dark:text-dark-text`}>
+              <div key={index} className="flex justify-between items-center py-3 sm:py-4">
+                <div className="flex items-center gap-4 sm:gap-8 md:gap-16 lg:gap-[200px] text-light-text dark:text-dark-text">
+                  <span className={`text-xl sm:text-2xl font-bold ${getScoreColor(test.avgScore)}text-light-text dark:text-dark-text flex-shrink-0`}>
                     {getScoreLetter(test.avgScore)}
                   </span>
-                  <span className="text-lg font-medium text-light-p dark:text-dark-text">{test.subject}</span>
+                  <span className="text-sm sm:text-base lg:text-lg font-medium text-light-p dark:text-dark-text">{test.subject}</span>
                 </div>
-                <span className={`text-2xl font-bold ${getScoreColor(test.yourScore)}`}>
+                <span className={`text-xl sm:text-2xl font-bold ${getScoreColor(test.yourScore)} flex-shrink-0`}>
                   {getScoreLetter(test.yourScore)}
                 </span>
               </div>
