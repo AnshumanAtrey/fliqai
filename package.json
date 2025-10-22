@@ -19,6 +19,7 @@
     "chart.js": "^4.5.0",
     "firebase": "^12.3.0",
     "framer-motion": "^12.23.12",
+    "fuse.js": "^7.1.0",
     "lucide-react": "^0.543.0",
     "next": "15.5.0",
     "react": "19.1.0",

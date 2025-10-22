@@ -13,6 +13,7 @@ interface University {
     author?: string;
     authorImage?: string;
     chartData?: number[];
+    overall_match?: number;
 }
 
 interface UniversityCardProps {
@@ -31,7 +32,9 @@ export function UniversityCard({ university, onUniversityClick }: UniversityCard
                     <div className="flex-1">
                         {/* Match Percentage Badge */}
                         <div className="inline-flex py-1 px-3 justify-center items-center gap-2.5 border border-black bg-white mb-3" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                            <span className="text-light-text font-outfit text-sm font-normal leading-normal">72% Overall Match</span>
+                            <span className="text-light-text font-outfit text-sm font-normal leading-normal">
+                                {university.overall_match ? `${Math.round(university.overall_match)}% Overall Match` : '72% Overall Match'}
+                            </span>
                         </div>
 
                         {/* University Name - Option 1: Limited to 2 lines with ellipsis */}
@@ -149,7 +152,9 @@ export function UniversityCard({ university, onUniversityClick }: UniversityCard
                     </div>
                     {/* Match Percentage Badge - Inside Image */}
                     <div className="absolute bottom-4 left-4 inline-flex py-2 px-4 justify-center items-center gap-2.5 border border-black bg-white" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                        <span className="text-light-text font-outfit text-sm lg:text-base font-normal leading-normal">72% Overall Match</span>
+                        <span className="text-light-text font-outfit text-sm lg:text-base font-normal leading-normal">
+                            {university.overall_match ? `${Math.round(university.overall_match)}% Overall Match` : '72% Overall Match'}
+                        </span>
                     </div>
                 </div>
 

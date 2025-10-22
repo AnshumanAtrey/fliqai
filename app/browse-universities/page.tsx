@@ -1,9 +1,10 @@
 "use client";
-import { useState, useEffect, useCallback } from 'react';
+
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from '../component/header';
-import { DotPatternBackground } from "../component/DotPatternBackground";
 import { withAuthProtection } from '@/lib/hooks/useAuthProtection';
+import { useAuth } from '@/lib/hooks/useAuth';
+import Fuse from 'fuse.js';
 
 // Import components
 import { HeroSection } from './components/HeroSection';
@@ -12,6 +13,8 @@ import { FilterButtons } from './components/FilterButtons';
 import { FilterModals } from './components/FilterModals';
 import { ResultsHeader } from './components/ResultsHeader';
 import { UniversityCard } from './components/UniversityCard';
+import DotPatternBackground from '@/app/component/DotPatternBackground';
+import Header from '@/app/component/header';
 
 // Define interface based on backend API structure
 interface University {
@@ -46,13 +49,23 @@ interface University {
   author?: string;
   authorImage?: string;
   chartData?: number[];
+  overall_match?: number;
+  category_scores?: {
+    academics: number;
+    finances: number;
+    location: number;
+    culture: number;
+  };
 }
 
 function BrowseUniversities() {
   const router = useRouter();
+  const { user } = useAuth();
   const [universities, setUniversities] = useState<University[]>([]);
+  const [allUniversities, setAllUniversities] = useState<University[]>([]); // Store ALL universities for search
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [useRecommendations, setUseRecommendations] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   // const [showFilters, setShowFilters] = useState(false);
@@ -60,6 +73,15 @@ function BrowseUniversities() {
   const [showSortFilter, setShowSortFilter] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const universitiesPerPage = 5;
+
+  // Initialize Fuse.js for fuzzy search
+  const fuse = useMemo(() => new Fuse(allUniversities, {
+    keys: ['name', 'location'],
+    threshold: 0.3, // 0.0 = perfect match, 1.0 = match anything
+    minMatchCharLength: 2,
+    includeScore: true,
+    ignoreLocation: true,
+  }), [allUniversities]);
 
   // Transform API university data to match frontend structure
   const transformUniversity = (uni: { id: string; country: 'US' | 'UK'; pages?: Record<string, unknown>; location?: string;[key: string]: unknown }): University => {
@@ -147,23 +169,124 @@ function BrowseUniversities() {
     return transformed;
   };
 
-  // Fetch universities from API
+  // Fetch personalized recommendations
+  const fetchRecommendations = useCallback(async () => {
+    if (!user) {
+      console.log('❌ No user found, skipping recommendations');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Get user token
+      let token = localStorage.getItem('token');
+      if (!token && user && 'getIdToken' in user && typeof user.getIdToken === 'function') {
+        token = await user.getIdToken();
+        if (token) {
+          localStorage.setItem('token', token);
+        }
+      }
+
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      console.log('🎯 Fetching personalized recommendations...');
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
+      const response = await fetch(`${backendUrl}/api/recommendations/final`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 400) {
+          const data = await response.json();
+          if (data.profileCompleted === false) {
+            setError('Please complete your profile to get personalized recommendations');
+            setUseRecommendations(false);
+            fetchUniversities(); // Fallback to generic list
+            return;
+          }
+        }
+        throw new Error('Failed to fetch recommendations');
+      }
+
+      const data = await response.json();
+      console.log('✅ Recommendations received:', data);
+      console.log('📊 First recommendation:', data.data?.recommendations?.[0]);
+
+      if (data.success && data.data && data.data.recommendations) {
+        const recommendations = data.data.recommendations.map((rec: {
+          id: string;
+          college_name: string;
+          country: string;
+          overall_match: number;
+          category_scores: { academics: number; finances: number; location: number; culture: number };
+          chartData: number[];
+          name?: string;
+          location?: string;
+          ranking?: string;
+          image?: string;
+          description?: string;
+          quote?: string;
+          author?: string;
+          authorImage?: string;
+        }) => ({
+          id: rec.id,
+          country: rec.country as 'US' | 'UK',
+          name: rec.name || rec.college_name,
+          location: rec.location || `${rec.country}`,
+          ranking: rec.ranking || '#1 in Innovation',
+          image: rec.image || '/college_profile.png',
+          description: rec.description || 'A world-class institution.',
+          quote: rec.quote || 'An amazing educational experience.',
+          author: rec.author || 'Student, Class of 2024',
+          authorImage: rec.authorImage || '/Ellipse 2.png',
+          overall_match: rec.overall_match,
+          category_scores: rec.category_scores,
+          chartData: rec.chartData || [
+            rec.category_scores.academics,
+            rec.category_scores.finances,
+            rec.category_scores.location,
+            rec.category_scores.culture
+          ]
+        }));
+
+        setUniversities(recommendations);
+        setAllUniversities(recommendations); // Store for search
+        console.log('✅ Set', recommendations.length, 'recommendations');
+        console.log('📊 First mapped university:', recommendations[0]);
+      } else {
+        throw new Error('No recommendations found');
+      }
+    } catch (err) {
+      console.error('❌ Error fetching recommendations:', err);
+      setError('Failed to fetch recommendations. Showing general universities.');
+      setUseRecommendations(false);
+      // Fallback will be handled by useEffect
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  // Fetch universities from API (fallback)
   const fetchUniversities = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
+      // Fetch ALL universities (no limit) for client-side search
       const queryParams = new URLSearchParams({
-        limit: (universitiesPerPage * 2).toString(), // Get more for better filtering
+        limit: '1000', // Get all universities
         offset: '0'
       });
 
       if (selectedCountry) {
         queryParams.append('country', selectedCountry);
-      }
-
-      if (searchTerm) {
-        queryParams.append('search', searchTerm);
       }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com'}/api/university?${queryParams.toString()}`);
@@ -180,6 +303,10 @@ function BrowseUniversities() {
           .map(transformUniversity)
           .filter((uni: University) => uni.name); // Filter out universities without names
 
+        // Store ALL universities for search
+        setAllUniversities(transformedUniversities);
+        
+        // Display all universities initially
         setUniversities(transformedUniversities);
       } else {
         throw new Error(data.message || 'No universities found');
@@ -189,82 +316,89 @@ function BrowseUniversities() {
       setError('Failed to fetch universities. Please try again.');
       // Fallback to empty array
       setUniversities([]);
+      setAllUniversities([]);
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, selectedCountry]);
+  }, [selectedCountry]); // Removed searchTerm from dependencies
 
-  // Search universities by name
-  const searchUniversitiesByName = async (name: string) => {
+  // Search universities using dedicated backend search endpoint
+  const searchUniversitiesByName = useCallback(async (name: string) => {
+    console.log('🔍 Search called with:', name);
+    
     if (!name.trim()) {
-      fetchUniversities();
+      // If no search term, show current universities
+      if (allUniversities.length > 0) {
+        setUniversities(allUniversities);
+      }
+      setError(null);
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-
-      const queryParams = new URLSearchParams({ limit: '20' });
-      if (selectedCountry) {
-        queryParams.append('country', selectedCountry);
-      }
-
-      console.log('🔍 Searching for:', name);
       
-      // Use the /search/:term endpoint for better results
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com'}/api/university/search/${encodeURIComponent(name)}?${queryParams.toString()}`);
+      console.log('🔍 Searching entire database for:', name);
+      
+      // Use dedicated search endpoint that searches ALL universities
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com'}/api/search-universities`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query: name })
+      });
 
       const data = await response.json();
       console.log('📦 Search response:', data);
 
-      // Handle 404 or unsuccessful response
       if (!response.ok || !data.success) {
-        console.log('❌ Search failed:', data);
-        setError(data.error || data.message || 'No universities found matching your search.');
-        setUniversities([]);
-        return;
+        throw new Error(data.error || 'Search failed');
       }
 
-      // Handle different response formats
-      let universitiesArray = [];
-      if (data.data.universities) {
-        // Response format: { data: { universities: [...] } }
-        universitiesArray = data.data.universities;
-      } else if (Array.isArray(data.data)) {
-        // Response format: { data: [...] }
-        universitiesArray = data.data;
+      if (data.data && data.data.universities) {
+        const transformedUniversities = data.data.universities
+          .map(transformUniversity)
+          .filter((uni: University) => uni.name);
+
+        console.log(`✅ Found ${data.data.totalFound} matches (showing ${transformedUniversities.length})`);
+        console.log(`📊 Scanned ${data.data.totalScanned} universities`);
+
+        if (transformedUniversities.length === 0) {
+          setError(`No universities found matching "${name}". Try different spelling or keywords.`);
+          setUniversities([]);
+        } else {
+          setUniversities(transformedUniversities);
+          setError(null);
+          
+          // Log top 3 matches
+          console.log('✅ Top matches:', transformedUniversities.slice(0, 3).map(u => u.name));
+        }
       } else {
-        // Response format: { data: {...} } (single university)
-        universitiesArray = [data.data];
+        throw new Error('Invalid response format');
       }
-
-      console.log('📊 Found universities:', universitiesArray.length);
-
-      const transformedUniversities = universitiesArray
-        .map(transformUniversity)
-        .filter((uni: University) => uni.name);
-
-      console.log('✅ Transformed universities:', transformedUniversities.length);
-
-      if (transformedUniversities.length === 0) {
-        setError('No universities found matching your search.');
-      }
-
-      setUniversities(transformedUniversities);
     } catch (err) {
       console.error('❌ Error searching universities:', err);
       setError('Failed to search universities. Please try again.');
       setUniversities([]);
     } finally {
       setLoading(false);
+      setCurrentPage(1);
     }
-  };
+  }, [transformUniversity]);
 
   // Load universities on mount and when filters change
   useEffect(() => {
-    fetchUniversities();
-  }, [fetchUniversities]);
+    console.log('🔄 useEffect triggered:', { useRecommendations, hasUser: !!user });
+    if (useRecommendations && user) {
+      console.log('📊 Calling fetchRecommendations...');
+      fetchRecommendations();
+    } else {
+      console.log('📚 Calling fetchUniversities (fallback)...');
+      fetchUniversities();
+    }
+  }, [useRecommendations, user, fetchRecommendations, fetchUniversities]);
 
   // Handle search form submission
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -297,7 +431,7 @@ function BrowseUniversities() {
       <DotPatternBackground>
         {/* Header */}
         <Header />
-
+        
         {/* Main Content */}
         <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
           {/* Hero Section */}
