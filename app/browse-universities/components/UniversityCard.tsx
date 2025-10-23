@@ -175,8 +175,8 @@ export function UniversityCard({ university, onUniversityClick }: UniversityCard
             */}
 
                         {/* Location and Ranking */}
-                        <p className="text-light-text dark:text-dark-text font-outfit text-sm lg:text-base font-normal leading-normal mb-4">{university.location} • {university.ranking}</p>
-                        <p className="text-black dark:text-dark-text font-outfit text-base lg:text-lg font-normal leading-[150%] mb-3">{university.ranking}</p>
+                        <p className="text-light-text dark:text-dark-text font-outfit text-lg font-normal leading-[150%] mb-2">{university.location}</p>
+                        <p className="text-light-text dark:text-dark-text font-outfit text-lg font-normal leading-[150%] mb-3">{university.ranking}</p>
                     </div>
 
                     {/* Bar Chart Container - Aligned to bottom */}

@@ -143,21 +143,41 @@ function BrowseUniversities() {
     // Use university ID to deterministically select quote and author
     const quoteIndex = parseInt((uni.id || '0').replace(/[^\d]/g, '') || '0') % quotes.length;
 
+    // Calculate ranking from global_grade
+    let rankingText = isUS ? "#200+ in QS World University Rankings" : "#5 QS World Rankings";
+    const recommendationScores = (uni as unknown as { recommendation_scores?: { global_grade?: number } }).recommendation_scores;
+    if (recommendationScores?.global_grade) {
+      const Rcurrent = 500;
+      const Rmax = recommendationScores.global_grade;
+      const percentile = Math.round((Rcurrent / Rmax) * 100);
+      rankingText = `#${percentile} QS World Rankings`;
+    }
+
+    // Format location properly
+    let locationText = '';
+    if (isUS) {
+      const rawLocation = (campusLifeData as { quickStats?: { location?: string } }).quickStats?.location || (uni as { location?: string }).location || '';
+      // If location doesn't already include USA, add it
+      locationText = rawLocation.includes('USA') ? rawLocation : rawLocation ? `${rawLocation}, USA` : 'USA';
+    } else {
+      const rawLocation = (uni.pages?.About as { location?: string })?.location || (uni as { location?: string }).location || '';
+      // If location doesn't already include United Kingdom, add it
+      locationText = rawLocation.includes('United Kingdom') ? rawLocation : rawLocation ? `${rawLocation}, United Kingdom` : 'United Kingdom';
+    }
+
     const transformed: University = {
       id: uni.id as string,
       country: uni.country as 'US' | 'UK',
       pages: uni.pages,
       name: universityName,
-      location: isUS
-        ? (campusLifeData as { quickStats?: { location?: string } }).quickStats?.location || (uni as { location?: string }).location
-        : (uni.pages?.About as { location?: string })?.location || (uni as { location?: string }).location,
+      location: locationText,
       acceptanceRate: acceptanceRate + '%',
       description: isUS
         ? (overviewData as { description?: string }).description
         : (uni.pages?.About as { about?: string })?.about,
       // Add default values for UI
       image: "/college_profile.png",
-      ranking: isUS ? "#1 in Innovation" : "#5 QS World Rankings",
+      ranking: rankingText,
       quote: quotes[quoteIndex],
       author: authors[quoteIndex],
       authorImage: "/Ellipse 2.png",
@@ -238,26 +258,50 @@ function BrowseUniversities() {
           quote?: string;
           author?: string;
           authorImage?: string;
-        }) => ({
-          id: rec.id,
-          country: rec.country as 'US' | 'UK',
-          name: rec.name || rec.college_name,
-          location: rec.location || `${rec.country}`,
-          ranking: rec.ranking || '#1 in Innovation',
-          image: rec.image || '/college_profile.png',
-          description: rec.description || 'A world-class institution.',
-          quote: rec.quote || 'An amazing educational experience.',
-          author: rec.author || 'Student, Class of 2024',
-          authorImage: rec.authorImage || '/Ellipse 2.png',
-          overall_match: rec.overall_match,
-          category_scores: rec.category_scores,
-          chartData: rec.chartData || [
-            rec.category_scores.academics,
-            rec.category_scores.finances,
-            rec.category_scores.location,
-            rec.category_scores.culture
-          ]
-        }));
+          recommendation_scores?: { global_grade?: number };
+        }) => {
+          const isUS = rec.country === 'US';
+          
+          // Calculate ranking from global_grade
+          let rankingText = isUS ? "#200+ in QS World University Rankings" : "#5 QS World Rankings";
+          if (rec.recommendation_scores?.global_grade) {
+            const Rcurrent = 500;
+            const Rmax = rec.recommendation_scores.global_grade;
+            const percentile = Math.round((Rcurrent / Rmax) * 100);
+            rankingText = `#${percentile} QS World Rankings`;
+          }
+
+          // Format location properly
+          let locationText = rec.location || '';
+          if (!locationText) {
+            locationText = rec.country;
+          } else if (isUS && !locationText.includes('USA')) {
+            locationText = `${locationText}, USA`;
+          } else if (!isUS && !locationText.includes('United Kingdom')) {
+            locationText = `${locationText}, United Kingdom`;
+          }
+
+          return {
+            id: rec.id,
+            country: rec.country as 'US' | 'UK',
+            name: rec.name || rec.college_name,
+            location: locationText,
+            ranking: rankingText,
+            image: rec.image || '/college_profile.png',
+            description: rec.description || 'A world-class institution.',
+            quote: rec.quote || 'An amazing educational experience.',
+            author: rec.author || 'Student, Class of 2024',
+            authorImage: rec.authorImage || '/Ellipse 2.png',
+            overall_match: rec.overall_match,
+            category_scores: rec.category_scores,
+            chartData: rec.chartData || [
+              rec.category_scores.academics,
+              rec.category_scores.finances,
+              rec.category_scores.location,
+              rec.category_scores.culture
+            ]
+          };
+        });
 
         setUniversities(recommendations);
         setAllUniversities(recommendations); // Store for search

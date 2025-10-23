@@ -211,12 +211,21 @@ function UniversityProfile() {
             if (gradMatch) graduationRate = parseFloat(gradMatch[1]);
           }
 
+          // Calculate ranking from global_grade
+          let rankingText = "#5 QS World Rankings"; // Default
+          if (apiUniversity.recommendation_scores?.global_grade) {
+            const Rcurrent = 500;
+            const Rmax = apiUniversity.recommendation_scores.global_grade;
+            const percentile = Math.round((Rcurrent / Rmax) * 100);
+            rankingText = `#${percentile} QS World Rankings`;
+          }
+
           // Transform API data to match frontend interface
           const transformedUniversity: University = {
             id: parseInt(apiUniversity.id.replace(/[^\d]/g, '') || '1'),
             name: overviewData.collegeName || apiUniversity.pages?.About?.name || apiUniversity.name || "University",
             location: apiUniversity.location || apiUniversity.pages?.About?.location || overviewData.stats?.location || "Unknown Location",
-            ranking: "#5 QS World Rankings", // Default value - API doesn't have ranking
+            ranking: rankingText,
             image: "/college_profile.png", // Default image
             qsRank: "QS Overall Rank",
             quote: overviewData.description || "An excellent institution providing world-class education and opportunities.",
@@ -283,7 +292,7 @@ function UniversityProfile() {
           }
 
           const response = await fetch(
-            `https://fliq-backend-bxhr.onrender.com/api/university/${universityId}/roadmap?regenerate=true`,
+            `https://fliq-backend-bxhr.onrender.com/api/university/${universityId}/roadmap`,
             {
               headers: {
                 'Authorization': `Bearer ${token}`,

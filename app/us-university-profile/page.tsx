@@ -229,14 +229,23 @@ function UniversityProfile() {
             if (gradMatch) graduationRate = parseFloat(gradMatch[1]);
           }
 
+          // Calculate ranking from global_grade
+          let rankingText = "#200+ in QS World University Rankings"; // Default
+          if (apiUniversity.recommendation_scores?.global_grade) {
+            const Rcurrent = 500;
+            const Rmax = apiUniversity.recommendation_scores.global_grade;
+            const percentile = Math.round((Rcurrent / Rmax) * 100);
+            rankingText = `#${percentile} QS World Rankings`;
+          }
+
           // Transform API data for US universities
           const transformedUniversity: University = {
             id: parseInt(apiUniversity.id.replace(/[^\d]/g, '') || '1'),
             name: overviewData.collegeName || "University",
             location: campusLifeData.quickStats?.location || apiUniversity.location || "USA",
-            ranking: "#1 in Innovation", // Default ranking - API doesn't provide rankings
+            ranking: rankingText,
             image: "/Arizona-Profile.png", // Default image
-            qsRank: "#200+ in QS World University Rankings", // Default QS rank
+            qsRank: rankingText,
             quote: overviewData.description || "Innovation and excellence in everything we do.",
             author: "University President",
             authorImage: "/Profile-pic-2.jpg",
@@ -297,7 +306,7 @@ function UniversityProfile() {
           }
 
           const response = await fetch(
-            `https://fliq-backend-bxhr.onrender.com/api/university/${universityId}/roadmap?regenerate=true`,
+            `https://fliq-backend-bxhr.onrender.com/api/university/${universityId}/roadmap`,
             {
               headers: {
                 'Authorization': `Bearer ${token}`,
