@@ -175,8 +175,8 @@ function UniversityProfile() {
         if (!token) {
           throw new Error('Authentication required. Please login again.');
         }
-
-        const response = await fetch(`https://fliq-backend-bxhr.onrender.com/api/university/${universityId}`, {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
+        const response = await fetch(`${backendUrl}/api/university/${universityId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -304,9 +304,9 @@ function UniversityProfile() {
           if (!token) {
             throw new Error('Authentication token not available');
           }
-
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
           const response = await fetch(
-            `https://fliq-backend-bxhr.onrender.com/api/university/${universityId}/roadmap`,
+            `${backendUrl}/api/university/${universityId}/roadmap`,
             {
               headers: {
                 'Authorization': `Bearer ${token}`,
