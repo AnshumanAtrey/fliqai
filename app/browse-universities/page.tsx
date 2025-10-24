@@ -18,6 +18,7 @@ import Header from '@/app/component/header';
 
 // Import college search data
 import collegeSearchData from '@/college_search.json';
+import { University } from 'lucide-react';
 
 // Define interface based on backend API structure
 interface University {
@@ -173,24 +174,84 @@ function BrowseUniversities() {
       location: locationText,
       acceptanceRate: acceptanceRate + '%',
       description: (() => {
+        // Helper function to truncate long text for description (limit to ~200 characters for description)
+        const truncateText = (text: string, maxLength: number = 200) => {
+          if (text.length <= maxLength) return text;
+          const truncated = text.substring(0, maxLength);
+          const lastSpace = truncated.lastIndexOf(' ');
+          return lastSpace > 0 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
+        };
+
+        // Try to use About.about field first (for both US and UK)
+        const aboutData = uni.pages?.About as { about?: string; name?: string };
+        if (aboutData?.about) {
+          console.log('✅ Using About.about for description:', aboutData.about.substring(0, 50) + '...');
+          return truncateText(aboutData.about);
+        }
+
+        // For US universities, try overview description
+        if (isUS) {
+          const overview = overviewData as { description?: string; collegeName?: string };
+          if (overview?.description) {
+            console.log('✅ Using Overview.description for description:', overview.description.substring(0, 50) + '...');
+            return truncateText(overview.description);
+          }
+        }
+
+        // Fallback to generated descriptions
         let desc = '';
         if (isUS) {
-          // For US universities, try multiple fields
           const overview = overviewData as { description?: string; collegeName?: string };
-          desc = overview.description || 
-                 `${overview.collegeName || 'This university'} is a leading institution in the United States, known for its academic excellence and diverse student body.`;
+          desc = `${overview.collegeName || 'This university'} is a leading institution in the United States, known for its academic excellence and diverse student body.`;
         } else {
-          // For UK universities, try multiple fields
-          const aboutData = uni.pages?.About as { about?: string; name?: string };
-          desc = aboutData?.about || 
-                 `${aboutData?.name || 'This university'} is a prestigious institution in the United Kingdom, offering world-class education and research opportunities.`;
+          desc = `${aboutData?.name || 'This university'} is a prestigious institution in the United Kingdom, offering world-class education and research opportunities.`;
         }
+        console.log('⚠️ Using fallback description');
         return desc;
       })(),
       // Add default values for UI
       image: "/college_profile.png",
       ranking: rankingText,
-      quote: quotes[quoteIndex],
+      quote: (() => {
+        // Helper function to truncate long text for quote (limit to ~150 characters)
+        const truncateText = (text: string, maxLength: number = 150) => {
+          if (text.length <= maxLength) return text;
+          const truncated = text.substring(0, maxLength);
+          const lastSpace = truncated.lastIndexOf(' ');
+          return lastSpace > 0 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
+        };
+
+        // Use About.about field for quote, fallback to generated quotes
+        const aboutData = uni.pages?.About as { about?: string };
+        
+        // Debug logging
+        console.log('🔍 Browse Universities Quote Debug:', {
+          universityId: uni.id,
+          universityName,
+          isUS,
+          aboutData,
+          hasAbout: !!aboutData?.about,
+          aboutText: aboutData?.about?.substring(0, 100) + '...'
+        });
+        
+        if (aboutData?.about) {
+          console.log('✅ Using About.about for quote:', aboutData.about.substring(0, 50) + '...');
+          return truncateText(aboutData.about);
+        }
+
+        // For US universities, also try description field
+        if (isUS) {
+          const overview = overviewData as { description?: string };
+          if (overview?.description) {
+            console.log('✅ Using Overview.description for quote:', overview.description.substring(0, 50) + '...');
+            return truncateText(overview.description);
+          }
+        }
+
+        // Fallback to generated quotes
+        console.log('⚠️ Using fallback generated quote');
+        return quotes[quoteIndex];
+      })(),
       author: authors[quoteIndex],
       authorImage: "/Ellipse 2.png",
       chartData: [
