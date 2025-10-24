@@ -172,9 +172,21 @@ function BrowseUniversities() {
       name: universityName,
       location: locationText,
       acceptanceRate: acceptanceRate + '%',
-      description: isUS
-        ? (overviewData as { description?: string }).description
-        : (uni.pages?.About as { about?: string })?.about,
+      description: (() => {
+        let desc = '';
+        if (isUS) {
+          // For US universities, try multiple fields
+          const overview = overviewData as { description?: string; collegeName?: string };
+          desc = overview.description || 
+                 `${overview.collegeName || 'This university'} is a leading institution in the United States, known for its academic excellence and diverse student body.`;
+        } else {
+          // For UK universities, try multiple fields
+          const aboutData = uni.pages?.About as { about?: string; name?: string };
+          desc = aboutData?.about || 
+                 `${aboutData?.name || 'This university'} is a prestigious institution in the United Kingdom, offering world-class education and research opportunities.`;
+        }
+        return desc;
+      })(),
       // Add default values for UI
       image: "/college_profile.png",
       ranking: rankingText,

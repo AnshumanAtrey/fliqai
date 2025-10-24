@@ -108,31 +108,12 @@ export function UniversityCard({ university, onUniversityClick }: UniversityCard
                     })}
                 </div>
 
-                {/* Quote Section */}
+                {/* Description Section */}
                 <div className="border border-black bg-white dark:bg-dark-tertiary p-4" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                    <p className="text-light-text dark:text-dark-text font-outfit text-sm font-normal leading-[140%] mb-3">
-                        &quot;{university.quote}&quot;
-                    </p>
-
-                    <div className="w-full h-px bg-[#5D5237] mb-3"></div>
-
-                    {/* Author Info - Bigger photo, name and details on separate lines */}
-                    <div className="flex items-start gap-3">
-                        <Image
-                            src={university.authorImage || "/Ellipse 2.png"}
-                            alt={university.author || "Student"}
-                            width={32}
-                            height={32}
-                            className="w-8 h-8 rounded-full flex-shrink-0"
-                        />
-                        <div className="flex-1">
-                            <div className="text-light-text dark:text-dark-text font-outfit text-sm font-semibold leading-normal">
-                                {university.author?.split(',')[0] || 'Student Name'}
-                            </div>
-                            <div className="text-light-text dark:text-dark-text font-outfit text-xs font-normal leading-normal">
-                                {university.author?.split(',')[1]?.trim() || 'Class Details'}
-                            </div>
-                        </div>
+                    <div className="max-h-32 overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
+                        <p className="text-light-text dark:text-dark-text font-outfit text-sm font-normal leading-[140%] pr-2">
+                            {university.description}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -210,41 +191,27 @@ export function UniversityCard({ university, onUniversityClick }: UniversityCard
                     </div>
                 </div>
 
-                {/* Right - Quote Section */}
+                {/* Right - Description Section */}
                 <div className="flex flex-col w-[240px] lg:w-[280px]">
-                    <div className="inline-flex py-4 px-6 flex-col justify-between items-end gap-4 border border-black bg-white dark:bg-dark-tertiary flex-1" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                        <p className="text-light-text dark:text-dark-text text-right font-outfit text-sm lg:text-base font-normal leading-[140%]">
-                            &quot;{university.quote}&quot;
-                        </p>
-
-                        <div className="w-full">
-                            {/* Divider Line */}
-                            <div className="w-full h-px bg-[#5D5237] mb-4"></div>
-
-                            {/* Author Info */}
-                            <div className="flex items-center gap-3 self-end">
-                                <div className="flex items-center mt-3">
-                                    <Image
-                                        src={university.authorImage || "/Ellipse 2.png"}
-                                        alt={university.author || "Student"}
-                                        width={24}
-                                        height={24}
-                                        className="w-6 h-6 rounded-full mr-2"
-                                    />
-                                    <span className="text-light-text dark:text-dark-text font-outfit text-sm font-medium leading-normal">{university.author}</span>
-                                </div>
+                    <div className="inline-flex py-4 px-6 flex-col justify-between border border-black bg-white dark:bg-dark-tertiary flex-1" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                        {/* Scrollable Description */}
+                        <div className="flex-1 mb-4">
+                            <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
+                                <p className="text-light-text dark:text-dark-text font-outfit text-sm lg:text-base font-normal leading-[140%] pr-2">
+                                    {university.description || 'A prestigious institution known for academic excellence and innovation, offering world-class education and research opportunities to students from around the globe.'}
+                                </p>
                             </div>
+                        </div>
 
-                            {/* Find out more button */}
-                            <div className="mt-4 p-4">
-                                <button
-                                    onClick={() => onUniversityClick(university)}
-                                    className="w-full py-3 border border-black text-black font-outfit text-sm lg:text-base font-medium leading-normal transition-colors duration-200 bg-[#FF9169] hover:bg-[#ff7b4d]"
-                                    style={{ boxShadow: '4px 4px 0 0 #000' }}
-                                >
-                                    View Full Profile
-                                </button>
-                            </div>
+                        {/* Find out more button */}
+                        <div className="mt-auto">
+                            <button
+                                onClick={() => onUniversityClick(university)}
+                                className="w-full py-3 border border-black text-black font-outfit text-sm lg:text-base font-medium leading-normal transition-colors duration-200 bg-[#FF9169] hover:bg-[#ff7b4d]"
+                                style={{ boxShadow: '4px 4px 0 0 #000' }}
+                            >
+                                View Full Profile
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -21,6 +21,7 @@ import { DotPatternBackground } from '../component/DotPatternBackground';
 import { useAuth } from '../../lib/hooks/useAuth';
 import { withAuthProtection } from '@/lib/hooks/useAuthProtection';
 import { auth } from '../firebase/config';
+import { RoadmapLockedModal } from '../component/RoadmapLockedModal';
 
 type University = {
   id: number;
@@ -149,6 +150,89 @@ function UniversityProfile() {
   } | null>(null);
   const [roadmapLoading, setRoadmapLoading] = useState(false);
   const [roadmapError, setRoadmapError] = useState<string | null>(null);
+  
+  // Locking system state
+  const [isRoadmapLocked, setIsRoadmapLocked] = useState(true);
+  const [isUnlockingRoadmap, setIsUnlockingRoadmap] = useState(false);
+  const [userCredits, setUserCredits] = useState(0);
+
+  // Fetch user credits
+  const fetchUserCredits = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const token = await user.getIdToken();
+      if (!token) return;
+
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
+      const response = await fetch(`${backendUrl}/api/profile/credits`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setUserCredits(data.data.credits || 0);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch credits:', err);
+    }
+  };
+
+  // Unlock roadmap (deducts 10 credits)
+  const unlockRoadmap = async () => {
+    if (!universityId) return;
+
+    setIsUnlockingRoadmap(true);
+
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('Authentication required');
+      }
+
+      const token = await user.getIdToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      console.log('🔓 Unlocking roadmap for university:', universityId);
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
+      const response = await fetch(`${backendUrl}/api/university/${universityId}/roadmap`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Insufficient credits');
+        }
+        throw new Error(`Failed to unlock roadmap: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Roadmap Data received:', data);
+
+      if (data.success) {
+        setRoadmapData(data.data);
+        setIsRoadmapLocked(false); // Unlock the roadmap
+        await fetchUserCredits(); // Refresh credits
+      }
+    } catch (err: unknown) {
+      console.error('❌ Failed to unlock roadmap:', err);
+      alert(err instanceof Error ? err.message : 'Failed to unlock roadmap');
+    } finally {
+      setIsUnlockingRoadmap(false);
+    }
+  };
 
   // Fetch university data from API
   useEffect(() => {
@@ -284,67 +368,10 @@ function UniversityProfile() {
     };
 
     fetchUniversity();
+    fetchUserCredits();
   }, [universityId]);
 
-  // Fetch roadmap data when roadmap tab is selected
-  useEffect(() => {
-    const fetchRoadmapData = async () => {
-      if (activeTab === 'roadmap' && universityId) {
-        setRoadmapLoading(true);
-        setRoadmapError(null);
-
-        try {
-          const user = auth.currentUser;
-
-          if (!user) {
-            throw new Error('Please sign in to access university roadmaps');
-          }
-
-          const token = await user.getIdToken();
-          if (!token) {
-            throw new Error('Authentication token not available');
-          }
-          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
-          const response = await fetch(
-            `${backendUrl}/api/university/${universityId}/roadmap`,
-            {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              }
-            }
-          );
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            if (response.status === 403) {
-              // Check if it's a credit issue
-              if (data.message && data.message.includes('credit')) {
-                throw new Error(data.message);
-              }
-              throw new Error('You need 10 credits to access this university roadmap');
-            }
-            throw new Error(data.message || 'Failed to load university roadmap');
-          }
-
-          if (data.success) {
-            setRoadmapData(data.data);
-            console.log('✅ Roadmap data loaded:', data.data);
-          } else {
-            throw new Error(data.message || 'Failed to load roadmap data');
-          }
-        } catch (err: unknown) {
-          console.error('Error fetching roadmap:', err);
-          setRoadmapError(err instanceof Error ? err.message : 'Failed to load roadmap');
-        } finally {
-          setRoadmapLoading(false);
-        }
-      }
-    };
-
-    fetchRoadmapData();
-  }, [activeTab, universityId]);
+  // No automatic roadmap fetching - user must unlock first
 
   if (loading) {
     return (
@@ -838,67 +865,95 @@ function UniversityProfile() {
 
               {activeTab === 'roadmap' && (
                 <div className="p-4 sm:p-6 lg:p-8">
-                  {roadmapLoading && (
-                    <div className="flex items-center justify-center py-20">
-                      <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF9169] mx-auto mb-4"></div>
-                        <p className="text-light-text dark:text-dark-text">Loading university roadmap...</p>
-                        <p className="text-sm text-light-p dark:text-dark-text mt-2">
-                          {roadmapData?.generated ? 'Generating student profiles...' : 'Preparing roadmap data...'}
-                        </p>
+                  {isRoadmapLocked ? (
+                    <div className="p-4 sm:p-8">
+                      {/* Blurred preview content */}
+                      <div className="blur-sm pointer-events-none opacity-50 mb-8">
+                        <ReadinessRing />
+                        <CaseStudyCard />
+                        <AcademicsSection />
+                        <TestScoresSection />
+                        <TimelineSection />
+                        <ExtracurricularsSection />
+                        <ScholarshipsAwardsSection />
+                        <ProofBankSection students={[]} />
+                      </div>
+
+                      {/* Locked Modal - Positioned over the blurred content */}
+                      <div className="relative -mt-48">
+                        <RoadmapLockedModal
+                          onUnlock={unlockRoadmap}
+                          isUnlocking={isUnlockingRoadmap}
+                          userCredits={userCredits}
+                          universityName={university?.name}
+                        />
                       </div>
                     </div>
-                  )}
+                  ) : (
+                    <>
+                      {roadmapLoading && (
+                        <div className="flex items-center justify-center py-20">
+                          <div className="text-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF9169] mx-auto mb-4"></div>
+                            <p className="text-light-text dark:text-dark-text">Loading university roadmap...</p>
+                            <p className="text-sm text-light-p dark:text-dark-text mt-2">
+                              {roadmapData?.generated ? 'Generating student profiles...' : 'Preparing roadmap data...'}
+                            </p>
+                          </div>
+                        </div>
+                      )}
 
-                  {roadmapError && (
-                    <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded p-6 mb-8">
-                      <div className="flex items-center mb-4">
-                        <svg className="w-6 h-6 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <h3 className="text-orange-800 dark:text-orange-300 font-semibold">Credits Required</h3>
-                      </div>
-                      <p className="text-orange-700 dark:text-orange-400 mb-4">{roadmapError}</p>
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => window.location.href = '/credits'}
-                          className="bg-[#FF9169] text-white px-6 py-2 rounded border border-black hover:bg-black hover:text-[#FF9169] transition-colors"
-                          style={{ boxShadow: '2px 2px 0 0 #000' }}
-                        >
-                          Get Credits
-                        </button>
-                        <button
-                          onClick={() => window.location.href = '/subscription'}
-                          className="bg-white dark:bg-dark-secondary text-black dark:text-white px-6 py-2 rounded border border-black hover:bg-gray-100 dark:hover:bg-dark-tertiary transition-colors"
-                          style={{ boxShadow: '2px 2px 0 0 #000' }}
-                        >
-                          View Plans
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                      {roadmapError && (
+                        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded p-6 mb-8">
+                          <div className="flex items-center mb-4">
+                            <svg className="w-6 h-6 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <h3 className="text-orange-800 dark:text-orange-300 font-semibold">Credits Required</h3>
+                          </div>
+                          <p className="text-orange-700 dark:text-orange-400 mb-4">{roadmapError}</p>
+                          <div className="flex gap-3">
+                            <button
+                              onClick={() => window.location.href = '/credits'}
+                              className="bg-[#FF9169] text-white px-6 py-2 rounded border border-black hover:bg-black hover:text-[#FF9169] transition-colors"
+                              style={{ boxShadow: '2px 2px 0 0 #000' }}
+                            >
+                              Get Credits
+                            </button>
+                            <button
+                              onClick={() => window.location.href = '/subscription'}
+                              className="bg-white dark:bg-dark-secondary text-black dark:text-white px-6 py-2 rounded border border-black hover:bg-gray-100 dark:hover:bg-dark-tertiary transition-colors"
+                              style={{ boxShadow: '2px 2px 0 0 #000' }}
+                            >
+                              View Plans
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
-                  {roadmapData && !roadmapLoading && (
-                    <div>
-                      {/* Student Profiles Section */}
-                      {/* Original Roadmap Components */}
-                      <ReadinessRing />
-                      <CaseStudyCard />
-                      <AcademicsSection />
-                      <TestScoresSection />
-                      <TimelineSection />
-                      <ExtracurricularsSection />
-                      <ScholarshipsAwardsSection />
-                      <ProofBankSection students={roadmapData.students || []} />
-                    </div>
-                  )}
+                      {roadmapData && !roadmapLoading && (
+                        <div>
+                          {/* Student Profiles Section */}
+                          {/* Original Roadmap Components */}
+                          <ReadinessRing />
+                          <CaseStudyCard />
+                          <AcademicsSection />
+                          <TestScoresSection />
+                          <TimelineSection />
+                          <ExtracurricularsSection />
+                          <ScholarshipsAwardsSection />
+                          <ProofBankSection students={roadmapData.students || []} />
+                        </div>
+                      )}
 
-                  {!roadmapLoading && !roadmapError && !roadmapData && (
-                    <div className="text-center py-20">
-                      <p className="text-light-text dark:text-dark-text">
-                        Click the roadmap tab to load university roadmap data
-                      </p>
-                    </div>
+                      {!roadmapLoading && !roadmapError && !roadmapData && (
+                        <div className="text-center py-20">
+                          <p className="text-light-text dark:text-dark-text">
+                            Roadmap unlocked! Loading data...
+                          </p>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
