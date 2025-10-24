@@ -13,7 +13,11 @@ type ExtracurricularItem = {
   statusColor: string;
 };
 
-const ExtracurricularsSection = () => {
+interface ExtracurricularsSectionProps {
+  redirectUrl?: string;
+}
+
+const ExtracurricularsSection = ({ redirectUrl }: ExtracurricularsSectionProps) => {
   const extracurriculars: ExtracurricularItem[] = [
     {
       id: 1,
@@ -167,7 +171,17 @@ const ExtracurricularsSection = () => {
             </p>
             
             <div className="flex justify-start">
-              <button className="bg-[#FF9169] hover:bg-black text-black hover:text-[#FF9169] font-semibold px-6 py-3 border-2 border-black transition-colors" style={{ boxShadow: '3px 3px 0 0 #000' }}>
+              <button 
+                onClick={() => {
+                  if (redirectUrl) {
+                    window.open(redirectUrl, '_blank');
+                  } else {
+                    alert('University profile link not available');
+                  }
+                }}
+                className="bg-[#FF9169] hover:bg-black text-black hover:text-[#FF9169] font-semibold px-6 py-3 border-2 border-black transition-colors" 
+                style={{ boxShadow: '3px 3px 0 0 #000' }}
+              >
                 Read case study
               </button>
             </div>

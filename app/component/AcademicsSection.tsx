@@ -1,7 +1,11 @@
 import React from 'react';
 import Image from 'next/image';
 
-const AcademicsSection = () => {
+interface AcademicsSectionProps {
+  redirectUrl?: string;
+}
+
+const AcademicsSection = ({ redirectUrl }: AcademicsSectionProps) => {
   // GPA values (out of 4.0)
   const avgGPARequirement = 3.92;
   const yourGPA = 3.71;
@@ -121,7 +125,17 @@ const AcademicsSection = () => {
 
           {/* Read Case Study Button */}
           <div className="flex justify-start">
-            <button className="bg-[#FF9169] hover:bg-black text-black hover:text-[#FF9169] font-medium px-4 py-2 border-2 border-black" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+            <button 
+              onClick={() => {
+                if (redirectUrl) {
+                  window.open(redirectUrl, '_blank');
+                } else {
+                  alert('University profile link not available');
+                }
+              }}
+              className="bg-[#FF9169] hover:bg-black text-black hover:text-[#FF9169] font-medium px-4 py-2 border-2 border-black" 
+              style={{ boxShadow: '2px 2px 0 0 #000' }}
+            >
               Read case study
             </button>
           </div>

@@ -4,7 +4,11 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-const CaseStudyCard = () => {
+interface CaseStudyCardProps {
+  redirectUrl?: string;
+}
+
+const CaseStudyCard = ({ redirectUrl }: CaseStudyCardProps) => {
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-[80px] max-w-7xl mx-auto">
       <div className="bg-light-bg dark:bg-dark-tertiary border-2 border-black p-6 w-full" style={{ boxShadow: '4px 4px 0 0 #000' }}>
@@ -14,14 +18,19 @@ const CaseStudyCard = () => {
             <p className="text-light-p dark:text-dark-text text-base sm:text-lg leading-relaxed">
               Jordan had the same problem as you when he was <br/> applying for Princeton. See what he did <br/>during his gap year to compensate for his <br/>comparatively weaker academic performance to <br/>strengthen his application and get in.
             </p>
-            <Link 
-              href=""
-              target="_blank"
+            <button
+              onClick={() => {
+                if (redirectUrl) {
+                  window.open(redirectUrl, '_blank');
+                } else {
+                  alert('University profile link not available');
+                }
+              }}
               className="inline-block bg-[#FF9169] text-light-text py-2 px-2 font-medium border-2 border-black hover:bg-black hover:text-[#FF9169] transition-colors"
               style={{ boxShadow: '4px 4px 0 0 #000' }}
             >
               Read case study
-            </Link>
+            </button>
           </div>
           <div className="w-full md:flex-1 flex justify-center md:justify-end mt-6 md:mt-0">
             <div className="relative w-full max-w-[280px] sm:max-w-[350px] h-[280px] sm:h-[350px] overflow-hidden border-2 border-black md:-mr-2">

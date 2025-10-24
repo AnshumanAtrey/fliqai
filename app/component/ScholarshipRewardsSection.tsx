@@ -1,19 +1,81 @@
 import React, { useEffect, useRef } from 'react';
 
+interface ScholarshipsAwardsSectionProps {
+  studentProfiles?: any[];
+  universityData?: any;
+}
 
-const ScholarshipsAwardsSection = () => {
+const ScholarshipsAwardsSection = ({ studentProfiles = [], universityData }: ScholarshipsAwardsSectionProps) => {
   const canvasRef1 = useRef(null);
   const canvasRef2 = useRef(null);
 
-  // Data for Average ASU Student
-  const asuData = {
-    segments: [
-      { label: 'Tier 1 (Local) - 12%', value: 12, color: '#80CAFF' },
-      { label: 'Tier 2 (State) - 28%', value: 28, color: '#85E0A3' },
-      { label: 'Tier 3 (National) - 36%', value: 36, color: '#FFD966' },
-      { label: 'Tier 4 (International) - 24%', value: 24, color: '#FFAFA3' }
-    ]
+  // Calculate dynamic scholarship data from student profiles
+  const calculateScholarshipData = () => {
+    if (studentProfiles.length > 0) {
+      // Analyze student profiles to determine scholarship tiers
+      const scholarshipCounts = {
+        tier1: 0, // Local
+        tier2: 0, // State  
+        tier3: 0, // National
+        tier4: 0  // International
+      };
+
+      studentProfiles.forEach(student => {
+        // Analyze student's achievements to determine scholarship tier
+        const gpa = student.gpa?.current || student.academicInfo?.gpa || 3.5;
+        const testScore = student.testScores?.sat || student.sat || 1200;
+        const activities = student.activities?.length || student.extracurriculars?.length || 3;
+        const awards = student.awards?.length || student.achievements?.length || 1;
+
+        // Calculate scholarship tier based on profile strength
+        const profileStrength = (gpa / 4.0) * 0.4 + (testScore / 1600) * 0.3 + (Math.min(activities, 10) / 10) * 0.2 + (Math.min(awards, 5) / 5) * 0.1;
+
+        if (profileStrength >= 0.85) {
+          scholarshipCounts.tier4++; // International
+        } else if (profileStrength >= 0.7) {
+          scholarshipCounts.tier3++; // National
+        } else if (profileStrength >= 0.55) {
+          scholarshipCounts.tier2++; // State
+        } else {
+          scholarshipCounts.tier1++; // Local
+        }
+      });
+
+      const total = studentProfiles.length;
+      const tier1Pct = Math.round((scholarshipCounts.tier1 / total) * 100);
+      const tier2Pct = Math.round((scholarshipCounts.tier2 / total) * 100);
+      const tier3Pct = Math.round((scholarshipCounts.tier3 / total) * 100);
+      const tier4Pct = Math.round((scholarshipCounts.tier4 / total) * 100);
+
+      return {
+        segments: [
+          { label: `Tier 1 (Local) - ${tier1Pct}%`, value: tier1Pct, color: '#80CAFF' },
+          { label: `Tier 2 (State) - ${tier2Pct}%`, value: tier2Pct, color: '#85E0A3' },
+          { label: `Tier 3 (National) - ${tier3Pct}%`, value: tier3Pct, color: '#FFD966' },
+          { label: `Tier 4 (International) - ${tier4Pct}%`, value: tier4Pct, color: '#FFAFA3' }
+        ],
+        mostCommonTier: tier3Pct >= Math.max(tier1Pct, tier2Pct, tier4Pct) ? 'National (Tier 3)' :
+                       tier2Pct >= Math.max(tier1Pct, tier3Pct, tier4Pct) ? 'State (Tier 2)' :
+                       tier4Pct >= Math.max(tier1Pct, tier2Pct, tier3Pct) ? 'International (Tier 4)' : 'Local (Tier 1)',
+        recommendedTier: tier3Pct >= 30 ? 'state level (Tier 2)' : 'local level (Tier 1)'
+      };
+    }
+
+    // Fallback to default data
+    return {
+      segments: [
+        { label: 'Tier 1 (Local) - 12%', value: 12, color: '#80CAFF' },
+        { label: 'Tier 2 (State) - 28%', value: 28, color: '#85E0A3' },
+        { label: 'Tier 3 (National) - 36%', value: 36, color: '#FFD966' },
+        { label: 'Tier 4 (International) - 24%', value: 24, color: '#FFAFA3' }
+      ],
+      mostCommonTier: 'National (Tier 3)',
+      recommendedTier: 'state level (Tier 2)'
+    };
   };
+
+  const scholarshipData = calculateScholarshipData();
+  const universityName = universityData?.name || 'this university';
 
   interface ChartSegment {
   label: string;
@@ -62,13 +124,13 @@ const drawDonutChart = (canvas: HTMLCanvasElement, data: ChartData) => {
 
   useEffect(() => {
     if (canvasRef1.current) {
-      drawDonutChart(canvasRef1.current, asuData);
+      drawDonutChart(canvasRef1.current, scholarshipData);
     }
     if (canvasRef2.current) {
-      drawDonutChart(canvasRef2.current, asuData);
+      drawDonutChart(canvasRef2.current, scholarshipData);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [studentProfiles, universityData]);
 
   const Label = ({ text, position }: { text: string; position: string }) => (
     <div 
@@ -99,11 +161,11 @@ const drawDonutChart = (canvas: HTMLCanvasElement, data: ChartData) => {
               className="w-full h-full"
             ></canvas>
             
-            {/* Labels for ASU Student */}
-            <Label text="Tier 1 (Local) - 12%" position="top-10 right-4" />
-            <Label text="Tier 2 (State) - 28%" position="bottom-28 -right-1" />
-            <Label text="Tier 3 (National) - 36%" position="bottom-12 left-1" />
-            <Label text="Tier 4 (International) - 24%" position="top-14 left-1" />
+            {/* Dynamic Labels */}
+            <Label text={scholarshipData.segments[0].label} position="top-10 right-4" />
+            <Label text={scholarshipData.segments[1].label} position="bottom-28 -right-1" />
+            <Label text={scholarshipData.segments[2].label} position="bottom-12 left-1" />
+            <Label text={scholarshipData.segments[3].label} position="top-14 left-1" />
           </div>
         </div>
 
@@ -116,11 +178,11 @@ const drawDonutChart = (canvas: HTMLCanvasElement, data: ChartData) => {
           </div>
           
           <h3 className="text-xl font-bold text-light-text dark:text-dark-text mb-4 leading-tight">
-            Most admits at this university have a National (Tier 3) scholarship
+            Most admits at {universityName} have a {scholarshipData.mostCommonTier} scholarship
           </h3>
           
           <p className="text-light-p dark:text-dark-text leading-relaxed">
-            It&apos;s recommended that you at least have a state level (Tier 2) scholarship/award for best chance of admission
+            It&apos;s recommended that you at least have a {scholarshipData.recommendedTier} scholarship/award for best chance of admission
           </p>
         </div>
       </div>

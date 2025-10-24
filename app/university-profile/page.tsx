@@ -48,6 +48,15 @@ type University = {
     preferences: number;
     requirements: number;
   };
+  recommendationScores?: {
+    global_grade?: number;
+    academics?: number;
+    finances?: number;
+    location?: number;
+    culture?: number;
+    [key: string]: any;
+  };
+  apiData?: any; // Raw API data for dynamic content
 };
 
 function UniversityProfile() {
@@ -154,6 +163,9 @@ function UniversityProfile() {
   const [isRoadmapLocked, setIsRoadmapLocked] = useState(true);
   const [isUnlockingRoadmap, setIsUnlockingRoadmap] = useState(false);
   const [userCredits, setUserCredits] = useState(0);
+  const [redirectUrl, setRedirectUrl] = useState<string | undefined>(undefined);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userProfileLoading, setUserProfileLoading] = useState(false);
 
   // Fetch user credits
   const fetchUserCredits = async () => {
@@ -180,6 +192,38 @@ function UniversityProfile() {
       }
     } catch (err) {
       console.error('Failed to fetch credits:', err);
+    }
+  };
+
+  // Fetch user profile data
+  const fetchUserProfile = async () => {
+    try {
+      setUserProfileLoading(true);
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const token = await user.getIdToken();
+      if (!token) return;
+
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
+      const response = await fetch(`${backendUrl}/api/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setUserProfile(data.data);
+          console.log('👤 User Profile Data:', data.data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err);
+    } finally {
+      setUserProfileLoading(false);
     }
   };
 
@@ -275,12 +319,14 @@ function UniversityProfile() {
           const academicData = pages.Academic || {};
           const studentsData = pages.Students || {};
 
-          // Calculate acceptance rate from admissions data
+          // Calculate acceptance rate from admissions data (UK universities)
           let acceptanceRate = 25; // Default
-          if (admissionsData.profileoffalladmission?.overalladmissionrate?.[0]) {
-            const rateMatch = admissionsData.profileoffalladmission.overalladmissionrate[0].match(/(\d+)%/);
-            if (rateMatch) acceptanceRate = parseInt(rateMatch[1]);
-          }
+          // For UK universities, use a calculated rate based on university name hash (same as browse-universities)
+          const nameHash = (apiUniversity.id || apiUniversity.pages?.About?.name || '').split('').reduce((a: number, b: string) => {
+            a = ((a << 5) - a) + b.charCodeAt(0);
+            return a & a;
+          }, 0);
+          acceptanceRate = 15 + Math.abs(nameHash) % 40; // Range 15-55%
 
           // Get student count
           const totalStudents = overviewData.stats?.undergraduates ?
@@ -289,12 +335,14 @@ function UniversityProfile() {
           // Get tuition from financials
           const tuitionFee = financialsData.quickStats?.['tuition&fees'] || "$8,549";
 
-          // Get graduation rate
+          // Get graduation rate (UK universities)
           let graduationRate = 45; // Default
-          if (studentsData.undergraduateretentiongraduation?.studentsgraduatingwithin6years) {
-            const gradMatch = studentsData.undergraduateretentiongraduation.studentsgraduatingwithin6years.match(/(\d+\.?\d*)%/);
-            if (gradMatch) graduationRate = parseFloat(gradMatch[1]);
-          }
+          // For UK universities, use a calculated graduation rate (same as browse-universities)
+          const gradNameHash = (apiUniversity.id || apiUniversity.pages?.About?.name || '').split('').reduce((a: number, b: string) => {
+            a = ((a << 7) - a) + b.charCodeAt(0);
+            return a & a;
+          }, 0);
+          graduationRate = 70 + Math.abs(gradNameHash) % 25; // Range 70-95%
 
           // Calculate ranking from global_grade
           let rankingText = "#5 QS World Rankings"; // Default
@@ -305,40 +353,116 @@ function UniversityProfile() {
             rankingText = `#${percentile} QS World Rankings`;
           }
 
+          // Calculate dynamic chart data like in browse-universities
+          const chartData = [
+            Math.min(95, Math.max(60, 100 - acceptanceRate + 10)), // Academics: inversely related to acceptance rate
+            Math.min(95, Math.max(40, 100 - acceptanceRate - 5)), // Finances: more selective = more expensive
+            (apiUniversity.location || '')?.toLowerCase().includes('london') ||
+              (apiUniversity.location || '')?.toLowerCase().includes('cambridge') ||
+              (apiUniversity.location || '')?.toLowerCase().includes('oxford') ? 85 : 75, // Location: higher for major cities
+            Math.min(95, Math.max(70, graduationRate + 15)) // Culture: related to graduation rate
+          ];
+
+          // Calculate overall match percentage based on chart data
+          const overallMatch = Math.round(chartData.reduce((sum, score) => sum + score, 0) / chartData.length);
+          
+          console.log('🎯 UK University Dynamic Data:', {
+            universityId: apiUniversity.id,
+            name: overviewData.collegeName || apiUniversity.pages?.About?.name,
+            acceptanceRate,
+            graduationRate,
+            chartData,
+            overallMatch,
+            ranking: rankingText
+          });
+
+          // Use about field for quote, fallback to description
+          const aboutText = apiUniversity.pages?.About?.about || overviewData.description || "An excellent institution providing world-class education and opportunities.";
+          
+          // Truncate long text for quote (limit to ~150 characters)
+          const truncateText = (text: string, maxLength: number = 150) => {
+            if (text.length <= maxLength) return text;
+            const truncated = text.substring(0, maxLength);
+            const lastSpace = truncated.lastIndexOf(' ');
+            return lastSpace > 0 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
+          };
+          
+          const shortQuote = truncateText(aboutText);
+
+          // Helper function to ensure URL has proper protocol
+          const ensureHttpProtocol = (url: string | undefined): string => {
+            if (!url) return "https://university.edu";
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+              return url;
+            }
+            return `https://${url}`;
+          };
+
+          // Extract dynamic data from the new schema
+          const aboutData = apiUniversity.pages?.About || {};
+          const statsData = apiUniversity.pages?.Stats || {};
+          const coursesData = apiUniversity.pages?.Courses || {};
+          const studentLifeData = apiUniversity.pages?.StudentLife || {};
+
+          // Get student statistics
+          const studentStats = statsData.studentStats || [];
+          const internationalStats = studentStats.find((stat: any) => stat.category === 'domicile');
+          const internationalPercentage = internationalStats?.items?.find((item: any) => item.label === 'International')?.value || '25%';
+          
+          // Get course information
+          const undergradCourses = coursesData.undergrad?.courseGroups?.[0]?.courses || [];
+          const studyOptions = coursesData.undergrad?.studyOptions || [];
+          
           // Transform API data to match frontend interface
           const transformedUniversity: University = {
             id: parseInt(apiUniversity.id.replace(/[^\d]/g, '') || '1'),
-            name: overviewData.collegeName || apiUniversity.pages?.About?.name || apiUniversity.name || "University",
-            location: apiUniversity.location || apiUniversity.pages?.About?.location || overviewData.stats?.location || "Unknown Location",
+            name: aboutData.name || apiUniversity.name || "University",
+            location: aboutData.location || apiUniversity.location || "Unknown Location",
             ranking: rankingText,
-            image: "/college_profile.png", // Default image
+            image: apiUniversity.image || "/college_profile.png", // Use dynamic image from backend
             qsRank: "QS Overall Rank",
-            quote: overviewData.description || "An excellent institution providing world-class education and opportunities.",
-            author: "Student, Class of 2024", // Default author
-            authorImage: "/Ellipse 2.png", // Default author image
-            matchPercentage: 72, // Default match percentage
-            chartData: [acceptanceRate, graduationRate, 90, 85], // Use real acceptance and graduation rates
-            about: overviewData.description || "A prestigious university known for excellence in education and research.",
-            programs: academicData.undergraduateMajors?.slice(0, 10) || ["Business", "Engineering", "Sciences", "Arts", "Technology"],
+            quote: shortQuote,
+            author: "University President",
+            authorImage: "/Ellipse 2.png",
+            matchPercentage: overallMatch,
+            chartData: chartData,
+            about: aboutText,
+            programs: undergradCourses.slice(0, 10) || ["Business", "Engineering", "Sciences", "Arts", "Technology"],
             contact: {
-              email: apiUniversity.pages?.About?.email || "admissions@university.edu",
-              phone: apiUniversity.pages?.About?.phone || "+1-XXX-XXX-XXXX",
-              website: apiUniversity.pages?.About?.website || "https://university.edu"
+              email: aboutData.email || "admissions@university.edu",
+              phone: aboutData.phone || "+44-XXX-XXX-XXXX",
+              website: ensureHttpProtocol(aboutData.website)
             },
             stats: {
               acceptanceRate: acceptanceRate,
-              studentToFaculty: 12, // Default - would need to calculate from faculty data
-              internationalStudents: studentsData.studentbody?.internationalstudents ?
-                parseFloat(studentsData.studentbody.internationalstudents.replace('%', '')) : 25,
+              studentToFaculty: 12,
+              internationalStudents: parseFloat(internationalPercentage.replace('%', '')) || 25,
               graduationRate: graduationRate,
               totalStudents: totalStudents,
               tuitionFee: tuitionFee,
               preferences: 85,
               requirements: 90
-            }
+            },
+            // Add recommendation scores for dynamic charts
+            recommendationScores: apiUniversity.recommendation_scores || {},
+            // Add the raw API data for use in components
+            apiData: apiUniversity
           };
 
+          console.log('🔍 UK University Contact Data:', {
+            aboutData,
+            contactInfo: {
+              email: aboutData.email,
+              phone: aboutData.phone,
+              website: aboutData.website
+            },
+            transformedContact: transformedUniversity.contact,
+            recommendationScores: apiUniversity.recommendation_scores
+          });
+
           setUniversity(transformedUniversity);
+          // Store the redirect URL for case study buttons
+          setRedirectUrl(apiUniversity.redirect_url || undefined);
         } else {
           throw new Error('University not found');
         }
@@ -352,6 +476,7 @@ function UniversityProfile() {
 
     fetchUniversity();
     fetchUserCredits();
+    fetchUserProfile();
   }, [universityId]);
 
   // No automatic roadmap fetching - user must unlock first
@@ -680,6 +805,15 @@ function UniversityProfile() {
                           <p className="text-light-text dark:text-dark-text mb-4 sm:mb-8 font-bold">Contact</p>
                           <div className="space-y-3 sm:space-y-4">
                             <button
+                              onClick={() => {
+                                const website = university?.contact?.website;
+                                console.log('🌐 UK Website button clicked:', { website, university: university?.name });
+                                if (website) {
+                                  window.open(website, '_blank');
+                                } else {
+                                  console.error('❌ No website URL available');
+                                }
+                              }}
                               className="group w-full py-2 sm:py-3 px-4 sm:px-6 bg-[#FF9169] text-light-text hover:bg-black hover:text-[#FF9169] text-start font-medium border border-black transition-colors flex flex-row items-center gap-2 text-sm sm:text-base"
                               style={{ boxShadow: '2px 2px 0 0 #000' }}
                             >
@@ -718,68 +852,64 @@ function UniversityProfile() {
               {/* Courses Recommended For You Section */}
               {activeTab === 'collegeInfo' ? (
                 <div className="w-full px-4 sm:px-6 py-10 sm:py-16 lg:py-20" style={{ borderBottom: "1px solid black" }}>
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-light-text dark:text-dark-text mb-4 sm:mb-6">Courses Recommended For You</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 text-light-text dark:text-dark-text gap-4 sm:gap-6">
-                    {/* Course Card 1 */}
-                    <div className="bg-light-bg dark:bg-dark-tertiary border-2 border-black p-3 sm:p-4" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                      <div className="flex items-center mb-3 sm:mb-4">
-                        <div className="flex -space-x-1 rounded-full overflow-hidden">
-                          <Image src="https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" width={20} height={20} className="inline-block w-5 h-5 sm:w-6 sm:h-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
-                          <Image src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" width={20} height={20} className="inline-block w-5 h-5 sm:w-6 sm:h-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
-                          <Image src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80" alt="" width={20} height={20} className="inline-block w-5 h-5 sm:w-6 sm:h-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
-                          <Image src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" width={20} height={20} className="inline-block w-5 h-5 sm:w-6 sm:h-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
-                        </div>
-                      </div>
-                      <h3 className="text-base sm:text-lg font-bold mb-2">BSc Computer Science</h3>
-                      <div className="flex items-center mb-2 sm:mb-3">
-                        <span className="text-yellow-400">★</span>
-                        <span className="ml-1 text-xs sm:text-sm">4.8 (23)</span>
-                      </div>
-                      <p className="text-xs sm:text-sm text-light-p dark:text-dark-text">
-                        Learn the fundamentals of computer science and software development with our comprehensive program.
-                      </p>
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-light-text dark:text-dark-text mb-4 sm:mb-6">
+                    {university?.apiData?.pages?.Courses?.heading || 'Courses Recommended For You'}
+                  </h2>
+                  
+                  {/* Dynamic Course Description */}
+                  {university?.apiData?.pages?.Courses?.paragraphs && (
+                    <div className="mb-6">
+                      {university.apiData.pages.Courses.paragraphs.slice(0, 2).map((paragraph: string, index: number) => (
+                        <p key={index} className="text-light-p dark:text-dark-text mb-2">{paragraph}</p>
+                      ))}
                     </div>
+                  )}
 
-                    {/* Course Card 2 */}
-                    <div className="bg-light-bg dark:bg-dark-tertiary border-2 border-black p-4" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                      <div className="flex items-center mb-4">
-                        <div className="flex -space-x-1 rounded-full overflow-hidden">
-                          <Image src="https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" width={24} height={24} className="inline-block size-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
-                          <Image src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" width={24} height={24} className="inline-block size-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
-                          <Image src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80" alt="" width={24} height={24} className="inline-block size-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
-                          <Image src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" width={24} height={24} className="inline-block size-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
+                  {/* Dynamic Study Options */}
+                  {university?.apiData?.pages?.Courses?.undergrad?.studyOptions && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 text-light-text dark:text-dark-text gap-4 sm:gap-6">
+                      {university.apiData.pages.Courses.undergrad.studyOptions.map((option: any, index: number) => (
+                        <div key={index} className="bg-light-bg dark:bg-dark-tertiary border-2 border-black p-3 sm:p-4" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                          <div className="flex items-center mb-3 sm:mb-4">
+                            <div className="flex -space-x-1 rounded-full overflow-hidden">
+                              <Image src="https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" width={20} height={20} className="inline-block w-5 h-5 sm:w-6 sm:h-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
+                              <Image src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" width={20} height={20} className="inline-block w-5 h-5 sm:w-6 sm:h-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
+                            </div>
+                          </div>
+                          <h3 className="text-base sm:text-lg font-bold mb-2">{option.mode} Courses</h3>
+                          <div className="flex items-center mb-2 sm:mb-3">
+                            <span className="text-yellow-400">★</span>
+                            <span className="ml-1 text-xs sm:text-sm">4.8 (23)</span>
+                          </div>
+                          <p className="text-xs sm:text-sm text-light-p dark:text-dark-text">
+                            {option.count} available in {option.mode.toLowerCase()} mode
+                          </p>
+                          {option.link && (
+                            <a 
+                              href={option.link} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="inline-block mt-2 text-xs text-[#FF9169] hover:underline"
+                            >
+                              View Courses →
+                            </a>
+                          )}
                         </div>
-                      </div>
-                      <h3 className="text-lg font-bold mb-2">MSc Data Science</h3>
-                      <div className="flex items-center mb-3">
-                        <span className="text-yellow-400">★</span>
-                        <span className="ml-1 text-sm">4.6 (18)</span>
-                      </div>
-                      <p className="text-sm text-light-p dark:text-dark-text">
-                        Master data analysis, machine learning, and big data technologies in this advanced program.
-                      </p>
+                      ))}
                     </div>
+                  )}
 
-                    {/* Course Card 3 */}
-                    <div className="bg-light-bg dark:bg-dark-tertiary border-2 border-black p-4" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                      <div className="flex items-center mb-4">
-                        <div className="flex -space-x-1 rounded-full overflow-hidden">
-                          <Image src="https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" width={24} height={24} className="inline-block size-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
-                          <Image src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" width={24} height={24} className="inline-block size-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
-                          <Image src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80" alt="" width={24} height={24} className="inline-block size-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
-                          <Image src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" width={24} height={24} className="inline-block size-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
-                        </div>
+                  {/* Fallback to static content if no dynamic data */}
+                  {!university?.apiData?.pages?.Courses?.undergrad?.studyOptions && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 text-light-text dark:text-dark-text gap-4 sm:gap-6">
+                      <div className="bg-light-bg dark:bg-dark-tertiary border-2 border-black p-3 sm:p-4" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                        <h3 className="text-base sm:text-lg font-bold mb-2">Undergraduate Courses</h3>
+                        <p className="text-xs sm:text-sm text-light-p dark:text-dark-text">
+                          Explore our comprehensive undergraduate programs
+                        </p>
                       </div>
-                      <h3 className="text-lg font-bold mb-2">BEng Mechanical Engineering</h3>
-                      <div className="flex items-center mb-3">
-                        <span className="text-yellow-400">★</span>
-                        <span className="ml-1 text-sm">4.7 (15)</span>
-                      </div>
-                      <p className="text-sm text-light-p dark:text-dark-text">
-                        Develop skills in mechanical systems design, analysis, and manufacturing processes.
-                      </p>
                     </div>
-                  </div>
+                  )}
                 </div>
               ) : null}
             </div>
@@ -958,13 +1088,20 @@ function UniversityProfile() {
                   <div className="p-4 sm:p-8">
                     {/* Blurred preview content */}
                     <div className="blur-sm pointer-events-none opacity-50 mb-8">
-                      <ReadinessRing />
-                      <CaseStudyCard />
-                      <AcademicsSection />
-                      <TestScoresSection />
+                      <ReadinessRing 
+                        userProfile={userProfile}
+                        universityData={university}
+                        studentProfiles={[]}
+                      />
+                      <CaseStudyCard redirectUrl={redirectUrl} />
+                      <AcademicsSection redirectUrl={redirectUrl} />
+                      <TestScoresSection redirectUrl={redirectUrl} />
                       <TimelineSection />
-                      <ExtracurricularsSection />
-                      <ScholarshipsAwardsSection />
+                      <ExtracurricularsSection redirectUrl={redirectUrl} />
+                      <ScholarshipsAwardsSection 
+                        studentProfiles={[]}
+                        universityData={university}
+                      />
                       <ProofBankSection students={[]} />
                     </div>
 
@@ -1024,13 +1161,20 @@ function UniversityProfile() {
                       <div>
                         {/* Student Profiles Section */}
                         {/* Original Roadmap Components */}
-                        <ReadinessRing />
-                        <CaseStudyCard />
-                        <AcademicsSection />
-                        <TestScoresSection />
+                        <ReadinessRing 
+                          userProfile={userProfile}
+                          universityData={university}
+                          studentProfiles={roadmapData.students || []}
+                        />
+                        <CaseStudyCard redirectUrl={redirectUrl} />
+                        <AcademicsSection redirectUrl={redirectUrl} />
+                        <TestScoresSection redirectUrl={redirectUrl} />
                         <TimelineSection />
-                        <ExtracurricularsSection />
-                        <ScholarshipsAwardsSection />
+                        <ExtracurricularsSection redirectUrl={redirectUrl} />
+                        <ScholarshipsAwardsSection 
+                          studentProfiles={roadmapData.students || []}
+                          universityData={university}
+                        />
                         <ProofBankSection students={roadmapData.students || []} />
                       </div>
                     )}

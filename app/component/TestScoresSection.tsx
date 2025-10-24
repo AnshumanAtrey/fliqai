@@ -1,7 +1,11 @@
 import React from 'react';
 import Image from 'next/image';
 
-export const TestScoresSection = () => {
+interface TestScoresSectionProps {
+  redirectUrl?: string;
+}
+
+export const TestScoresSection = ({ redirectUrl }: TestScoresSectionProps) => {
   const testScores = [
     { subject: "Calc", avgScore: "B+", yourScore: "A-" },
     { subject: "Biology", avgScore: "A-", yourScore: "B+" },
@@ -91,7 +95,17 @@ export const TestScoresSection = () => {
 
           {/* Read Case Study Button */}
           <div className="flex justify-start">
-            <button className="bg-[#FF9169] hover:bg-black text-black hover:text-[#FF9169] font-semibold px-6 py-3 border-2 border-black transition-colors" style={{ boxShadow: '3px 3px 0 0 #000' }}>
+            <button 
+              onClick={() => {
+                if (redirectUrl) {
+                  window.open(redirectUrl, '_blank');
+                } else {
+                  alert('University profile link not available');
+                }
+              }}
+              className="bg-[#FF9169] hover:bg-black text-black hover:text-[#FF9169] font-semibold px-6 py-3 border-2 border-black transition-colors" 
+              style={{ boxShadow: '3px 3px 0 0 #000' }}
+            >
               Read case study
             </button>
           </div>

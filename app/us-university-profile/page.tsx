@@ -41,6 +41,11 @@ type University = {
   admissionsPhone?: string;
   admissionsAddress?: string[];
   tuitionFees?: string;
+  contact: {
+    email: string;
+    phone: string;
+    website: string;
+  };
   stats: {
     students: number;
     international: number;
@@ -51,6 +56,14 @@ type University = {
     extracurriculars: number;
     preferences: number;
     requirements: number;
+  };
+  recommendationScores?: {
+    global_grade?: number;
+    academics?: number;
+    finances?: number;
+    location?: number;
+    culture?: number;
+    [key: string]: any;
   };
   // Raw API data for components
   apiData?: Record<string, unknown>;
@@ -155,6 +168,9 @@ function UniversityProfile() {
   const [isRoadmapLocked, setIsRoadmapLocked] = useState(true);
   const [isUnlockingRoadmap, setIsUnlockingRoadmap] = useState(false);
   const [userCredits, setUserCredits] = useState(0);
+  const [redirectUrl, setRedirectUrl] = useState<string | undefined>(undefined);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userProfileLoading, setUserProfileLoading] = useState(false);
 
   // Fetch user credits
   const fetchUserCredits = async () => {
@@ -181,6 +197,38 @@ function UniversityProfile() {
       }
     } catch (err) {
       console.error('Failed to fetch credits:', err);
+    }
+  };
+
+  // Fetch user profile data
+  const fetchUserProfile = async () => {
+    try {
+      setUserProfileLoading(true);
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const token = await user.getIdToken();
+      if (!token) return;
+
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
+      const response = await fetch(`${backendUrl}/api/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setUserProfile(data.data);
+          console.log('👤 US User Profile Data:', data.data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err);
+    } finally {
+      setUserProfileLoading(false);
     }
   };
 
@@ -288,10 +336,10 @@ function UniversityProfile() {
           const campusLifeData = pages['Campus Life'] || {};
           const studentsData = pages.Students || {};
 
-          // Calculate acceptance rate from admissions data
+          // Calculate acceptance rate from admissions data (US universities)
           let acceptanceRate = 25; // Default
-          if (admissionsData.profileoffalladmission?.overalladmissionrate?.[0]) {
-            const rateMatch = admissionsData.profileoffalladmission.overalladmissionrate[0].match(/(\d+)%/);
+          if ((admissionsData as { profileoffalladmission?: { overalladmissionrate?: string[] } }).profileoffalladmission?.overalladmissionrate?.[0]) {
+            const rateMatch = (admissionsData as { profileoffalladmission: { overalladmissionrate: string[] } }).profileoffalladmission.overalladmissionrate[0].match(/(\d+)%/);
             if (rateMatch) acceptanceRate = parseInt(rateMatch[1]);
           }
 
@@ -301,15 +349,15 @@ function UniversityProfile() {
 
           // Get international student percentage
           let internationalStudents = 15; // Default
-          if (studentsData.studentbody?.internationalstudents) {
-            const intMatch = studentsData.studentbody.internationalstudents.match(/(\d+\.?\d*)%/);
+          if ((studentsData as { studentbody?: { internationalstudents?: string } }).studentbody?.internationalstudents) {
+            const intMatch = (studentsData as { studentbody: { internationalstudents: string } }).studentbody.internationalstudents.match(/(\d+\.?\d*)%/);
             if (intMatch) internationalStudents = parseFloat(intMatch[1]);
           }
 
-          // Get graduation rate
+          // Get graduation rate (US universities)
           let graduationRate = 45; // Default
-          if (studentsData.undergraduateretentiongraduation?.studentsgraduatingwithin6years) {
-            const gradMatch = studentsData.undergraduateretentiongraduation.studentsgraduatingwithin6years.match(/(\d+\.?\d*)%/);
+          if ((studentsData as { undergraduateretentiongraduation?: { studentsgraduatingwithin6years?: string } }).undergraduateretentiongraduation?.studentsgraduatingwithin6years) {
+            const gradMatch = (studentsData as { undergraduateretentiongraduation: { studentsgraduatingwithin6years: string } }).undergraduateretentiongraduation.studentsgraduatingwithin6years.match(/(\d+\.?\d*)%/);
             if (gradMatch) graduationRate = parseFloat(gradMatch[1]);
           }
 
@@ -322,25 +370,77 @@ function UniversityProfile() {
             rankingText = `#${percentile} QS World Rankings`;
           }
 
+          // Calculate dynamic chart data like in browse-universities
+          const chartData = [
+            Math.min(95, Math.max(60, 100 - acceptanceRate + 10)), // Academics: inversely related to acceptance rate
+            Math.min(95, Math.max(40, 100 - acceptanceRate - 5)), // Finances: more selective = more expensive
+            (campusLifeData.quickStats?.location || apiUniversity.location || '')?.toLowerCase().includes('california') ||
+              (campusLifeData.quickStats?.location || apiUniversity.location || '')?.toLowerCase().includes('new york') ? 85 : 75, // Location: higher for major cities
+            Math.min(95, Math.max(70, graduationRate + 15)) // Culture: related to graduation rate
+          ];
+
+          // Calculate overall match percentage based on chart data
+          const overallMatch = Math.round(chartData.reduce((sum, score) => sum + score, 0) / chartData.length);
+          
+          console.log('🎯 US University Dynamic Data:', {
+            universityId: apiUniversity.id,
+            name: overviewData.collegeName,
+            acceptanceRate,
+            graduationRate,
+            chartData,
+            overallMatch,
+            ranking: rankingText
+          });
+
+          // Use about field for quote, fallback to description
+          const aboutText = apiUniversity.pages?.About?.about || overviewData.description || "Innovation and excellence in everything we do.";
+          
+          // Truncate long text for quote (limit to ~150 characters)
+          const truncateText = (text: string, maxLength: number = 150) => {
+            if (text.length <= maxLength) return text;
+            const truncated = text.substring(0, maxLength);
+            const lastSpace = truncated.lastIndexOf(' ');
+            return lastSpace > 0 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
+          };
+          
+          const shortQuote = truncateText(aboutText);
+
+          // Helper function to ensure URL has proper protocol
+          const ensureHttpProtocol = (url: string | undefined): string => {
+            if (!url) return "https://university.edu";
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+              return url;
+            }
+            return `https://${url}`;
+          };
+
+          // Extract contact information from API data
+          const aboutData = apiUniversity.pages?.About || {};
+          
           // Transform API data for US universities
           const transformedUniversity: University = {
             id: parseInt(apiUniversity.id.replace(/[^\d]/g, '') || '1'),
             name: overviewData.collegeName || "University",
             location: campusLifeData.quickStats?.location || apiUniversity.location || "USA",
             ranking: rankingText,
-            image: "/Arizona-Profile.png", // Default image
+            image: apiUniversity.image || "/Arizona-Profile.png", // Use dynamic image from backend
             qsRank: rankingText,
-            quote: overviewData.description || "Innovation and excellence in everything we do.",
+            quote: shortQuote,
             author: "University President",
             authorImage: "/Profile-pic-2.jpg",
-            matchPercentage: 78, // Default match percentage
-            chartData: [acceptanceRate, graduationRate, 90, 85], // Use real acceptance and graduation rates
-            about: overviewData.description || "A leading institution known for innovation and research excellence.",
+            matchPercentage: overallMatch, // Dynamic match percentage
+            chartData: chartData, // Dynamic chart data
+            about: aboutText,
             programs: academicData.undergraduateMajors?.slice(0, 10) || ["Business", "Engineering", "Computer Science", "Medicine", "Arts"],
             website: overviewData.website,
             admissionsPhone: admissionsData.headerCards?.admissionsPhone,
             admissionsAddress: admissionsData.headerCards?.admissionsAddress?.split('\n'),
             tuitionFees: financialsData.quickStats?.['tuition&fees'],
+            contact: {
+              email: aboutData.email || overviewData.email || "admissions@university.edu",
+              phone: aboutData.phone || admissionsData.headerCards?.admissionsPhone || "(000) 000-0000",
+              website: ensureHttpProtocol(aboutData.website || overviewData.website)
+            },
             stats: {
               students: totalStudents,
               international: internationalStudents,
@@ -352,10 +452,27 @@ function UniversityProfile() {
               preferences: 92,
               requirements: 85
             },
+            // Add recommendation scores for dynamic charts
+            recommendationScores: apiUniversity.recommendation_scores || {},
             apiData: apiUniversity // Store raw API data for components
           };
 
+          console.log('🔍 US University Contact Data:', {
+            aboutData,
+            overviewData: {
+              email: overviewData.email,
+              website: overviewData.website
+            },
+            admissionsData: {
+              phone: admissionsData.headerCards?.admissionsPhone
+            },
+            transformedContact: transformedUniversity.contact,
+            recommendationScores: apiUniversity.recommendation_scores
+          });
+
           setUniversity(transformedUniversity);
+          // Store the redirect URL for case study buttons
+          setRedirectUrl(apiUniversity.redirect_url || undefined);
         } else {
           throw new Error('University not found');
         }
@@ -369,6 +486,7 @@ function UniversityProfile() {
 
     fetchUniversity();
     fetchUserCredits();
+    fetchUserProfile();
   }, [universityId]);
 
   // No automatic roadmap fetching - user must unlock first
@@ -710,6 +828,15 @@ function UniversityProfile() {
                           <p className="text-light-text dark:text-dark-text mb-4 sm:mb-8 font-bold">Contact</p>
                           <div className="space-y-3 sm:space-y-4">
                             <button
+                              onClick={() => {
+                                const website = university?.contact?.website;
+                                console.log('🌐 US Website button clicked:', { website, university: university?.name });
+                                if (website) {
+                                  window.open(website, '_blank');
+                                } else {
+                                  console.error('❌ No website URL available');
+                                }
+                              }}
                               className="group w-full py-2 sm:py-3 px-4 sm:px-6 bg-[#FF9169] text-black hover:bg-black hover:text-[#FF9169] text-start font-medium border border-black transition-colors flex flex-row items-center gap-2 text-sm sm:text-base"
                               style={{ boxShadow: '2px 2px 0 0 #000' }}
                             >
@@ -726,7 +853,7 @@ function UniversityProfile() {
                               <svg width="14" height="11" viewBox="0 0 14 11" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-[#FF9169] flex-shrink-0">
                                 <path d="M13.02 0.189941H1.02002C0.821107 0.189941 0.630342 0.268959 0.489689 0.409611C0.349037 0.550264 0.27002 0.741029 0.27002 0.939941V9.43994C0.27002 9.77146 0.401716 10.0894 0.636136 10.3238C0.870557 10.5582 1.1885 10.6899 1.52002 10.6899H12.52C12.8515 10.6899 13.1695 10.5582 13.4039 10.3238C13.6383 10.0894 13.77 9.77146 13.77 9.43994V0.939941C13.77 0.741029 13.691 0.550264 13.5503 0.409611C13.4097 0.268959 13.2189 0.189941 13.02 0.189941ZM7.02002 5.42244L2.94814 1.68994H11.0919L7.02002 5.42244ZM4.81939 5.43994L1.77002 8.23494V2.64494L4.81939 5.43994ZM5.92939 6.45744L6.51314 6.99307C6.65148 7.11991 6.83234 7.19028 7.02002 7.19028C7.2077 7.19028 7.38856 7.11991 7.52689 6.99307L8.11064 6.45744L11.0919 9.18994H2.94814L5.92939 6.45744ZM9.22064 5.43994L12.27 2.64494V8.23494L9.22064 5.43994Z" fill="currentColor" />
                               </svg>
-                              <span className="truncate">admissions@{university?.name?.toLowerCase().replace(/[\s&]/g, '') || 'university'}.edu</span>
+                              <span className="truncate">{university?.contact?.email || 'admissions@university.edu'}</span>
                             </button>
 
                             <button
@@ -736,7 +863,7 @@ function UniversityProfile() {
                               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:fill-[#FF9169] flex-shrink-0">
                                 <path d="M12.52 9.11491L9.5769 7.79554L9.56565 7.79054C9.37434 7.70806 9.16542 7.67486 8.95797 7.69397C8.75052 7.71307 8.55117 7.78388 8.37815 7.89991C8.3539 7.91615 8.33053 7.93367 8.30815 7.95241L6.91377 9.13991C6.10127 8.69929 5.2619 7.86679 4.82065 7.06429L6.0119 5.64804C6.03105 5.62518 6.04879 5.60118 6.06502 5.57616C6.17801 5.40376 6.24661 5.20609 6.26471 5.00075C6.28281 4.79542 6.24986 4.5888 6.16877 4.39929C6.16685 4.39566 6.16518 4.3919 6.16377 4.38804L4.84502 1.43991C4.73678 1.19336 4.55203 0.988216 4.31812 0.854829C4.08422 0.721443 3.81358 0.666905 3.54627 0.699286C2.63901 0.818469 1.80614 1.26383 1.20324 1.9522C0.600328 2.64056 0.268606 3.52485 0.270024 4.43991C0.270024 9.54054 4.4194 13.6899 9.52002 13.6899C10.4351 13.6913 11.3194 13.3596 12.0077 12.7567C12.6961 12.1538 13.1415 11.3209 13.2606 10.4137C13.293 10.1464 13.2385 9.87572 13.1051 9.64181C12.9717 9.40791 12.7666 9.22316 12.52 9.11491ZM9.52002 12.1899C7.46536 12.1874 5.49556 11.3701 4.04269 9.91725C2.58982 8.46438 1.77251 6.49458 1.77002 4.43991C1.76859 3.9221 1.94439 3.41938 2.2682 3.0153C2.59201 2.61122 3.04434 2.3301 3.55002 2.21866L4.72627 4.84366L3.52877 6.26991C3.50942 6.29298 3.49147 6.31719 3.47502 6.34241C3.35699 6.52276 3.2876 6.73056 3.27358 6.94564C3.25956 7.16072 3.3014 7.37577 3.39502 7.56991C3.98377 8.77491 5.1969 9.97991 6.4144 10.5699C6.60984 10.6626 6.82597 10.7029 7.04167 10.687C7.25738 10.6712 7.46527 10.5996 7.64502 10.4793C7.66919 10.463 7.69236 10.4452 7.7144 10.4262L9.11627 9.23429L11.7413 10.4099C11.6298 10.9156 11.3487 11.3679 10.9446 11.6917C10.5406 12.0155 10.0378 12.1913 9.52002 12.1899Z" fill="currentColor" />
                               </svg>
-                              <span className="truncate">{university?.admissionsPhone || '(000) 000-0000'}</span>
+                              <span className="truncate">{university?.contact?.phone || '(000) 000-0000'}</span>
                             </button>
                           </div>
                         </div>
@@ -869,13 +996,20 @@ function UniversityProfile() {
                     <div className="p-4 sm:p-8">
                       {/* Blurred preview content */}
                       <div className="blur-sm pointer-events-none opacity-50 mb-8">
-                        <ReadinessRing />
-                        <CaseStudyCard />
-                        <AcademicsSection />
-                        <TestScoresSection />
+                        <ReadinessRing 
+                          userProfile={userProfile}
+                          universityData={university}
+                          studentProfiles={[]}
+                        />
+                        <CaseStudyCard redirectUrl={redirectUrl} />
+                        <AcademicsSection redirectUrl={redirectUrl} />
+                        <TestScoresSection redirectUrl={redirectUrl} />
                         <TimelineSection />
-                        <ExtracurricularsSection />
-                        <ScholarshipsAwardsSection />
+                        <ExtracurricularsSection redirectUrl={redirectUrl} />
+                        <ScholarshipsAwardsSection 
+                          studentProfiles={[]}
+                          universityData={university}
+                        />
                         <ProofBankSection students={[]} />
                       </div>
 
@@ -935,13 +1069,20 @@ function UniversityProfile() {
                         <div>
                           {/* Student Profiles Section */}
                           {/* Original Roadmap Components */}
-                          <ReadinessRing />
-                          <CaseStudyCard />
-                          <AcademicsSection />
-                          <TestScoresSection />
+                          <ReadinessRing 
+                            userProfile={userProfile}
+                            universityData={university}
+                            studentProfiles={roadmapData.students || []}
+                          />
+                          <CaseStudyCard redirectUrl={redirectUrl} />
+                          <AcademicsSection redirectUrl={redirectUrl} />
+                          <TestScoresSection redirectUrl={redirectUrl} />
                           <TimelineSection />
-                          <ExtracurricularsSection />
-                          <ScholarshipsAwardsSection />
+                          <ExtracurricularsSection redirectUrl={redirectUrl} />
+                          <ScholarshipsAwardsSection 
+                            studentProfiles={roadmapData.students || []}
+                            universityData={university}
+                          />
                           <ProofBankSection students={roadmapData.students || []} />
                         </div>
                       )}
