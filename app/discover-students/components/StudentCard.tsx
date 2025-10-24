@@ -200,7 +200,7 @@ export function StudentCard({ student, onStudentClick }: StudentCardProps) {
             </p>
 
             {/* Accepted Universities */}
-            <div>
+            {/* <div>
               <p className="text-light-text dark:text-dark-text font-outfit text-sm font-bold mb-3">Accepted to</p>
               <div className="flex items-center gap-4">
                 {student.colleges.slice(0, 4).map((college, index) => (
@@ -219,7 +219,7 @@ export function StudentCard({ student, onStudentClick }: StudentCardProps) {
                   </span>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Right Side: Background + Academic Info + Test Scores */}

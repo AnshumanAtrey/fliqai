@@ -261,7 +261,7 @@ function BrowseUniversities() {
           recommendation_scores?: { global_grade?: number };
         }) => {
           const isUS = rec.country === 'US';
-          
+
           // Calculate ranking from global_grade
           let rankingText = isUS ? "#200+ in QS World University Rankings" : "#5 QS World Rankings";
           if (rec.recommendation_scores?.global_grade) {
@@ -352,7 +352,7 @@ function BrowseUniversities() {
 
         // Store ALL universities for search
         setAllUniversities(transformedUniversities);
-        
+
         // Display all universities initially
         setUniversities(transformedUniversities);
       } else {
@@ -372,7 +372,7 @@ function BrowseUniversities() {
   // Search universities using Fuse.js on college_search.json, then fetch by ID
   const searchUniversitiesByName = useCallback(async (name: string) => {
     console.log('🔍 Search called with:', name);
-    
+
     if (!name.trim()) {
       // If no search term, show current universities
       if (allUniversities.length > 0) {
@@ -385,14 +385,14 @@ function BrowseUniversities() {
     try {
       setLoading(true);
       setError(null);
-      
+
       console.log('🔍 Fuzzy searching college names for:', name);
-      
+
       // Step 1: Use Fuse.js to search college names in JSON file
       const searchResults = collegeFuse.search(name);
-      
+
       console.log(`📊 Found ${searchResults.length} name matches`);
-      
+
       if (searchResults.length === 0) {
         setError(`No universities found matching "${name}". Try different spelling or keywords.`);
         setUniversities([]);
@@ -419,7 +419,7 @@ function BrowseUniversities() {
       }
 
       const data = await response.json();
-      
+
       if (!data.success || !data.data || !data.data.universities) {
         throw new Error('Invalid response format');
       }
@@ -437,7 +437,7 @@ function BrowseUniversities() {
       } else {
         setUniversities(validUniversities);
         setError(null);
-        
+
         // Log top matches
         console.log('✅ Top matches:', validUniversities.slice(0, 3).map((u: University) => u.name));
       }
@@ -494,7 +494,7 @@ function BrowseUniversities() {
       <DotPatternBackground>
         {/* Header */}
         <Header />
-        
+
         {/* Main Content */}
         <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
           {/* Hero Section */}

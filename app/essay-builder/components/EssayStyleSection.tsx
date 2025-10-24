@@ -46,8 +46,8 @@ export const EssayStyleSection = ({ essayData }: EssayStyleSectionProps) => {
     const svg = svgRef.current;
     const centerX = 350;
     const centerY = 350;
-    const outerRadius = 210;
-    const innerRadius = 130;
+    const outerRadius = 250;
+    const innerRadius = 150;
 
     // Clear existing content
     svg.innerHTML = `
@@ -151,8 +151,8 @@ export const EssayStyleSection = ({ essayData }: EssayStyleSectionProps) => {
     
     // Create foreignObject for HTML content
     const foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-    const boxWidth = 180;
-    const boxHeight = 45;
+    const boxWidth = 220;
+    const boxHeight = 55;
     
     foreignObject.setAttribute('width', boxWidth.toString());
     foreignObject.setAttribute('height', boxHeight.toString());
@@ -173,15 +173,15 @@ export const EssayStyleSection = ({ essayData }: EssayStyleSectionProps) => {
     const label = document.createElement('span');
     label.style.cssText = `
       background: white;
-      padding: 6px 12px;
+      padding: 10px 16px;
       border: 2px solid #000;
-      box-shadow: 2px 2px 0 #000;
-      font-size: 13px;
+      box-shadow: 3px 3px 0 #000;
+      font-size: 15px;
       font-weight: 600;
       color: #000;
       white-space: nowrap;
       font-family: 'Outfit', sans-serif;
-      line-height: 1.2;
+      line-height: 1.3;
     `;
     label.textContent = `${item.title} (${item.value}%)`;
     
@@ -212,35 +212,17 @@ export const EssayStyleSection = ({ essayData }: EssayStyleSectionProps) => {
         </div>
       ) : (
         <>
-          {/* Responsive Donut Chart - Made much bigger by removing constraints */}
+          {/* Responsive Donut Chart - Made bigger and removed legend */}
           <div className="flex items-center justify-center w-full mt-6 mb-6">
             <div className="w-full aspect-square">
               <svg 
                 ref={svgRef}
                 viewBox="0 0 700 700"
                 className="w-full h-full"
-                style={{ maxWidth: '520px', maxHeight: '520px' }}
+                style={{ maxWidth: '600px', maxHeight: '600px' }}
               >
               </svg>
             </div>
-          </div>
-          
-          {/* Legend */}
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {chartData.map((item, index) => (
-              <div key={index} className="flex items-center">
-                <div 
-                  className="w-4 h-4 border-2 border-black mr-3 flex-shrink-0" 
-                  style={{ 
-                    backgroundColor: item.color,
-                    boxShadow: '1px 1px 0 #000'
-                  }}
-                ></div>
-                <span className="text-sm text-light-text dark:text-dark-text font-outfit font-medium">
-                  {item.title} ({item.value}%)
-                </span>
-              </div>
-            ))}
           </div>
         </>
       )}
