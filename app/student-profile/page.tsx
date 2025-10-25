@@ -476,9 +476,9 @@ function StudentProfile() {
 
               {/* Profile Section */}
               <div className="bg-white dark:bg-dark-tertiary border border-black dark:border-dark-text p-4 sm:p-6 lg:p-12 mb-8">
-                <div className="flex flex-col lg:flex-row gap-6 lg:gap-12">
-                  {/* Left Section - Text Content */}
-                  <div className="flex-1">
+                <div className="w-full">
+                  {/* Content Section - Full Width */}
+                  <div className="w-full">
                     <div className="space-y-6">
                       {/* Name and University */}
                       <div>
@@ -500,56 +500,11 @@ function StudentProfile() {
                       </div>
 
                       {/* Bio */}
-                      <div className="w-full max-w-[550px] space-y-2">
+                      <div className="w-full space-y-2">
                         <p className="text-gray-600 dark:text-gray-300 leading-relaxed break-words">
                           {profile.bio}
                         </p>
                       </div>
-
-                      {/* University Admissions */}
-                      <div className="pt-2">
-                        <h3 className="font-outfit font-semibold text-gray-900 dark:text-white text-lg mb-3">{profile.name.split(' ')[0]}&apos;s Admissions:</h3>
-                        <div className="flex items-center gap-4">
-                          {profile.admissions && profile.admissions.length > 0 ? (
-                            <>
-                              {profile.admissions.slice(0, 4).map((uni, index) => (
-                                <div
-                                  key={uni.id}
-                                  className="w-[70px] h-[70px] shrink-0 relative"
-                                >
-                                  <Image
-                                    src={uni.src}
-                                    alt={uni.name}
-                                    width={70}
-                                    height={70}
-                                    className="w-full h-full object-contain"
-                                  />
-                                </div>
-                              ))}
-                              {profile.admissions.length > 4 && (
-                                <span className="text-gray-400 dark:text-gray-400 text-sm font-medium ml-2">
-                                  +{profile.admissions.length - 4} more
-                                </span>
-                              )}
-                            </>
-                          ) : (
-                            <p className="text-gray-400 dark:text-gray-400 text-sm">No admissions data available</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Section - Profile Photo */}
-                  <div className="lg:w-80 flex-shrink-0 flex items-center justify-center">
-                    <div className="relative w-full max-w-[455px] h-[455px] overflow-hidden border-2 border-black dark:border-dark-text ">
-                      <Image
-                        src={profile.profileImage}
-                        alt={profile.name}
-                        fill
-                        className="object-cover"
-                        priority
-                      />
                     </div>
                   </div>
                 </div>
