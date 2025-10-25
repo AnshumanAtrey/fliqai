@@ -440,7 +440,7 @@ function BrowseUniversities() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCountry, allUniversities]); // Added allUniversities dependency
+  }, [selectedCountry]); // Removed allUniversities dependency to prevent infinite loop
 
   // Search universities using Fuse.js on college_search.json, then fetch by ID
   const searchUniversitiesByName = useCallback(async (name: string) => {

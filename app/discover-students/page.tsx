@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../component/header';
 import { DotPatternBackground } from '../component/DotPatternBackground';
@@ -16,6 +16,9 @@ import {
   StudentCard,
   ResultsHeader
 } from './components';
+
+// Constants
+const STUDENTS_PER_PAGE = 6;
 
 // Student interface
 interface Student {
@@ -48,7 +51,6 @@ function DiscoverStudentsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [usingFrontendPagination, setUsingFrontendPagination] = useState(false);
-  const studentsPerPage = 6;
 
   // Filter states
   const [showGPAFilter, setShowGPAFilter] = useState(false);
@@ -71,7 +73,7 @@ function DiscoverStudentsPage() {
   });
 
   // Fallback data for when API is not available
-  const fallbackStudents: Student[] = [
+  const fallbackStudents: Student[] = useMemo(() => [
     {
       id: 1,
       name: "Jordan Hughes",
@@ -130,14 +132,14 @@ function DiscoverStudentsPage() {
       sticker: "/sticker2.png",
       hasSticker: true
     }
-  ];
+  ], []);
 
   // Fetch students data from backend
   const fetchStudentsData = useCallback(async () => {
     if (!user) {
       console.log('❌ No user found, using fallback data');
       setStudents(fallbackStudents);
-      setTotalPages(Math.ceil(fallbackStudents.length / studentsPerPage));
+      setTotalPages(Math.ceil(fallbackStudents.length / STUDENTS_PER_PAGE));
       setUsingFrontendPagination(true);
       return;
     }
@@ -185,9 +187,9 @@ function DiscoverStudentsPage() {
           setUsingFrontendPagination(false);
         } else {
           // Backend returned more students or pagination is not working - use frontend pagination
-          setTotalPages(Math.ceil(data.data.students.length / studentsPerPage));
+          setTotalPages(Math.ceil(data.data.students.length / STUDENTS_PER_PAGE));
           setUsingFrontendPagination(true);
-          console.log(`🔧 Using frontend pagination: ${data.data.students.length} students, ${Math.ceil(data.data.students.length / studentsPerPage)} pages`);
+          console.log(`🔧 Using frontend pagination: ${data.data.students.length} students, ${Math.ceil(data.data.students.length / STUDENTS_PER_PAGE)} pages`);
         }
       }
     } catch (err: unknown) {
@@ -196,7 +198,7 @@ function DiscoverStudentsPage() {
     } finally {
       setLoading(false);
     }
-  }, [user, currentPage, searchQuery, refreshToken, fallbackStudents, studentsPerPage]);
+  }, [user, currentPage, searchQuery, refreshToken]);
 
   useEffect(() => {
     // Only fetch data if we're not using frontend pagination or if it's the first page
@@ -308,9 +310,9 @@ function DiscoverStudentsPage() {
   };
 
   // Calculate pagination - use backend pagination if available, otherwise frontend pagination
-  const finalTotalPages = totalPages > 1 ? totalPages : Math.ceil(students.length / studentsPerPage);
-  const indexOfLastStudent = currentPage * studentsPerPage;
-  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+  const finalTotalPages = totalPages > 1 ? totalPages : Math.ceil(students.length / STUDENTS_PER_PAGE);
+  const indexOfLastStudent = currentPage * STUDENTS_PER_PAGE;
+  const indexOfFirstStudent = indexOfLastStudent - STUDENTS_PER_PAGE;
   const currentStudents = usingFrontendPagination ? students.slice(indexOfFirstStudent, indexOfLastStudent) : students;
 
   // Check if subscription error
