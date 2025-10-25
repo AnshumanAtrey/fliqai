@@ -1,8 +1,26 @@
 import React, { useEffect, useRef } from 'react';
 
+interface StudentProfile {
+  gpa?: { current?: string | number } | number;
+  testScores?: { sat?: string | number };
+  academicInfo?: { gpa?: number };
+  sat?: number;
+  awards?: string[];
+  achievements?: string[];
+  activities?: string[];
+  extracurriculars?: string[];
+}
+
+interface UniversityData {
+  acceptance_rate?: number;
+  graduation_rate?: number;
+  tuition?: number;
+  name?: string;
+}
+
 interface ScholarshipsAwardsSectionProps {
-  studentProfiles?: any[];
-  universityData?: any;
+  studentProfiles?: StudentProfile[];
+  universityData?: UniversityData;
 }
 
 const ScholarshipsAwardsSection = ({ studentProfiles = [], universityData }: ScholarshipsAwardsSectionProps) => {
@@ -22,8 +40,8 @@ const ScholarshipsAwardsSection = ({ studentProfiles = [], universityData }: Sch
 
       studentProfiles.forEach(student => {
         // Analyze student's achievements to determine scholarship tier
-        const gpa = student.gpa?.current || student.academicInfo?.gpa || 3.5;
-        const testScore = student.testScores?.sat || student.sat || 1200;
+        const gpa = (typeof student.gpa === 'object' ? parseFloat(String(student.gpa?.current || 0)) : parseFloat(String(student.gpa || 0))) || student.academicInfo?.gpa || 3.5;
+        const testScore = parseFloat(String(student.testScores?.sat || student.sat || 1200));
         const activities = student.activities?.length || student.extracurriculars?.length || 3;
         const awards = student.awards?.length || student.achievements?.length || 1;
 

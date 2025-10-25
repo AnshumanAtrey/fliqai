@@ -47,7 +47,6 @@ function DiscoverStudentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalStudents, setTotalStudents] = useState(0);
   const [usingFrontendPagination, setUsingFrontendPagination] = useState(false);
   const studentsPerPage = 6;
 
@@ -139,7 +138,6 @@ function DiscoverStudentsPage() {
       console.log('❌ No user found, using fallback data');
       setStudents(fallbackStudents);
       setTotalPages(Math.ceil(fallbackStudents.length / studentsPerPage));
-      setTotalStudents(fallbackStudents.length);
       setUsingFrontendPagination(true);
       return;
     }
@@ -184,12 +182,10 @@ function DiscoverStudentsPage() {
         if (data.data.pagination && data.data.students.length <= 6) {
           // Backend pagination is working correctly
           setTotalPages(data.data.pagination.totalPages || 1);
-          setTotalStudents(data.data.pagination.totalStudents || data.data.students.length);
           setUsingFrontendPagination(false);
         } else {
           // Backend returned more students or pagination is not working - use frontend pagination
           setTotalPages(Math.ceil(data.data.students.length / studentsPerPage));
-          setTotalStudents(data.data.students.length);
           setUsingFrontendPagination(true);
           console.log(`🔧 Using frontend pagination: ${data.data.students.length} students, ${Math.ceil(data.data.students.length / studentsPerPage)} pages`);
         }
@@ -200,7 +196,7 @@ function DiscoverStudentsPage() {
     } finally {
       setLoading(false);
     }
-  }, [user, currentPage, searchQuery, refreshToken]);
+  }, [user, currentPage, searchQuery, refreshToken, fallbackStudents, studentsPerPage]);
 
   useEffect(() => {
     // Only fetch data if we're not using frontend pagination or if it's the first page

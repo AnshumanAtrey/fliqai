@@ -54,9 +54,25 @@ type University = {
     finances?: number;
     location?: number;
     culture?: number;
-    [key: string]: any;
+    [key: string]: number | undefined;
   };
-  apiData?: any; // Raw API data for dynamic content
+  apiData?: {
+    pages?: {
+      Courses?: {
+        heading?: string;
+        paragraphs?: string[];
+        undergrad?: {
+          studyOptions?: Array<{
+            mode?: string;
+            title?: string;
+            description?: string;
+            count?: string | number;
+            link?: string;
+          }>;
+        };
+      };
+    };
+  }; // Raw API data for dynamic content
 };
 
 function UniversityProfile() {
@@ -158,13 +174,20 @@ function UniversityProfile() {
   } | null>(null);
   const [roadmapLoading, setRoadmapLoading] = useState(false);
   const [roadmapError, setRoadmapError] = useState<string | null>(null);
-  
+
   // Locking system state
   const [isRoadmapLocked, setIsRoadmapLocked] = useState(true);
   const [isUnlockingRoadmap, setIsUnlockingRoadmap] = useState(false);
   const [userCredits, setUserCredits] = useState(0);
   const [redirectUrl, setRedirectUrl] = useState<string | undefined>(undefined);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<{
+    gpa?: { current?: number };
+    testScores?: { sat?: number };
+    extracurriculars?: string[];
+    academicInfo?: { gpa?: number };
+    sat?: number;
+    activities?: string[];
+  } | undefined>(undefined);
   const [userProfileLoading, setUserProfileLoading] = useState(false);
 
   // Fetch user credits
@@ -365,7 +388,7 @@ function UniversityProfile() {
 
           // Calculate overall match percentage based on chart data
           const overallMatch = Math.round(chartData.reduce((sum, score) => sum + score, 0) / chartData.length);
-          
+
           console.log('🎯 UK University Dynamic Data:', {
             universityId: apiUniversity.id,
             name: overviewData.collegeName || apiUniversity.pages?.About?.name,
@@ -378,7 +401,7 @@ function UniversityProfile() {
 
           // Use about field for quote, fallback to description
           const aboutText = apiUniversity.pages?.About?.about || overviewData.description || "An excellent institution providing world-class education and opportunities.";
-          
+
           // Truncate long text for quote (limit to ~150 characters)
           const truncateText = (text: string, maxLength: number = 150) => {
             if (text.length <= maxLength) return text;
@@ -386,7 +409,7 @@ function UniversityProfile() {
             const lastSpace = truncated.lastIndexOf(' ');
             return lastSpace > 0 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
           };
-          
+
           const shortQuote = truncateText(aboutText);
 
           // Helper function to ensure URL has proper protocol
@@ -406,13 +429,13 @@ function UniversityProfile() {
 
           // Get student statistics
           const studentStats = statsData.studentStats || [];
-          const internationalStats = studentStats.find((stat: any) => stat.category === 'domicile');
-          const internationalPercentage = internationalStats?.items?.find((item: any) => item.label === 'International')?.value || '25%';
-          
+          const internationalStats = studentStats.find((stat: Record<string, unknown>) => stat.category === 'domicile');
+          const internationalPercentage = internationalStats?.items?.find((item: Record<string, unknown>) => item.label === 'International')?.value || '25%';
+
           // Get course information
           const undergradCourses = coursesData.undergrad?.courseGroups?.[0]?.courses || [];
           const studyOptions = coursesData.undergrad?.studyOptions || [];
-          
+
           // Transform API data to match frontend interface
           const transformedUniversity: University = {
             id: parseInt(apiUniversity.id.replace(/[^\d]/g, '') || '1'),
@@ -855,7 +878,7 @@ function UniversityProfile() {
                   <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-light-text dark:text-dark-text mb-4 sm:mb-6">
                     {university?.apiData?.pages?.Courses?.heading || 'Courses Recommended For You'}
                   </h2>
-                  
+
                   {/* Dynamic Course Description */}
                   {university?.apiData?.pages?.Courses?.paragraphs && (
                     <div className="mb-6">
@@ -868,7 +891,7 @@ function UniversityProfile() {
                   {/* Dynamic Study Options */}
                   {university?.apiData?.pages?.Courses?.undergrad?.studyOptions && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 text-light-text dark:text-dark-text gap-4 sm:gap-6">
-                      {university.apiData.pages.Courses.undergrad.studyOptions.map((option: any, index: number) => (
+                      {university.apiData.pages.Courses.undergrad.studyOptions.map((option, index: number) => (
                         <div key={index} className="bg-light-bg dark:bg-dark-tertiary border-2 border-black p-3 sm:p-4" style={{ boxShadow: '4px 4px 0 0 #000' }}>
                           <div className="flex items-center mb-3 sm:mb-4">
                             <div className="flex -space-x-1 rounded-full overflow-hidden">
@@ -876,18 +899,18 @@ function UniversityProfile() {
                               <Image src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" width={20} height={20} className="inline-block w-5 h-5 sm:w-6 sm:h-6 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10" />
                             </div>
                           </div>
-                          <h3 className="text-base sm:text-lg font-bold mb-2">{option.mode} Courses</h3>
+                          <h3 className="text-base sm:text-lg font-bold mb-2">{String(option.mode || 'General')} Courses</h3>
                           <div className="flex items-center mb-2 sm:mb-3">
                             <span className="text-yellow-400">★</span>
                             <span className="ml-1 text-xs sm:text-sm">4.8 (23)</span>
                           </div>
                           <p className="text-xs sm:text-sm text-light-p dark:text-dark-text">
-                            {option.count} available in {option.mode.toLowerCase()} mode
+                            {String(option.count || 'Multiple')} available in {String(option.mode || 'general').toLowerCase()} mode
                           </p>
                           {option.link && (
-                            <a 
-                              href={option.link} 
-                              target="_blank" 
+                            <a
+                              href={String(option.link)}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="inline-block mt-2 text-xs text-[#FF9169] hover:underline"
                             >
@@ -1088,7 +1111,7 @@ function UniversityProfile() {
                   <div className="p-4 sm:p-8">
                     {/* Blurred preview content */}
                     <div className="blur-sm pointer-events-none opacity-50 mb-8">
-                      <ReadinessRing 
+                      <ReadinessRing
                         userProfile={userProfile}
                         universityData={university}
                         studentProfiles={[]}
@@ -1098,7 +1121,7 @@ function UniversityProfile() {
                       <TestScoresSection redirectUrl={redirectUrl} />
                       <TimelineSection />
                       <ExtracurricularsSection redirectUrl={redirectUrl} />
-                      <ScholarshipsAwardsSection 
+                      <ScholarshipsAwardsSection
                         studentProfiles={[]}
                         universityData={university}
                       />
@@ -1161,7 +1184,7 @@ function UniversityProfile() {
                       <div>
                         {/* Student Profiles Section */}
                         {/* Original Roadmap Components */}
-                        <ReadinessRing 
+                        <ReadinessRing
                           userProfile={userProfile}
                           universityData={university}
                           studentProfiles={roadmapData.students || []}
@@ -1171,7 +1194,7 @@ function UniversityProfile() {
                         <TestScoresSection redirectUrl={redirectUrl} />
                         <TimelineSection />
                         <ExtracurricularsSection redirectUrl={redirectUrl} />
-                        <ScholarshipsAwardsSection 
+                        <ScholarshipsAwardsSection
                           studentProfiles={roadmapData.students || []}
                           universityData={university}
                         />

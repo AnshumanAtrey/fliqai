@@ -291,6 +291,7 @@ function StudentProfile() {
   };
 
   // Fetch student profile data from backend (OLD - keeping for reference)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const fetchProfileData = async () => {
     if (!user || !studentId) {
       console.log('❌ No user or student ID found, using fallback data');

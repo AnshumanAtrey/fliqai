@@ -440,7 +440,7 @@ function BrowseUniversities() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCountry]); // Removed searchTerm from dependencies
+  }, [selectedCountry, allUniversities]); // Added allUniversities dependency
 
   // Search universities using Fuse.js on college_search.json, then fetch by ID
   const searchUniversitiesByName = useCallback(async (name: string) => {
@@ -522,7 +522,7 @@ function BrowseUniversities() {
       setLoading(false);
       setCurrentPage(1);
     }
-  }, [collegeFuse, transformUniversity]);
+  }, [collegeFuse, transformUniversity, fetchUniversities]);
 
   // Load universities on mount and when filters change
   useEffect(() => {

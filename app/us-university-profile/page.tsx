@@ -63,7 +63,7 @@ type University = {
     finances?: number;
     location?: number;
     culture?: number;
-    [key: string]: any;
+    [key: string]: number | undefined;
   };
   // Raw API data for components
   apiData?: Record<string, unknown>;
@@ -169,7 +169,14 @@ function UniversityProfile() {
   const [isUnlockingRoadmap, setIsUnlockingRoadmap] = useState(false);
   const [userCredits, setUserCredits] = useState(0);
   const [redirectUrl, setRedirectUrl] = useState<string | undefined>(undefined);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<{
+    gpa?: { current?: number };
+    testScores?: { sat?: number };
+    extracurriculars?: string[];
+    academicInfo?: { gpa?: number };
+    sat?: number;
+    activities?: string[];
+  } | undefined>(undefined);
   const [userProfileLoading, setUserProfileLoading] = useState(false);
 
   // Fetch user credits
