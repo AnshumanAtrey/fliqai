@@ -46,7 +46,10 @@ function DiscoverStudentsPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const studentsPerPage = 10;
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalStudents, setTotalStudents] = useState(0);
+  const [usingFrontendPagination, setUsingFrontendPagination] = useState(false);
+  const studentsPerPage = 6;
 
   // Filter states
   const [showGPAFilter, setShowGPAFilter] = useState(false);
@@ -135,6 +138,9 @@ function DiscoverStudentsPage() {
     if (!user) {
       console.log('❌ No user found, using fallback data');
       setStudents(fallbackStudents);
+      setTotalPages(Math.ceil(fallbackStudents.length / studentsPerPage));
+      setTotalStudents(fallbackStudents.length);
+      setUsingFrontendPagination(true);
       return;
     }
 
@@ -145,12 +151,12 @@ function DiscoverStudentsPage() {
       const token = await refreshToken();
       const searchParams = new URLSearchParams();
       searchParams.set('page', currentPage.toString());
-      searchParams.set('limit', '10');
+      searchParams.set('limit', '10'); // Request more to see if there are additional students
       if (searchQuery.trim()) {
         searchParams.set('search', searchQuery);
       }
 
-      console.log('🔄 Fetching students data for user:', user.uid);
+      console.log('🔄 Fetching students data for user:', user.uid, 'Page:', currentPage);
       const response = await fetch(`https://fliq-backend-bxhr.onrender.com/api/students/discover?${searchParams}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -168,9 +174,25 @@ function DiscoverStudentsPage() {
 
       const data = await response.json();
       console.log('✅ API Data received:', data);
+      console.log('📊 Students count:', data.data?.students?.length, 'Backend says total:', data.data?.pagination?.totalStudents);
 
       if (data.success && data.data?.students) {
         setStudents(data.data.students);
+        
+        // Use backend pagination info if available, but implement frontend pagination
+        // if backend returns more students than expected per page
+        if (data.data.pagination && data.data.students.length <= 6) {
+          // Backend pagination is working correctly
+          setTotalPages(data.data.pagination.totalPages || 1);
+          setTotalStudents(data.data.pagination.totalStudents || data.data.students.length);
+          setUsingFrontendPagination(false);
+        } else {
+          // Backend returned more students or pagination is not working - use frontend pagination
+          setTotalPages(Math.ceil(data.data.students.length / studentsPerPage));
+          setTotalStudents(data.data.students.length);
+          setUsingFrontendPagination(true);
+          console.log(`🔧 Using frontend pagination: ${data.data.students.length} students, ${Math.ceil(data.data.students.length / studentsPerPage)} pages`);
+        }
       }
     } catch (err: unknown) {
       console.error('❌ Failed to fetch students:', err);
@@ -181,8 +203,11 @@ function DiscoverStudentsPage() {
   }, [user, currentPage, searchQuery, refreshToken]);
 
   useEffect(() => {
-    fetchStudentsData();
-  }, [user, currentPage, fetchStudentsData]);
+    // Only fetch data if we're not using frontend pagination or if it's the first page
+    if (!usingFrontendPagination || currentPage === 1) {
+      fetchStudentsData();
+    }
+  }, [user, currentPage, fetchStudentsData, usingFrontendPagination]);
 
   // Filter handlers
   const handleGPAChange = (min: number, max: number) => {
@@ -214,6 +239,7 @@ function DiscoverStudentsPage() {
   // Apply filters
   const applyFilters = () => {
     setCurrentPage(1);
+    setUsingFrontendPagination(false); // Reset pagination mode
     fetchStudentsData();
   };
 
@@ -231,6 +257,7 @@ function DiscoverStudentsPage() {
     });
     setSearchQuery('');
     setCurrentPage(1);
+    setUsingFrontendPagination(false); // Reset pagination mode
     fetchStudentsData();
   };
 
@@ -284,11 +311,11 @@ function DiscoverStudentsPage() {
     );
   };
 
-  // Calculate pagination
-  const totalPages = Math.ceil(students.length / studentsPerPage);
+  // Calculate pagination - use backend pagination if available, otherwise frontend pagination
+  const finalTotalPages = totalPages > 1 ? totalPages : Math.ceil(students.length / studentsPerPage);
   const indexOfLastStudent = currentPage * studentsPerPage;
   const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
-  const currentStudents = students.slice(indexOfFirstStudent, indexOfLastStudent);
+  const currentStudents = usingFrontendPagination ? students.slice(indexOfFirstStudent, indexOfLastStudent) : students;
 
   // Check if subscription error
   if (error && error.includes('Subscription required')) {
@@ -377,9 +404,9 @@ function DiscoverStudentsPage() {
           <ResultsHeader
             loading={loading}
             error={error}
-            studentsCount={students.length}
+            studentsCount={currentStudents.length}
             currentPage={currentPage}
-            totalPages={totalPages}
+            totalPages={finalTotalPages}
             setCurrentPage={setCurrentPage}
           />
         </div>

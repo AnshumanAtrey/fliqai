@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Header from "../component/header";
 import ExamTimeline from "@/components/ExamTimeline";
 import ExtracurricularsDashboard from "@/components/ExtracurricularsDashboard";
@@ -96,6 +96,7 @@ function StudentProfile() {
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [essays, setEssays] = useState<Array<Essay>>([]);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const studentId = searchParams.get('id') || '1';
 
   const { user } = useAuth();
@@ -395,7 +396,7 @@ function StudentProfile() {
         <div className="px-[90px] pt-12 pb-2">
           <button
             className="flex items-center gap-2 text-[#5D5237] dark:text-dark-text hover:opacity-80 transition-opacity cursor-pointer"
-            onClick={() => window.location.href = '/discover-students'}
+            onClick={() => router.push('/discover-students')}
           >
             <svg width="32" height="31" viewBox="0 0 32 31" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g filter="url(#filter0_d_1_332)">
@@ -416,10 +417,7 @@ function StudentProfile() {
               </defs>
             </svg>
 
-            <span
-              className="font-outfit text-sm"
-              onClick={() => window.location.href = '/discover-students'}
-            >
+            <span className="font-outfit text-sm">
               Back to Student Catalogue
             </span>
           </button>
