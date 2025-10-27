@@ -18,7 +18,7 @@ import {
 } from './components';
 
 // Constants
-const STUDENTS_PER_PAGE = 6;
+const STUDENTS_PER_PAGE = 10;
 
 // Student interface
 interface Student {
@@ -157,7 +157,8 @@ function DiscoverStudentsPage() {
       }
 
       console.log('🔄 Fetching students data for user:', user.uid, 'Page:', currentPage);
-      const response = await fetch(`https://fliq-backend-bxhr.onrender.com/api/students/discover?${searchParams}`, {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
+      const response = await fetch(`${backendUrl}/api/students/discover?${searchParams}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -181,7 +182,7 @@ function DiscoverStudentsPage() {
         
         // Use backend pagination info if available, but implement frontend pagination
         // if backend returns more students than expected per page
-        if (data.data.pagination && data.data.students.length <= 6) {
+        if (data.data.pagination && data.data.students.length <= 10) {
           // Backend pagination is working correctly
           setTotalPages(data.data.pagination.totalPages || 1);
           setUsingFrontendPagination(false);
@@ -210,6 +211,10 @@ function DiscoverStudentsPage() {
   // Filter handlers
   const handleGPAChange = (min: number, max: number) => {
     setFilters({ ...filters, gpaMin: min, gpaMax: max });
+  };
+
+  const handleSATChange = (min: number, max: number) => {
+    setFilters({ ...filters, satMin: min, satMax: max });
   };
 
   const handleMajorToggle = (major: string) => {
@@ -377,6 +382,9 @@ function DiscoverStudentsPage() {
               onGPAChange={handleGPAChange}
               showSATFilter={showSATFilter}
               setShowSATFilter={setShowSATFilter}
+              satMin={filters.satMin}
+              satMax={filters.satMax}
+              onSATChange={handleSATChange}
               showMajorFilter={showMajorFilter}
               setShowMajorFilter={setShowMajorFilter}
               selectedMajors={filters.majors}

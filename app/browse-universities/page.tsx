@@ -289,9 +289,9 @@ function BrowseUniversities() {
         throw new Error('Authentication required');
       }
 
-      console.log('🎯 Fetching personalized recommendations...');
+      console.log('🎯 Fetching personalized universities with match percentages...');
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
-      const response = await fetch(`${backendUrl}/api/recommendations/final`, {
+      const response = await fetch(`${backendUrl}/api/browse-universities?limit=50`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -312,42 +312,37 @@ function BrowseUniversities() {
       }
 
       const data = await response.json();
-      console.log('✅ Recommendations received:', data);
-      console.log('📊 First recommendation:', data.data?.recommendations?.[0]);
+      console.log('✅ Universities received:', data);
+      console.log('📊 First university:', data.data?.universities?.[0]);
 
-      if (data.success && data.data && data.data.recommendations) {
-        const recommendations = data.data.recommendations.map((rec: {
+      if (data.success && data.data && data.data.universities) {
+        const universities = data.data.universities.map((uni: {
           id: string;
           college_name: string;
+          name: string;
           country: string;
+          match_percentage: number;
           overall_match: number;
           category_scores: { academics: number; finances: number; location: number; culture: number };
           chartData: number[];
-          name?: string;
           location?: string;
+          qs_ranking?: string;
           ranking?: string;
           image?: string;
           description?: string;
           quote?: string;
           author?: string;
           authorImage?: string;
-          recommendation_scores?: { global_grade?: number };
         }) => {
-          const isUS = rec.country === 'US';
+          const isUS = uni.country === 'US';
 
-          // Calculate ranking from global_grade
-          let rankingText = isUS ? "#200+ in QS World University Rankings" : "#5 QS World Rankings";
-          if (rec.recommendation_scores?.global_grade) {
-            const Rcurrent = 500;
-            const Rmax = rec.recommendation_scores.global_grade;
-            const percentile = Math.round((Rcurrent / Rmax) * 100);
-            rankingText = `#${percentile} QS World Rankings`;
-          }
+          // Use QS ranking if available, otherwise use ranking field
+          let rankingText = uni.qs_ranking || uni.ranking || (isUS ? "#200+ in QS World University Rankings" : "#5 QS World Rankings");
 
           // Format location properly
-          let locationText = rec.location || '';
+          let locationText = uni.location || '';
           if (!locationText) {
-            locationText = rec.country;
+            locationText = uni.country;
           } else if (isUS && !locationText.includes('USA')) {
             locationText = `${locationText}, USA`;
           } else if (!isUS && !locationText.includes('United Kingdom')) {
@@ -355,33 +350,33 @@ function BrowseUniversities() {
           }
 
           return {
-            id: rec.id,
-            country: rec.country as 'US' | 'UK',
-            name: rec.name || rec.college_name,
+            id: uni.id,
+            country: uni.country as 'US' | 'UK',
+            name: uni.name || uni.college_name,
             location: locationText,
             ranking: rankingText,
-            image: rec.image || '/college_profile.png',
-            description: rec.description || 'A world-class institution.',
-            quote: rec.quote || 'An amazing educational experience.',
-            author: rec.author || 'Student, Class of 2024',
-            authorImage: rec.authorImage || '/Ellipse 2.png',
-            overall_match: rec.overall_match,
-            category_scores: rec.category_scores,
-            chartData: rec.chartData || [
-              rec.category_scores.academics,
-              rec.category_scores.finances,
-              rec.category_scores.location,
-              rec.category_scores.culture
+            image: uni.image || '/college_profile.png',
+            description: uni.description || 'A world-class institution.',
+            quote: uni.quote || 'An amazing educational experience.',
+            author: uni.author || 'Student, Class of 2024',
+            authorImage: uni.authorImage || '/Ellipse 2.png',
+            overall_match: uni.match_percentage || uni.overall_match,
+            category_scores: uni.category_scores,
+            chartData: uni.chartData || [
+              uni.category_scores.academics,
+              uni.category_scores.finances,
+              uni.category_scores.location,
+              uni.category_scores.culture
             ]
           };
         });
 
-        setUniversities(recommendations);
-        setAllUniversities(recommendations); // Store for search
-        console.log('✅ Set', recommendations.length, 'recommendations');
-        console.log('📊 First mapped university:', recommendations[0]);
+        setUniversities(universities);
+        setAllUniversities(universities); // Store for search
+        console.log('✅ Set', universities.length, 'universities with consistent match percentages');
+        console.log('📊 First mapped university:', universities[0]);
       } else {
-        throw new Error('No recommendations found');
+        throw new Error('No universities found');
       }
     } catch (err) {
       console.error('❌ Error fetching recommendations:', err);
@@ -477,11 +472,25 @@ function BrowseUniversities() {
       const matchedIds = searchResults.slice(0, 10).map(result => result.item.id);
       console.log('🎯 Fetching universities with IDs:', matchedIds);
 
-      // Step 3: Fetch universities by IDs from backend (batch request)
+      // Step 3: Fetch universities by IDs from backend with consistent match percentages
+      let token = localStorage.getItem('token');
+      if (!token && user) {
+        token = await user.getIdToken();
+      }
+      
+      if (!token) {
+        console.warn('⚠️ No token available for search, showing cached results');
+        // Filter from allUniversities if available
+        const filtered = allUniversities.filter(uni => matchedIds.includes(uni.id));
+        setUniversities(filtered);
+        return;
+      }
+      
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
-      const response = await fetch(`${backendUrl}/api/search-universities`, {
+      const response = await fetch(`${backendUrl}/api/browse-universities/by-ids`, {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ ids: matchedIds })
@@ -497,12 +506,46 @@ function BrowseUniversities() {
         throw new Error('Invalid response format');
       }
 
-      // Transform universities
-      const validUniversities = data.data.universities
-        .map(transformUniversity)
-        .filter((uni: University) => uni.name);
+      // Map universities from new API format (already includes match_percentage)
+      const validUniversities = data.data.universities.map((uni: {
+        id: string;
+        name: string;
+        college_name: string;
+        country: string;
+        location: string;
+        match_percentage: number;
+        overall_match: number;
+        category_scores: { academics: number; finances: number; location: number; culture: number };
+        chartData: number[];
+        qs_ranking?: string;
+        ranking?: string;
+        image?: string;
+        description?: string;
+        quote?: string;
+        author?: string;
+        authorImage?: string;
+      }) => ({
+        id: uni.id,
+        country: uni.country as 'US' | 'UK',
+        name: uni.name || uni.college_name,
+        location: uni.location,
+        ranking: uni.qs_ranking || uni.ranking || '#1 in Innovation',
+        image: uni.image || '/college_profile.png',
+        description: uni.description || 'A world-class institution.',
+        quote: uni.quote || 'An amazing educational experience.',
+        author: uni.author || 'Student, Class of 2024',
+        authorImage: uni.authorImage || '/Ellipse 2.png',
+        overall_match: uni.match_percentage || uni.overall_match,
+        category_scores: uni.category_scores,
+        chartData: uni.chartData || [
+          uni.category_scores.academics,
+          uni.category_scores.finances,
+          uni.category_scores.location,
+          uni.category_scores.culture
+        ]
+      })).filter((uni: University) => uni.name);
 
-      console.log(`✅ Successfully loaded ${validUniversities.length} universities`);
+      console.log(`✅ Successfully loaded ${validUniversities.length} universities with consistent match %`);
 
       if (validUniversities.length === 0) {
         setError(`Found matches but couldn't load university data. Please try again.`);
@@ -511,8 +554,8 @@ function BrowseUniversities() {
         setUniversities(validUniversities);
         setError(null);
 
-        // Log top matches
-        console.log('✅ Top matches:', validUniversities.slice(0, 3).map((u: University) => u.name));
+        // Log top matches with match percentages
+        console.log('✅ Top matches:', validUniversities.slice(0, 3).map((u: University) => `${u.name}: ${u.overall_match}%`));
       }
     } catch (err) {
       console.error('❌ Error searching universities:', err);
@@ -548,6 +591,15 @@ function BrowseUniversities() {
 
   // Handle university card click
   const handleUniversityClick = (university: University) => {
+    // Store university data in sessionStorage for consistent match % on detail page
+    sessionStorage.setItem('university_match_data', JSON.stringify({
+      id: university.id,
+      match_percentage: university.overall_match,
+      category_scores: university.category_scores,
+      chartData: university.chartData,
+      ranking: university.ranking
+    }));
+    
     // Navigate to appropriate profile page based on country
     if (university.country === 'UK') {
       router.push(`/university-profile?id=${university.id}`);

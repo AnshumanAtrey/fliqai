@@ -313,6 +313,30 @@ function UniversityProfile() {
         setLoading(true);
         setError(null);
 
+        // Check for stored match data from browse page
+        let storedMatchData: {
+          id: string;
+          match_percentage: number;
+          category_scores: { academics: number; finances: number; location: number; culture: number };
+          chartData: number[];
+          ranking: string;
+        } | null = null;
+        
+        try {
+          const stored = sessionStorage.getItem('university_match_data');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed.id === universityId) {
+              storedMatchData = parsed;
+              console.log('✅ Using stored match data from browse page:', storedMatchData);
+            } else {
+              console.log('⚠️ Stored match data is for different university, will calculate fresh');
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to parse stored match data:', e);
+        }
+
         const token = await refreshToken();
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://fliq-backend-bxhr.onrender.com';
         const response = await fetch(`${backendUrl}/api/university/${universityId}`, {
@@ -367,27 +391,40 @@ function UniversityProfile() {
           }, 0);
           graduationRate = 70 + Math.abs(gradNameHash) % 25; // Range 70-95%
 
-          // Calculate ranking from global_grade
+          // Use stored match data if available, otherwise calculate
           let rankingText = "#5 QS World Rankings"; // Default
-          if (apiUniversity.recommendation_scores?.global_grade) {
-            const Rcurrent = 500;
-            const Rmax = apiUniversity.recommendation_scores.global_grade;
-            const percentile = Math.round((Rcurrent / Rmax) * 100);
-            rankingText = `#${percentile} QS World Rankings`;
+          let chartData: number[];
+          let overallMatch: number;
+          
+          if (storedMatchData) {
+            // Use consistent data from browse page
+            rankingText = storedMatchData.ranking;
+            chartData = storedMatchData.chartData;
+            overallMatch = storedMatchData.match_percentage;
+            console.log('✅ Using consistent match data:', { rankingText, chartData, overallMatch });
+          } else {
+            // Calculate fresh (fallback for direct navigation)
+            if (apiUniversity.recommendation_scores?.global_grade) {
+              const Rcurrent = 500;
+              const Rmax = apiUniversity.recommendation_scores.global_grade;
+              const percentile = Math.round((Rcurrent / Rmax) * 100);
+              rankingText = `#${percentile} QS World Rankings`;
+            }
+
+            // Calculate dynamic chart data like in browse-universities
+            chartData = [
+              Math.min(95, Math.max(60, 100 - acceptanceRate + 10)), // Academics: inversely related to acceptance rate
+              Math.min(95, Math.max(40, 100 - acceptanceRate - 5)), // Finances: more selective = more expensive
+              (apiUniversity.location || '')?.toLowerCase().includes('london') ||
+                (apiUniversity.location || '')?.toLowerCase().includes('cambridge') ||
+                (apiUniversity.location || '')?.toLowerCase().includes('oxford') ? 85 : 75, // Location: higher for major cities
+              Math.min(95, Math.max(70, graduationRate + 15)) // Culture: related to graduation rate
+            ];
+
+            // Calculate overall match percentage based on chart data
+            overallMatch = Math.round(chartData.reduce((sum, score) => sum + score, 0) / chartData.length);
+            console.log('⚠️ Calculated fresh match data:', { rankingText, chartData, overallMatch });
           }
-
-          // Calculate dynamic chart data like in browse-universities
-          const chartData = [
-            Math.min(95, Math.max(60, 100 - acceptanceRate + 10)), // Academics: inversely related to acceptance rate
-            Math.min(95, Math.max(40, 100 - acceptanceRate - 5)), // Finances: more selective = more expensive
-            (apiUniversity.location || '')?.toLowerCase().includes('london') ||
-              (apiUniversity.location || '')?.toLowerCase().includes('cambridge') ||
-              (apiUniversity.location || '')?.toLowerCase().includes('oxford') ? 85 : 75, // Location: higher for major cities
-            Math.min(95, Math.max(70, graduationRate + 15)) // Culture: related to graduation rate
-          ];
-
-          // Calculate overall match percentage based on chart data
-          const overallMatch = Math.round(chartData.reduce((sum, score) => sum + score, 0) / chartData.length);
 
           console.log('🎯 UK University Dynamic Data:', {
             universityId: apiUniversity.id,

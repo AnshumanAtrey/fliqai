@@ -11,6 +11,9 @@ interface FilterModalsProps {
   // SAT Filter
   showSATFilter: boolean;
   setShowSATFilter: (show: boolean) => void;
+  satMin: number;
+  satMax: number;
+  onSATChange: (min: number, max: number) => void;
   
   // Major Filter
   showMajorFilter: boolean;
@@ -47,6 +50,11 @@ export const FilterModals: React.FC<FilterModalsProps> = ({
   gpaMin,
   gpaMax,
   onGPAChange,
+  showSATFilter,
+  setShowSATFilter,
+  satMin,
+  satMax,
+  onSATChange,
   showMajorFilter,
   setShowMajorFilter,
   selectedMajors,
@@ -134,6 +142,60 @@ export const FilterModals: React.FC<FilterModalsProps> = ({
             </button>
             <button
               onClick={() => { onApply(); setShowGPAFilter(false); }}
+              className="flex-1 py-2 border border-black bg-accent font-outfit font-semibold"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* SAT Filter Modal */}
+      {showSATFilter && (
+        <div className="absolute top-full left-0 mt-2 bg-light-bg dark:bg-dark-secondary border border-black p-6 z-50 w-80" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-outfit font-semibold text-lg text-black">SAT Range</h3>
+            <button onClick={() => setShowSATFilter(false)} className="w-8 h-8 flex items-center justify-center bg-accent border border-black">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M12 4L4 12M4 4L12 12" stroke="#000" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div className="mb-6">
+            <div className="flex justify-between mb-2">
+              <span className="font-outfit text-sm text-black">{satMin}</span>
+              <span className="font-outfit text-sm text-black">{satMax}</span>
+            </div>
+            <input
+              type="range"
+              min="400"
+              max="1600"
+              step="10"
+              value={satMin}
+              onChange={(e) => onSATChange(parseInt(e.target.value), satMax)}
+              className="w-full accent-[#FF9269]"
+            />
+            <input
+              type="range"
+              min="400"
+              max="1600"
+              step="10"
+              value={satMax}
+              onChange={(e) => onSATChange(satMin, parseInt(e.target.value))}
+              className="w-full accent-[#FF9269] mt-2"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={onReset}
+              className="flex-1 py-2 border border-black bg-light-secondary font-outfit font-medium"
+            >
+              Reset
+            </button>
+            <button
+              onClick={() => { onApply(); setShowSATFilter(false); }}
               className="flex-1 py-2 border border-black bg-accent font-outfit font-semibold"
             >
               Apply
