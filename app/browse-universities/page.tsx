@@ -337,7 +337,7 @@ function BrowseUniversities() {
           const isUS = uni.country === 'US';
 
           // Use QS ranking if available, otherwise use ranking field
-          let rankingText = uni.qs_ranking || uni.ranking || (isUS ? "#200+ in QS World University Rankings" : "#5 QS World Rankings");
+          const rankingText = uni.qs_ranking || uni.ranking || (isUS ? "#200+ in QS World University Rankings" : "#5 QS World Rankings");
 
           // Format location properly
           let locationText = uni.location || '';
@@ -386,6 +386,7 @@ function BrowseUniversities() {
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // Fetch universities from API (fallback)
@@ -565,7 +566,8 @@ function BrowseUniversities() {
       setLoading(false);
       setCurrentPage(1);
     }
-  }, [collegeFuse, transformUniversity, fetchUniversities]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collegeFuse, transformUniversity]);
 
   // Load universities on mount and when filters change
   useEffect(() => {
