@@ -63,13 +63,18 @@ export default function CircularCarousel({
     const numItems = images.length;
     const angleStep = (2 * Math.PI) / numItems;
     const radius = (diameter / 2) - (Math.max(imageWidth, imageHeight) / 2);
+    
+    // True center of the container
+    const centerX = diameter / 2;
+    const centerY = diameter / 2;
 
     return images.map((imageSrc, index) => {
       const initialAngle = angleStep * index;
       const currentAngle = initialAngle + currentRotation;
 
-      const x = radius + radius * Math.cos(currentAngle);
-      const y = radius + radius * Math.sin(currentAngle);
+      // Position images around the true center
+      const x = centerX + radius * Math.cos(currentAngle);
+      const y = centerY + radius * Math.sin(currentAngle);
 
       return (
         <div

@@ -26,10 +26,10 @@ export default function Footer() {
     <footer className="w-full bg-[#F9F7F3] relative overflow-hidden">
       {/* Hero Section with Circular Carousel */}
       <div className="relative w-full">
-        {/* Circular Carousel Background - Responsive */}
-        <div className="w-full h-[600px] md:h-[1100px] relative flex items-center justify-center pb-20 md:pb-40 pt-40 md:pt-80">
+        {/* Circular Carousel Background - Fixed positioning */}
+        <div className="w-full relative flex items-center justify-center">
           {/* Mobile Carousel */}
-          <div className="block md:hidden -mb-[30%]" style={{ marginRight: '-40px' }}>
+          <div className="block md:hidden absolute top-0 left-1/2 transform -translate-x-1/2" style={{ marginTop: '80px' }}>
             <CircularCarousel
               images={[
                 FooterImg1.src,
@@ -53,7 +53,7 @@ export default function Footer() {
           </div>
 
           {/* Desktop Carousel */}
-          <div className="hidden md:block -mb-[30%]" style={{ marginRight: '-64px' }}>
+          <div className="hidden md:block absolute top-0 left-1/2 transform -translate-x-1/2" style={{ marginTop: '120px' }}>
             <CircularCarousel
               images={[
                 FooterImg1.src,
@@ -80,11 +80,14 @@ export default function Footer() {
               imageBorderRadius={12}
             />
           </div>
+          
+          {/* Spacer to maintain proper height */}
+          <div className="h-[600px] md:h-[800px] w-full"></div>
         </div>
 
         {/* Centered Content */}
-        <div className="absolute inset-0 flex items-center justify-center px-4">
-          <div className="flex flex-col items-center gap-4 md:gap-6 max-w-[629px] mx-auto">
+        <div className="absolute inset-0 flex items-center justify-center px-4 z-10">
+          <div className="flex flex-col items-center gap-4 md:gap-6 max-w-[629px] mx-auto mt-40 md:mt-60">
             <div className="flex flex-col items-center gap-4 md:gap-[22px]">
               <h2 className="text-[#191919] font-outfit text-2xl md:text-[40px] font-bold leading-[110%] text-center capitalize">
                 It&apos;s Not Luck, It&apos;s Data
@@ -104,7 +107,7 @@ export default function Footer() {
       </div>
 
       {/* Footer Content - Positioned to overlap bottom of carousel */}
-      <div className="bg-[#191919] h-full rounded-t-[24px] relative z-10 flex justify-center mx-4 md:mx-[30px] -mt-40 md:-mt-80">
+      <div className="bg-[#191919] h-full rounded-t-[24px] relative z-20 flex justify-center mx-4 md:mx-[30px] -mt-20 md:-mt-40">
         {/* Main Footer Section */}
         <div className="w-full md:w-[1408px] min-h-[400px] md:h-[500px] px-4 md:px-[30px] py-10 md:py-40 md:pt-16">
           {/* Top Section with Logo, Links, and Sign Up */}

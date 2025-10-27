@@ -39,19 +39,19 @@ const HeroSection = () => {
               className="flex py-3 px-4 md:px-6 md:py-4 gap-2.5 justify-center items-center rounded-xl md:rounded-xl bg-white hover:bg-gray-50 transition-colors border border-gray-200 w-full md:w-auto order-2 md:order-1"
             >
               <span className="text-[#191919] font-outfit text-[14px] md:text-base font-medium leading-[17.64px] md:leading-normal whitespace-nowrap">
-                View Free Profile
+                View Sample
               </span>
             </button>
 
             {/* Primary Button - Shows second on mobile */}
-            {/* <button 
+            <button 
               onClick={() => router.push('/signup')}
               className="flex py-3 px-4 md:px-8 md:py-4 gap-2.5 justify-center items-center rounded-xl md:rounded-xl border border-[#191919] bg-[#191919] hover:bg-[#333333] transition-colors w-full md:w-auto order-1 md:order-2"
             >
               <span className="text-white font-outfit text-[14px] md:text-base font-medium leading-[17.64px] md:leading-normal whitespace-nowrap">
-                Get your playbook
+                Start Exploring
               </span>
-            </button> */}
+            </button>
           </div>
         </div>
 

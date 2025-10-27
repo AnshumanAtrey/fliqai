@@ -2,80 +2,80 @@
 
 import React from 'react';
 
-// Demo testimonials. Replace avatar, name, role, and text with your user data.
+// Demo testimonials with PNG avatars from /pfps folder (1.png to 12.png)
 const testimonials = [
   // -------- ROW 1 -----------
   {
-    avatar: '/avatar1.jpg',
+    avatar: '/pfps/1.png',
     name: 'John Doe',
     role: 'College Graduate',
     text: 'Using Fliq was a game-changer for my university applications. The AI recommendations helped me find the perfect programs and I crafted essays that truly represented my passion.'
   },
   {
-    avatar: '/avatar2.jpg',
+    avatar: '/pfps/2.png',
     name: 'Aisha Khan',
     role: 'Junior Year Student',
     text: 'Fliq’s features made navigating the university landscape so much easier. The insights into successful students gave me the motivation I needed to refine my applications.'
   },
   {
-    avatar: '/avatar3.jpg',
+    avatar: '/pfps/3.png',
     name: 'Aishwariya',
     role: 'College Grad',
-    text: "I can&apos;t thank Fliq enough for their support. The AI-driven essay builder helped me articulate my story effectively, which made a huge difference in my acceptance."
+    text: "I can't thank Fliq enough for their support. The AI-driven essay builder helped me articulate my story effectively, which made a huge difference in my acceptance."
   },
   // -------- ROW 2 -----------
   {
-    avatar: '/avatar4.jpg',
+    avatar: '/pfps/4.png',
     name: 'Sofia Reyes',
     role: 'College Grad',
     text: "Fliq was instrumental in my university search. The tailored recommendations and essay tips made me stand out in a crowded applicant pool."
   },
   {
-    avatar: '/avatar5.jpg',
+    avatar: '/pfps/5.png',
     name: 'Kreethi Kapoor',
     role: 'College Grad',
     text: "The personalized guidance from Fliq gave me clarity on my academic goals. I discovered universities I had never considered before, all thanks to their smart tools."
   },
   {
-    avatar: '/avatar6.jpg',
+    avatar: '/pfps/6.png',
     name: 'Kreethi Kapoor',
     role: 'College Grad',
     text: "The personalized guidance from Fliq gave me clarity on my academic goals. I discovered universities I had never considered before, all thanks to their smart tools."
   },
   // -------- ROW 3 -----------
   {
-    avatar: '/avatar7.jpg',
+    avatar: '/pfps/7.png',
     name: 'Anil Sharma',
     role: 'Senior Year Student',
     text: "The personalized guidance from Fliq gave me clarity on my academic goals. I discovered universities I had never considered before, all thanks to their smart tools."
   },
   {
-    avatar: '/avatar8.jpg',
+    avatar: '/pfps/8.png',
     name: 'Sarah Williams',
     role: 'Senior Year Student',
-    text: "I can&apos;t thank Fliq enough for their support. The AI-driven essay builder helped me articulate my story effectively, which made a huge difference in my acceptance."
+    text: "I can't thank Fliq enough for their support. The AI-driven essay builder helped me articulate my story effectively, which made a huge difference in my acceptance."
   },
   {
-    avatar: '/avatar9.jpg',
+    avatar: '/pfps/9.png',
     name: 'Ali Hamad',
     role: 'Senior Year Student',
     text: "I was blown away by how Fliq streamlined my application process. The insights into what worked for other successful students were invaluable."
   },
   // -------- ROW 4 -----------
   {
-    avatar: '/avatar10.jpg',
+    avatar: '/pfps/10.png',
     name: 'Anil Sharma',
     role: 'Senior Year Student',
     text: "The personalized guidance from Fliq gave me clarity on my academic goals. I discovered universities I had never considered before, all thanks to their smart tools."
   },
   {
-    avatar: '/avatar11.jpg',
+    avatar: '/pfps/11.png',
     name: 'Ayesha Latif',
     role: 'Senior Year Student',
-    text: "I can&apos;t thank Fliq enough for their support. The AI-driven essay builder helped me articulate my story effectively, which made a huge difference in my acceptance."
+    text: "I can't thank Fliq enough for their support. The AI-driven essay builder helped me articulate my story effectively, which made a huge difference in my acceptance."
   },
   {
-    avatar: '/avatar12.jpg',
+    avatar: '/pfps/12.png',
     name: 'Liam Johnson',
     role: 'Senior Year Student',
     text: "I was blown away by how Fliq streamlined my application process. The insights into what worked for other successful students were invaluable."
@@ -87,7 +87,7 @@ export default function TestimonialWallSection() {
     <section className="w-full min-h-[600px] md:min-h-[950px] bg-[#FAF6F2] flex flex-col items-center pt-12 md:pt-[120px] pb-12 md:pb-[120px] px-4 md:px-[120px]">
       {/* Heading */}
       <h2 className="text-[#191919] font-outfit text-2xl md:text-[40px] font-bold leading-[110%] text-center mb-6 md:mb-9">
-        We Could Brag, But It&apos;d Be<br/>Better If They Do
+        We Could Brag, But It&apos;d Be<br />Better If They Do
       </h2>
       {/* Testimonials Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-[20px] w-full max-w-[1440px]">
