@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Header from '../component/header';
 import StudentSupportSection from '../component/StudentSupportSection';
@@ -77,6 +77,7 @@ type University = {
 
 function UniversityProfile() {
   const { refreshToken } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     // Add custom radio button styles
@@ -577,7 +578,10 @@ function UniversityProfile() {
 
         {/* Back to Student Catalogue */}
         <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 lg:pt-12">
-          <button className="flex items-center gap-2 text-light-text dark:text-dark-text hover:opacity-80 transition-opacity">
+          <button 
+            className="flex items-center gap-2 text-light-text dark:text-dark-text hover:opacity-80 transition-opacity cursor-pointer"
+            onClick={() => router.push('/browse-universities')}
+          >
             <svg width="32" height="31" viewBox="0 0 32 31" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g filter="url(#filter0_d_1_332)">
                 <rect width="30" height="29" fill="#FF9169" />
