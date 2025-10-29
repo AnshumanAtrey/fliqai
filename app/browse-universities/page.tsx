@@ -478,7 +478,7 @@ function BrowseUniversities() {
 
       // Step 3: Fetch universities by IDs from backend with consistent match percentages
       let token = localStorage.getItem('token');
-      if (!token && user) {
+      if (!token && user && 'getIdToken' in user && typeof user.getIdToken === 'function') {
         token = await user.getIdToken();
       }
       
