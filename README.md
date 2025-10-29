@@ -14,7 +14,6 @@ Ok to proceed? (y) y
 Creating a new Next.js app in /Users/atrey/Desktop/code/fliqai.
 
 Using npm.
-
 Initializing project with template: app-tw 
 
 
