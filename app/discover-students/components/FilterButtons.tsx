@@ -20,6 +20,8 @@ interface FilterButtonsProps {
   // Filter values for display
   gpaMin: number;
   gpaMax: number;
+  satMin: number;
+  satMax: number;
   selectedMajors: string[];
   selectedBackgrounds: string[];
   selectedCountries: string[];
@@ -40,6 +42,8 @@ export function FilterButtons({
   setShowSortFilter,
   gpaMin,
   gpaMax,
+  satMin,
+  satMax,
   selectedMajors,
   selectedBackgrounds,
   selectedCountries
@@ -84,10 +88,14 @@ export function FilterButtons({
               closeAllFilters();
               setShowSATFilter(!showSATFilter);
             }}
-            className="flex py-2 sm:py-3 px-3 sm:px-4 justify-center items-center gap-2 border border-black bg-light-secondary dark:bg-dark-secondary cursor-pointer whitespace-nowrap"
+            className={`flex py-2 sm:py-3 px-3 sm:px-4 justify-center items-center gap-2 border border-black whitespace-nowrap ${
+              satMin !== 1200 || satMax !== 1600 ? 'bg-accent' : 'bg-light-secondary dark:bg-dark-secondary'
+            } cursor-pointer`}
             style={{ boxShadow: '2px 2px 0 0 #000' }}
           >
-            <span className="text-black font-outfit text-sm sm:text-base font-medium">SAT</span>
+            <span className="text-black font-outfit text-sm sm:text-base font-medium">
+              SAT {satMin !== 1200 || satMax !== 1600 ? `(${satMin}-${satMax})` : ''}
+            </span>
             <ChevronDownIcon />
           </button>
         </div>

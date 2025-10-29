@@ -12,6 +12,8 @@ interface University {
     quote?: string;
     author?: string;
     authorImage?: string;
+    authorCourse?: string;
+    authorYear?: string;
     chartData?: number[];
     overall_match?: number;
 }
@@ -108,12 +110,35 @@ export function UniversityCard({ university, onUniversityClick }: UniversityCard
                     })}
                 </div>
 
-                {/* Description Section */}
+                {/* Student Testimonial Section */}
                 <div className="border border-black bg-white dark:bg-dark-tertiary p-4" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                    <div className="max-h-32 overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
-                        <p className="text-light-text dark:text-dark-text font-outfit text-sm font-normal leading-[140%] pr-2">
-                            {university.description}
-                        </p>
+                    {/* Student Quote */}
+                    <p className="text-light-text dark:text-dark-text font-outfit text-sm font-normal leading-[140%] mb-3">
+                        &ldquo;{university.quote || 'The University of Bath gave me more than a degree. It gave me a community that challenged me, inspired me, and prepared me to make a real impact'}&rdquo;
+                    </p>
+                    
+                    {/* Student Info */}
+                    <div className="flex items-center gap-3">
+                        {/* Student Profile Image */}
+                        <div className="w-10 h-10 rounded-full border border-black overflow-hidden flex-shrink-0">
+                            <Image
+                                src={university.authorImage || "/student1.png"}
+                                alt={university.author || "Student"}
+                                width={40}
+                                height={40}
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                        
+                        {/* Student Details */}
+                        <div className="flex-1">
+                            <p className="text-[#FF9169] font-outfit text-sm font-semibold leading-tight">
+                                {university.author || "David Kim"}
+                            </p>
+                            <p className="text-light-text dark:text-dark-text font-outfit text-xs font-normal leading-tight">
+                                {university.authorCourse || "BSc Business"}, {university.authorYear || "Class of 2025"}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -191,15 +216,37 @@ export function UniversityCard({ university, onUniversityClick }: UniversityCard
                     </div>
                 </div>
 
-                {/* Right - Description Section */}
+                {/* Right - Student Testimonial Section */}
                 <div className="flex flex-col w-[240px] lg:w-[280px]">
                     <div className="inline-flex py-4 px-6 flex-col justify-between border border-black bg-white dark:bg-dark-tertiary flex-1" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                        {/* Scrollable Description */}
+                        {/* Student Quote */}
                         <div className="flex-1 mb-4">
-                            <div className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
-                                <p className="text-light-text dark:text-dark-text font-outfit text-sm lg:text-base font-normal leading-[140%] pr-2">
-                                    {university.description || 'A prestigious institution known for academic excellence and innovation, offering world-class education and research opportunities to students from around the globe.'}
-                                </p>
+                            <p className="text-light-text dark:text-dark-text font-outfit text-sm lg:text-base font-normal leading-[140%] mb-4">
+                                &ldquo;{university.quote || 'The University of Bath gave me more than a degree. It gave me a community that challenged me, inspired me, and prepared me to make a real impact'}&rdquo;
+                            </p>
+                            
+                            {/* Student Info */}
+                            <div className="flex items-center gap-3">
+                                {/* Student Profile Image */}
+                                <div className="w-12 h-12 rounded-full border border-black overflow-hidden flex-shrink-0">
+                                    <Image
+                                        src={university.authorImage || "/student1.png"}
+                                        alt={university.author || "Student"}
+                                        width={48}
+                                        height={48}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                
+                                {/* Student Details */}
+                                <div className="flex-1">
+                                    <p className="text-[#FF9169] font-outfit text-sm font-semibold leading-tight">
+                                        {university.author || "David Kim"}
+                                    </p>
+                                    <p className="text-light-text dark:text-dark-text font-outfit text-xs font-normal leading-tight">
+                                        {university.authorCourse || "BSc Business"}, {university.authorYear || "Class of 2025"}
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
@@ -210,7 +257,7 @@ export function UniversityCard({ university, onUniversityClick }: UniversityCard
                                 className="w-full py-3 border border-black text-black font-outfit text-sm lg:text-base font-medium leading-normal transition-colors duration-200 bg-[#FF9169] hover:bg-[#ff7b4d]"
                                 style={{ boxShadow: '4px 4px 0 0 #000' }}
                             >
-                                View Full Profile
+                                Find out more
                             </button>
                         </div>
                     </div>

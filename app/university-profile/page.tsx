@@ -12,12 +12,15 @@ import TestScoresSection from '../component/TestScoresSection';
 import TimelineSection from '../component/TimelineSection';
 import ExtracurricularsSection from '../component/ExtracurricularsSection';
 import ScholarshipsAwardsSection from '../component/ScholarshipRewardsSection';
+import FinancialBreakdown from '../component/FinancialBreakdown';
 import ProofBankSection from '../component/ProofBankSection';
+import CampusLife from '../component/CampusLife';
 import { DotPatternBackground } from '../component/DotPatternBackground';
 import { useAuth } from '../../lib/hooks/useAuth';
 import { auth } from '../firebase/config';
 import { withAuthProtection } from '@/lib/hooks/useAuthProtection';
 import { RoadmapLockedModal } from '../component/RoadmapLockedModal';
+import DynamicCoursesSection from '../component/DynamicCoursesSection';
 
 type University = {
   id: number;
@@ -71,7 +74,33 @@ type University = {
           }>;
         };
       };
+      Financials?: {
+        quickStats?: {
+          selectedState?: string;
+          costofattendance?: string;
+          'tuition&fees'?: string;
+          'room&board'?: string;
+          'books&supplies'?: string;
+          otherexpenses?: string;
+        };
+      };
+      'Campus Life'?: {
+        quickStats?: {
+          location?: string;
+          riverdalepopulation?: string;
+          nearestmetropolitanarea?: string;
+        };
+        locationandsetting?: {
+          riverdalepopulation?: string;
+          nearestmetropolitanarea?: string;
+        };
+        housing?: {
+          collegehousing?: string;
+        };
+      };
+      [key: string]: unknown;
     };
+    [key: string]: unknown;
   }; // Raw API data for dynamic content
 };
 
@@ -322,7 +351,7 @@ function UniversityProfile() {
           chartData: number[];
           ranking: string;
         } | null = null;
-        
+
         try {
           const stored = sessionStorage.getItem('university_match_data');
           if (stored) {
@@ -396,7 +425,7 @@ function UniversityProfile() {
           let rankingText = "#5 QS World Rankings"; // Default
           let chartData: number[];
           let overallMatch: number;
-          
+
           if (storedMatchData) {
             // Use consistent data from browse page
             rankingText = storedMatchData.ranking;
@@ -578,7 +607,7 @@ function UniversityProfile() {
 
         {/* Back to Student Catalogue */}
         <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 lg:pt-12">
-          <button 
+          <button
             className="flex items-center gap-2 text-light-text dark:text-dark-text hover:opacity-80 transition-opacity cursor-pointer"
             onClick={() => router.push('/browse-universities')}
           >
@@ -832,12 +861,15 @@ function UniversityProfile() {
                           <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-light-text dark:text-dark-text pb-2 sm:pb-4">Want to join {university?.name || 'this university'}?</h3>
                           <p className="text-xs sm:text-sm text-light-p dark:text-dark-text">Built from patterns across hundreds of students who got in. This roadmap shows what actually gets attention and how to make it work for you</p>
                         </div>
-                        <button
-                          className="w-full py-2 sm:py-2.5 bg-[#FF9169] text-light-text hover:bg-black hover:text-[#FF9169] font-medium text-xs sm:text-sm border border-black"
+                        <a
+                          href={redirectUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full py-2 sm:py-2.5 bg-[#FF9169] text-light-text hover:bg-black hover:text-[#FF9169] font-medium text-xs sm:text-sm border border-black inline-block text-center"
                           style={{ boxShadow: '2px 2px 0 0 #000' }}
                         >
                           View Full Guide
-                        </button>
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -888,6 +920,10 @@ function UniversityProfile() {
                             </button>
 
                             <button
+                              onClick={() => {
+                                const email = university?.contact?.email || 'admissions@university.edu';
+                                window.location.href = `mailto:${email}`;
+                              }}
                               className="group w-full py-2 sm:py-3 px-4 sm:px-6 bg-[#FF9169] text-light-text hover:bg-black hover:text-[#FF9169] text-start font-medium border border-black transition-colors flex flex-row items-center gap-2 text-sm sm:text-base"
                               style={{ boxShadow: '2px 2px 0 0 #000' }}
                             >
@@ -898,6 +934,10 @@ function UniversityProfile() {
                             </button>
 
                             <button
+                              onClick={() => {
+                                const phone = university?.contact?.phone || '+1-XXX-XXX-XXXX';
+                                window.location.href = `tel:${phone.replace(/[^\d+]/g, '')}`;
+                              }}
                               className="group w-full py-2 sm:py-3 px-4 sm:px-6 bg-[#FF9169] text-light-text hover:bg-black hover:text-[#FF9169] text-start font-medium border border-black transition-colors flex flex-row items-center gap-2 text-sm sm:text-base"
                               style={{ boxShadow: '2px 2px 0 0 #000' }}
                             >
@@ -989,9 +1029,15 @@ function UniversityProfile() {
                       <p className="mb-3 sm:mb-4 text-sm sm:text-base">
                         The South West of England is made up of seven counties, with rural areas surrounding key student cities – from Plymouth and Bournemouth up to Bath, Bristol and Cheltenham & Gloucester.
                       </p>
-                      <button className="bg-[#FF9169] text-light-text px-4 sm:px-6 py-2 border border-black hover:bg-black hover:text-[#FF9169] transition-colors text-sm sm:text-base" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                      <a
+                        href={(university?.apiData?.pages?.StudentLife as { regionGuides?: Array<{ link?: string }> })?.regionGuides?.[0]?.link || redirectUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-[#FF9169] text-light-text px-4 sm:px-6 py-2 border border-black hover:bg-black hover:text-[#FF9169] transition-colors text-sm sm:text-base inline-block"
+                        style={{ boxShadow: '4px 4px 0 0 #000' }}
+                      >
                         Read Article
-                      </button>
+                      </a>
                     </div>
                     <div className="lg:w-1/2 p-2 sm:p-4 w-full">
                       <div className="relative w-full aspect-square border border-black">
@@ -1013,9 +1059,15 @@ function UniversityProfile() {
                       <p className=" mb-4">
                         The University’s campus is set in rural grounds overlooking the city of Bath and is one of the safest campus sites in the UK. You don&apos;t have to walk far to reach the facilities on campus and you can easily travel between the campus and the city either by foot, bike, bus or car.
                       </p>
-                      <button className="bg-[#FF9169] text-light-text px-6 py-2 border-[1px] border-black hover:bg-black hover:text-[#FF9169] transition-colors" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                      <a
+                        href={(university?.apiData?.pages?.StudentLife as { regionGuides?: Array<{ link?: string }> })?.regionGuides?.[1]?.link || redirectUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-[#FF9169] text-light-text px-6 py-2 border-[1px] border-black hover:bg-black hover:text-[#FF9169] transition-colors inline-block"
+                        style={{ boxShadow: '4px 4px 0 0 #000' }}
+                      >
                         Read Article
-                      </button>
+                      </a>
                     </div>
                     <div className="md:w-1/2 p-4">
                       <div className="relative w-full aspect-square border-[1px] border-black">
@@ -1030,12 +1082,18 @@ function UniversityProfile() {
                     </div>
                   </div>
                   <div className="p-6 flex items-center gap-6">
-                    <button className="bg-[#FF9169] text-light-text px-8 py-3 text-lg font-medium border-[1px] border-black hover:bg-black hover:text-[#FF9169] transition-colors flex items-center gap-2" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                    <a
+                      href={redirectUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-[#FF9169] text-light-text px-8 py-3 text-lg font-medium border-[1px] border-black hover:bg-black hover:text-[#FF9169] transition-colors flex items-center gap-2"
+                      style={{ boxShadow: '4px 4px 0 0 #000' }}
+                    >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                       </svg>
                       Book an open day
-                    </button>
+                    </a>
                     <p className="text-light-p dark:text-dark-text">Visit {university?.name || 'the university'} to see what it&apos;s like on campus</p>
                   </div>
                 </div>
@@ -1046,112 +1104,54 @@ function UniversityProfile() {
               <>
                 {/* Browse Courses Section */}
                 <div className="w-[90%] mx-auto py-10 text-light-text dark:text-dark-text" style={{ borderBottom: "1px solid black" }}>
-                  <h2 className="text-2xl font-bold text-light-text dark:text-dark-text mb-6">Browse courses</h2>
-                  <div className="flex flex-col md:flex-row gap-8">
-                    {/* Filters Sidebar */}
-                    <div className="w-full md:w-1/4">
-                      <div className="p-6">
-                        <h3 className="font-bold text-lg mb-4">Filter by</h3>
-
-                        {/* Degree Type Filter */}
-                        <div className="mb-6">
-                          <h4 className="font-medium mb-3">Degree Type</h4>
-                          <div className="space-y-2">
-                            {['Undergraduate', 'Postgraduate'].map((type) => (
-                              <label key={type} className="radio-label">
-                                <input
-                                  type="radio"
-                                  name="degreeType"
-                                  defaultChecked={type === 'Undergraduate'}
-                                />
-                                <span className="custom-radio"></span>
-                                <span className="text-light-text dark:text-dark-text ml-1">{type}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Mode of Study Filter */}
-                        <div className="mb-6">
-                          <h4 className="font-medium mb-3">Mode of Study</h4>
-                          <div className="space-y-2">
-                            {['Full-time', 'Part-time', 'Distance Learning'].map((mode) => (
-                              <label key={mode} className="radio-label">
-                                <input
-                                  type="radio"
-                                  name="studyMode"
-                                  defaultChecked={mode === 'Full-time'}
-                                />
-                                <span className="custom-radio"></span>
-                                <span className="text-light-text dark:text-dark-text ml-1">{mode}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Courses Grid */}
-                    <div className="w-full md:w-3/4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[1, 2, 3, 4, 5, 6].map((item) => (
-                          <div key={item} className="bg-light-bg dark:bg-dark-tertiary border-2 border-black p-2" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                            <div className="relative w-full h-64 border-2 border-black mb-3 bg-gray-200">
-                              <Image
-                                src={`/bath_profile.png`}
-                                alt={`Course ${item}`}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                            <h3 className="font-bold text-lg mb-1 mt-2">
-                              {[
-                                'Computer Science',
-                                'Business Administration',
-                                'Mechanical Engineering',
-                                'Data Science',
-                                'Architecture',
-                                'Biomedical Sciences'
-                              ][item - 1]}
-                            </h3>
-                            <div className="flex gap-1 text-sm text-light-p dark:text-dark-text">
-                              <p className="text-sm text-light-p dark:text-dark-text mb-2">
-                                {['BSc', 'MBA', 'BEng', 'MSc', 'BArch', 'BSc'][item - 1]}
-                              </p>
-                              <span>{['3 years', '2 years', '4 years', '1 year', '5 years', '3 years'][item - 1]}</span>
-                              <span>•</span>
-                              <span>Full-time</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* View More Button */}
-                      <div className="mt-10 mb-8 text-center">
-                        <button className="bg-[#FF9169] text-light-text flex flex-row justify-between items-center gap-2 px-8 py-3 text-lg mt-4 font-medium border-2 border-black hover:bg-black hover:text-[#FF9169] transition-colors group" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                          <svg className="m-2 transition-all duration-300 group-hover:fill-[#FF9169]" width="12" height="13" viewBox="0 0 12 13" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M11.938 1.21338V9.33838C11.938 9.58702 11.8392 9.82548 11.6634 10.0013C11.4876 10.1771 11.2491 10.2759 11.0005 10.2759C10.7518 10.2759 10.5134 10.1771 10.3375 10.0013C10.1617 9.82548 10.063 9.58702 10.063 9.33838V3.479L1.66374 11.8767C1.48762 12.0528 1.24874 12.1517 0.999673 12.1517C0.750601 12.1517 0.511731 12.0528 0.335611 11.8767C0.15949 11.7005 0.0605469 11.4617 0.0605469 11.2126C0.0605469 10.9635 0.15949 10.7247 0.335611 10.5485L8.73483 2.15088H2.87545C2.62681 2.15088 2.38836 2.05211 2.21254 1.87629C2.03673 1.70048 1.93795 1.46202 1.93795 1.21338C1.93795 0.964738 2.03673 0.726282 2.21254 0.550466C2.38836 0.374651 2.62681 0.275879 2.87545 0.275879H11.0005C11.2491 0.275879 11.4876 0.374651 11.6634 0.550466C11.8392 0.726282 11.938 0.964738 11.938 1.21338Z" />
-                          </svg>
-                          Show all 182 options
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <DynamicCoursesSection
+                    universityData={university}
+                    redirectUrl={redirectUrl}
+                    totalCoursesCount={182}
+                  />
                 </div>
+
+                {/* Financial Breakdown Section */}
+                <FinancialBreakdown financialData={university?.apiData?.pages?.Financials} />
+
+                {/* Campus Life Section */}
+                <CampusLife campusLifeData={university?.apiData?.pages?.['Campus Life']} universityName={university?.name} />
 
                 {/* Student Support Section */}
                 <div className="w-full px-4 sm:px-6 py-10 sm:py-16 lg:py-20">
                   <h2 className="text-xl sm:text-2xl lg:text-3xl text-light-text dark:text-dark-text font-bold mb-6 sm:mb-10">Student Support</h2>
-                  <StudentSupportSection />
+                  <StudentSupportSection redirectUrl={redirectUrl} />
                 </div>
               </>
             )}
             {activeTab === 'roadmap' && (
               <div className="p-4 sm:p-6 lg:p-8">
+                {/* Always show the intro section with background image */}
+                <div className="relative w-full h-[400px] mb-8 flex items-center justify-center">
+                  {/* Full Background Image */}
+                  <Image
+                    src="/clg.png"
+                    alt="University building"
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                  
+                  {/* Content over the background */}
+                  <div className="relative z-10 bg-white dark:bg-dark-secondary border-2 border-black p-6 max-w-2xl mx-4" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                    <h2 className="text-xl sm:text-2xl font-bold text-black dark:text-dark-text mb-4 text-center">
+                      A roadmap built against the ideal uni admit
+                    </h2>
+                    <p className="text-sm text-gray-600 dark:text-dark-text text-center">
+                      Academics, test scores, extracurriculars, exam timelines, scholarships & awards - see and compare yourself to the average admit from this university
+                    </p>
+                  </div>
+                </div>
+
                 {isRoadmapLocked ? (
-                  <div className="p-4 sm:p-8">
+                  <div className="relative">
                     {/* Blurred preview content */}
-                    <div className="blur-sm pointer-events-none opacity-50 mb-8">
+                    <div className="blur-md pointer-events-none opacity-40">
                       <ReadinessRing
                         userProfile={userProfile}
                         universityData={university}
@@ -1169,15 +1169,14 @@ function UniversityProfile() {
                       <ProofBankSection students={[]} />
                     </div>
 
-                    {/* Locked Modal - Positioned over the blurred content */}
-                    <div className="relative -mt-48">
-                      <RoadmapLockedModal
-                        onUnlock={unlockRoadmap}
-                        isUnlocking={isUnlockingRoadmap}
-                        userCredits={userCredits}
-                        universityName={university?.name}
-                      />
-                    </div>
+                    {/* Locked Modal - Fixed positioned modal */}
+                    <RoadmapLockedModal
+                      onUnlock={unlockRoadmap}
+                      isUnlocking={isUnlockingRoadmap}
+                      userCredits={userCredits}
+                      universityName={university?.name}
+                      redirectUrl={redirectUrl}
+                    />
                   </div>
                 ) : (
                   <>

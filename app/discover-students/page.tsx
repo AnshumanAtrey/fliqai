@@ -369,6 +369,8 @@ function DiscoverStudentsPage() {
               setShowSortFilter={setShowSortFilter}
               gpaMin={filters.gpaMin}
               gpaMax={filters.gpaMax}
+              satMin={filters.satMin}
+              satMax={filters.satMax}
               selectedMajors={filters.majors}
               selectedBackgrounds={filters.backgrounds}
               selectedCountries={filters.countries}

@@ -1,8 +1,14 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 
-export const GPADistribution = () => {
+interface GPADistributionProps {
+  admissionsData?: unknown; // We'll define this more specifically if we find GPA data in the schema
+}
+
+export const GPADistribution: React.FC<GPADistributionProps> = ({ admissionsData }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // For now, we'll use the default data since I don't see specific GPA distribution 
+  // data in the provided schema. This can be updated when that data is available.
   const gpaData = useMemo(() => [
     { label: '4.00 GPA & Above', value: 4, color: '#80CAFF' },
     { label: '3.75-3.99 GPA', value: 24, color: '#85E0A3' },
@@ -10,7 +16,7 @@ export const GPADistribution = () => {
     { label: '3.25-3.49 GPA', value: 13, color: '#FFAFA3' },
     { label: '3.00-3.24 GPA', value: 15, color: '#FFC470' },
     { label: '<2.99 GPA', value: 24, color: '#D9B8FF' }
-  ], []);
+  ], [admissionsData]); // Added admissionsData as dependency for future use
 
   interface GpaDataItem {
     label: string;

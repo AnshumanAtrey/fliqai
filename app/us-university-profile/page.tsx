@@ -22,6 +22,7 @@ import { useAuth } from '../../lib/hooks/useAuth';
 import { withAuthProtection } from '@/lib/hooks/useAuthProtection';
 import { auth } from '../firebase/config';
 import { RoadmapLockedModal } from '../component/RoadmapLockedModal';
+import DynamicCoursesSection from '../component/DynamicCoursesSection';
 
 type University = {
   id: number;
@@ -66,7 +67,48 @@ type University = {
     [key: string]: number | undefined;
   };
   // Raw API data for components
-  apiData?: Record<string, unknown>;
+  apiData?: {
+    pages?: {
+      Financials?: {
+        quickStats?: {
+          selectedState?: string;
+          costofattendance?: string;
+          'tuition&fees'?: string;
+          'room&board'?: string;
+          'books&supplies'?: string;
+          otherexpenses?: string;
+        };
+      };
+      'Campus Life'?: {
+        quickStats?: {
+          location?: string;
+          riverdalepopulation?: string;
+          nearestmetropolitanarea?: string;
+        };
+        locationandsetting?: {
+          riverdalepopulation?: string;
+          nearestmetropolitanarea?: string;
+        };
+        housing?: {
+          collegehousing?: string;
+        };
+      };
+      Admissions?: {
+        selectionofstudents?: {
+          table?: Array<{
+            Factor: string;
+            'Very Important': string;
+            Important: string;
+            Considered: string;
+            'Not Considered': string;
+          }>;
+        };
+        [key: string]: unknown;
+      };
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  };
 };
 
 function UniversityProfile() {
@@ -164,7 +206,7 @@ function UniversityProfile() {
   } | null>(null);
   const [roadmapLoading, setRoadmapLoading] = useState(false);
   const [roadmapError, setRoadmapError] = useState<string | null>(null);
-  
+
   // Locking system state
   const [isRoadmapLocked, setIsRoadmapLocked] = useState(true);
   const [isUnlockingRoadmap, setIsUnlockingRoadmap] = useState(false);
@@ -311,7 +353,7 @@ function UniversityProfile() {
           chartData: number[];
           ranking: string;
         } | null = null;
-        
+
         try {
           const stored = sessionStorage.getItem('university_match_data');
           if (stored) {
@@ -397,7 +439,7 @@ function UniversityProfile() {
           let rankingText = "#200+ in QS World University Rankings"; // Default
           let chartData: number[];
           let overallMatch: number;
-          
+
           if (storedMatchData) {
             // Use consistent data from browse page
             rankingText = storedMatchData.ranking;
@@ -426,7 +468,7 @@ function UniversityProfile() {
             overallMatch = Math.round(chartData.reduce((sum, score) => sum + score, 0) / chartData.length);
             console.log('⚠️ Calculated fresh match data:', { rankingText, chartData, overallMatch });
           }
-          
+
           console.log('🎯 US University Dynamic Data:', {
             universityId: apiUniversity.id,
             name: overviewData.collegeName,
@@ -439,7 +481,7 @@ function UniversityProfile() {
 
           // Use about field for quote, fallback to description
           const aboutText = apiUniversity.pages?.About?.about || overviewData.description || "Innovation and excellence in everything we do.";
-          
+
           // Truncate long text for quote (limit to ~150 characters)
           const truncateText = (text: string, maxLength: number = 150) => {
             if (text.length <= maxLength) return text;
@@ -447,7 +489,7 @@ function UniversityProfile() {
             const lastSpace = truncated.lastIndexOf(' ');
             return lastSpace > 0 ? truncated.substring(0, lastSpace) + '...' : truncated + '...';
           };
-          
+
           const shortQuote = truncateText(aboutText);
 
           // Helper function to ensure URL has proper protocol
@@ -461,7 +503,7 @@ function UniversityProfile() {
 
           // Extract contact information from API data
           const aboutData = apiUniversity.pages?.About || {};
-          
+
           // Transform API data for US universities
           const transformedUniversity: University = {
             id: parseInt(apiUniversity.id.replace(/[^\d]/g, '') || '1'),
@@ -570,7 +612,7 @@ function UniversityProfile() {
 
         {/* Back to Browse Universities */}
         <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 lg:pt-12">
-          <button 
+          <button
             onClick={() => router.push('/browse-universities')}
             className="flex items-center gap-2 text-light-text hover:opacity-80 transition-opacity cursor-pointer"
           >
@@ -892,6 +934,10 @@ function UniversityProfile() {
                             </button>
 
                             <button
+                              onClick={() => {
+                                const email = university?.contact?.email || 'admissions@university.edu';
+                                window.location.href = `mailto:${email}`;
+                              }}
                               className="group w-full py-2 sm:py-3 px-4 sm:px-6 bg-[#FF9169] text-black hover:bg-black hover:text-[#FF9169] text-start font-medium border border-black transition-colors flex flex-row items-center gap-2 text-sm sm:text-base"
                               style={{ boxShadow: '2px 2px 0 0 #000' }}
                             >
@@ -902,6 +948,10 @@ function UniversityProfile() {
                             </button>
 
                             <button
+                              onClick={() => {
+                                const phone = university?.contact?.phone || '(000) 000-0000';
+                                window.location.href = `tel:${phone.replace(/[^\d+]/g, '')}`;
+                              }}
                               className="group w-full py-2 sm:py-3 px-4 sm:px-6 bg-[#FF9169] text-black hover:bg-black hover:text-[#FF9169] text-start font-medium border border-black transition-colors flex flex-row items-center gap-2 text-sm sm:text-base"
                               style={{ boxShadow: '2px 2px 0 0 #000' }}
                             >
@@ -922,126 +972,57 @@ function UniversityProfile() {
               {activeTab === 'collegeInfo' && <AdmissionsSection university={university} />}
 
               {/* Financial Breakdown Section */}
-              {activeTab === 'collegeInfo' && <FinancialBreakdown />}
+              {activeTab === 'collegeInfo' && <FinancialBreakdown financialData={university?.apiData?.pages?.Financials} />}
 
               {/* Campus Life Section */}
-              {activeTab === 'collegeInfo' && <CampusLife />}
+              {activeTab === 'collegeInfo' && <CampusLife campusLifeData={university?.apiData?.pages?.['Campus Life']} universityName={university?.name} />}
 
               {activeTab === 'collegeInfo' && (
                 <>
                   {/* Browse Courses Section */}
-                  <div className="w-full px-4 sm:px-6 py-10 sm:py-16 lg:py-20 text-light-text dark:text-dark-text border-b border-t border-light-text dark:border-dark-text">
-                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-light-text dark:text-dark-text mb-4 sm:mb-6">Browse courses</h2>
-                    <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
-                      {/* Filters Sidebar */}
-                      <div className="w-full lg:w-1/4">
-                        <div className="p-4 sm:p-6">
-                          <h3 className="font-bold text-base sm:text-lg mb-3 sm:mb-4">Filter by</h3>
+                  <DynamicCoursesSection
+                    universityData={university}
+                    redirectUrl={redirectUrl}
+                    totalCoursesCount={182}
+                  />
 
-                          {/* Degree Type Filter */}
-                          <div className="mb-6">
-                            <h4 className="font-medium mb-3">Degree Type</h4>
-                            <div className="space-y-2">
-                              {['Undergraduate', 'Postgraduate'].map((type) => (
-                                <label key={type} className="radio-label">
-                                  <input
-                                    type="radio"
-                                    name="degreeType"
-                                    defaultChecked={type === 'Undergraduate'}
-                                  />
-                                  <span className="custom-radio"></span>
-                                  <span className="text-light-text dark:text-dark-text ml-1">{type}</span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Mode of Study Filter */}
-                          <div className="mb-6">
-                            <h4 className="font-medium mb-3">Mode of Study</h4>
-                            <div className="space-y-2">
-                              {['Full-time', 'Part-time', 'Distance Learning'].map((mode) => (
-                                <label key={mode} className="radio-label">
-                                  <input
-                                    type="radio"
-                                    name="studyMode"
-                                    defaultChecked={mode === 'Full-time'}
-                                  />
-                                  <span className="custom-radio"></span>
-                                  <span className="text-light-text dark:text-dark-text ml-1">{mode}</span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Courses Grid */}
-                      <div className="w-full lg:w-3/4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                          {[1, 2, 3, 4, 5, 6].map((item) => (
-                            <div key={item} className="bg-light-secondary dark:bg-dark-tertiary border border-black p-2" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                              <div className="relative w-full h-48 sm:h-64 border border-black mb-2 sm:mb-3 bg-light-secondary dark:bg-dark-tertiary">
-                                <Image
-                                  src={`/us-cources.png`}
-                                  alt={`Course ${item}`}
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-                              <h3 className="font-bold text-base sm:text-lg mb-1 mt-2">
-                                {[
-                                  'Computer Science',
-                                  'Business Administration',
-                                  'Mechanical Engineering',
-                                  'Data Science',
-                                  'Architecture',
-                                  'Biomedical Sciences'
-                                ][item - 1]}
-                              </h3>
-                              <div className="flex gap-1 text-xs sm:text-sm text-light-p dark:text-dark-text">
-                                <p className="text-xs sm:text-sm text-light-p dark:text-dark-text mb-2">
-                                  {['BSc', 'MBA', 'BEng', 'MSc', 'BArch', 'BSc'][item - 1]}
-                                </p>
-                                <span>{['3 years', '2 years', '4 years', '1 year', '5 years', '3 years'][item - 1]}</span>
-                                <span>•</span>
-                                <span>Full-time</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* View More Button */}
-                        <div className="mt-6 sm:mt-10 mb-6 sm:mb-8 text-center">
-                          <button className="bg-[#FF9169] text-black flex flex-row justify-center items-center gap-2 px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg font-medium border border-black hover:bg-black hover:text-[#FF9169] transition-colors group" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                            <svg className="transition-opacity duration-300 fill-black hover:fill-[#FF9169]" width="12" height="13" viewBox="0 0 12 13" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M11.938 1.21338V9.33838C11.938 9.58702 11.8392 9.82548 11.6634 10.0013C11.4876 10.1771 11.2491 10.2759 11.0005 10.2759C10.7518 10.2759 10.5134 10.1771 10.3375 10.0013C10.1617 9.82548 10.063 9.58702 10.063 9.33838V3.479L1.66374 11.8767C1.48762 12.0528 1.24874 12.1517 0.999673 12.1517C0.750601 12.1517 0.511731 12.0528 0.335611 11.8767C0.15949 11.7005 0.0605469 11.4617 0.0605469 11.2126C0.0605469 10.9635 0.15949 10.7247 0.335611 10.5485L8.73483 2.15088H2.87545C2.62681 2.15088 2.38836 2.05211 2.21254 1.87629C2.03673 1.70048 1.93795 1.46202 1.93795 1.21338C1.93795 0.964738 2.03673 0.726282 2.21254 0.550466C2.38836 0.374651 2.62681 0.275879 2.87545 0.275879H11.0005C11.2491 0.275879 11.4876 0.374651 11.6634 0.550466C11.8392 0.726282 11.938 0.964738 11.938 1.21338Z" fill="currentColor" />
-                            </svg>
-                            Show all 182 options
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-              {activeTab === 'collegeInfo' && (
-                <>
                   {/* Admission Factors Section */}
-                  <AdmissionFactors />
+                  <AdmissionFactors admissionsData={university?.apiData?.pages?.Admissions} />
 
                   {/* GPA Distribution Section */}
-                  <GPADistribution />
+                  <GPADistribution admissionsData={university?.apiData?.pages?.Admissions} />
                 </>
               )}
 
               {activeTab === 'roadmap' && (
                 <div className="p-4 sm:p-6 lg:p-8">
+                  {/* Always show the intro section with background image */}
+                  <div className="relative w-full h-[400px] mb-8 flex items-center justify-center">
+                    {/* Full Background Image */}
+                    <Image
+                      src="/clg.png"
+                      alt="University building"
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                    
+                    {/* Content over the background */}
+                    <div className="relative z-10 bg-white dark:bg-dark-secondary border-2 border-black p-6 max-w-2xl mx-4" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                      <h2 className="text-xl sm:text-2xl font-bold text-black dark:text-dark-text mb-4 text-center">
+                        A roadmap built against the ideal uni admit
+                      </h2>
+                      <p className="text-sm text-gray-600 dark:text-dark-text text-center">
+                        Academics, test scores, extracurriculars, exam timelines, scholarships & awards - see and compare yourself to the average admit from this university
+                      </p>
+                    </div>
+                  </div>
+
                   {isRoadmapLocked ? (
-                    <div className="p-4 sm:p-8">
+                    <div className="relative">
                       {/* Blurred preview content */}
-                      <div className="blur-sm pointer-events-none opacity-50 mb-8">
-                        <ReadinessRing 
+                      <div className="blur-md pointer-events-none opacity-40">
+                        <ReadinessRing
                           userProfile={userProfile}
                           universityData={university}
                           studentProfiles={[]}
@@ -1051,22 +1032,21 @@ function UniversityProfile() {
                         <TestScoresSection redirectUrl={redirectUrl} />
                         <TimelineSection />
                         <ExtracurricularsSection redirectUrl={redirectUrl} />
-                        <ScholarshipsAwardsSection 
+                        <ScholarshipsAwardsSection
                           studentProfiles={[]}
                           universityData={university}
                         />
                         <ProofBankSection students={[]} />
                       </div>
 
-                      {/* Locked Modal - Positioned over the blurred content */}
-                      <div className="relative -mt-48">
-                        <RoadmapLockedModal
-                          onUnlock={unlockRoadmap}
-                          isUnlocking={isUnlockingRoadmap}
-                          userCredits={userCredits}
-                          universityName={university?.name}
-                        />
-                      </div>
+                      {/* Locked Modal - Fixed positioned modal */}
+                      <RoadmapLockedModal
+                        onUnlock={unlockRoadmap}
+                        isUnlocking={isUnlockingRoadmap}
+                        userCredits={userCredits}
+                        universityName={university?.name}
+                        redirectUrl={redirectUrl}
+                      />
                     </div>
                   ) : (
                     <>
@@ -1114,7 +1094,7 @@ function UniversityProfile() {
                         <div>
                           {/* Student Profiles Section */}
                           {/* Original Roadmap Components */}
-                          <ReadinessRing 
+                          <ReadinessRing
                             userProfile={userProfile}
                             universityData={university}
                             studentProfiles={roadmapData.students || []}
@@ -1124,7 +1104,7 @@ function UniversityProfile() {
                           <TestScoresSection redirectUrl={redirectUrl} />
                           <TimelineSection />
                           <ExtracurricularsSection redirectUrl={redirectUrl} />
-                          <ScholarshipsAwardsSection 
+                          <ScholarshipsAwardsSection
                             studentProfiles={roadmapData.students || []}
                             universityData={university}
                           />

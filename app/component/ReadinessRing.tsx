@@ -35,44 +35,57 @@ const ReadinessRingSection = ({ userProfile, universityData, studentProfiles = [
   const canvasRef1 = useRef(null);
   const canvasRef2 = useRef(null);
 
-  // Calculate dynamic data based on props
-  const calculateAverageStudentData = () => {
+  // Calculate data for a single representative student from the university
+  const calculateUniversityStudentData = () => {
     if (studentProfiles.length > 0) {
-      // Calculate averages from actual student profiles
-      const avgAcademics = studentProfiles.reduce((sum, student) => {
-        const gpa = (typeof student.gpa === 'object' ? parseFloat(String(student.gpa?.current || 0)) : parseFloat(String(student.gpa || 0))) || student.academicInfo?.gpa || 3.5;
-        return sum + (gpa / 4.0 * 100);
-      }, 0) / studentProfiles.length;
+      // Select the first student as representative, or pick one based on university name hash
+      const universityHash = (universityData?.name || '').split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0);
+      const studentIndex = Math.abs(universityHash) % studentProfiles.length;
+      const student = studentProfiles[studentIndex];
 
-      const avgTestScores = studentProfiles.reduce((sum, student) => {
-        const sat = parseFloat(String(student.testScores?.sat || student.sat || 1200));
-        return sum + (sat / 1600 * 100);
-      }, 0) / studentProfiles.length;
+      // Calculate this specific student's profile
+      const gpa = (typeof student.gpa === 'object' ? parseFloat(String(student.gpa?.current || 0)) : parseFloat(String(student.gpa || 0))) || student.academicInfo?.gpa || 3.5;
+      const academics = Math.round((gpa / 4.0) * 100);
 
-      const avgExtracurriculars = studentProfiles.reduce((sum, student) => {
-        const activities = student.activities?.length || student.extracurriculars?.length || 3;
-        return sum + Math.min(activities * 10, 100);
-      }, 0) / studentProfiles.length;
+      const sat = parseFloat(String(student.testScores?.sat || student.sat || 1200));
+      const testScores = Math.round((sat / 1600) * 100);
 
-      const avgProjects = 100 - avgAcademics - avgTestScores - avgExtracurriculars;
+      const activities = student.activities?.length || student.extracurriculars?.length || 3;
+      const extracurriculars = Math.min(Math.round(activities * 8), 25); // Cap at 25%
+
+      const projects = Math.max(100 - academics - testScores - extracurriculars, 5);
 
       return {
         segments: [
-          { label: `Academics - ${Math.round(avgAcademics)}%`, value: Math.round(avgAcademics), color: '#80CAFF' },
-          { label: `Personal Projects - ${Math.round(Math.max(avgProjects, 5))}%`, value: Math.round(Math.max(avgProjects, 5)), color: '#FFAFA3' },
-          { label: `Extracurriculars - ${Math.round(avgExtracurriculars)}%`, value: Math.round(avgExtracurriculars), color: '#FFD966' },
-          { label: `Test Scores - ${Math.round(avgTestScores)}%`, value: Math.round(avgTestScores), color: '#85E0A3' }
+          { label: `Academics - ${academics}%`, value: academics, color: '#80CAFF' },
+          { label: `Personal Projects - ${projects}%`, value: projects, color: '#FFAFA3' },
+          { label: `Extracurriculars - ${extracurriculars}%`, value: extracurriculars, color: '#FFD966' },
+          { label: `Test Scores - ${testScores}%`, value: testScores, color: '#85E0A3' }
         ]
       };
     }
 
-    // Fallback to default data
+    // Generate randomized fallback data based on university name
+    const universityHash = (universityData?.name || 'University').split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
+    
+    const seed = Math.abs(universityHash);
+    const academics = 30 + (seed % 20); // 30-49%
+    const testScores = 25 + ((seed >> 4) % 25); // 25-49%
+    const extracurriculars = 10 + ((seed >> 8) % 15); // 10-24%
+    const projects = Math.max(100 - academics - testScores - extracurriculars, 5);
+
     return {
       segments: [
-        { label: 'Academics - 38%', value: 38, color: '#80CAFF' },
-        { label: 'Personal Projects - 18%', value: 18, color: '#FFAFA3' },
-        { label: 'Extracurriculars - 15%', value: 15, color: '#FFD966' },
-        { label: 'Test Scores - 35%', value: 35, color: '#85E0A3' }
+        { label: `Academics - ${academics}%`, value: academics, color: '#80CAFF' },
+        { label: `Personal Projects - ${projects}%`, value: projects, color: '#FFAFA3' },
+        { label: `Extracurriculars - ${extracurriculars}%`, value: extracurriculars, color: '#FFD966' },
+        { label: `Test Scores - ${testScores}%`, value: testScores, color: '#85E0A3' }
       ]
     };
   };
@@ -81,42 +94,48 @@ const ReadinessRingSection = ({ userProfile, universityData, studentProfiles = [
     if (userProfile) {
       // Calculate user's scores based on their profile
       const userGPA = userProfile.gpa?.current || userProfile.academicInfo?.gpa || 3.7;
-      const userAcademics = (userGPA / 4.0) * 100;
+      const userAcademics = Math.round((userGPA / 4.0) * 100);
 
       const userSAT = userProfile.testScores?.sat || userProfile.sat || 1400;
-      const userTestScores = (userSAT / 1600) * 100;
+      const userTestScores = Math.round((userSAT / 1600) * 100);
 
       const userActivities = userProfile.activities?.length || userProfile.extracurriculars?.length || 2;
-      const userExtracurriculars = Math.min(userActivities * 12, 100);
+      const userExtracurriculars = Math.min(Math.round(userActivities * 8), 25); // Cap at 25%
 
       const userProjects = Math.max(100 - userAcademics - userTestScores - userExtracurriculars, 5);
 
       return {
         segments: [
-          { label: `Academics - ${Math.round(userAcademics)}%`, value: Math.round(userAcademics), color: '#80CAFF' },
-          { label: `Personal Projects - ${Math.round(userProjects)}%`, value: Math.round(userProjects), color: '#FFAFA3' },
-          { label: `Extracurriculars - ${Math.round(userExtracurriculars)}%`, value: Math.round(userExtracurriculars), color: '#FFD966' },
-          { label: `Test Scores - ${Math.round(userTestScores)}%`, value: Math.round(userTestScores), color: '#85E0A3' }
+          { label: `Academics - ${userAcademics}%`, value: userAcademics, color: '#80CAFF' },
+          { label: `Personal Projects - ${userProjects}%`, value: userProjects, color: '#FFAFA3' },
+          { label: `Extracurriculars - ${userExtracurriculars}%`, value: userExtracurriculars, color: '#FFD966' },
+          { label: `Test Scores - ${userTestScores}%`, value: userTestScores, color: '#85E0A3' }
         ]
       };
     }
 
-    // Fallback to default data
+    // Generate randomized fallback data for user (different from university student)
+    const userSeed = Date.now() % 1000; // Changes periodically
+    const academics = 25 + (userSeed % 25); // 25-49%
+    const testScores = 35 + ((userSeed >> 3) % 30); // 35-64%
+    const extracurriculars = 5 + ((userSeed >> 6) % 15); // 5-19%
+    const projects = Math.max(100 - academics - testScores - extracurriculars, 5);
+
     return {
       segments: [
-        { label: 'Academics - 32%', value: 32, color: '#80CAFF' },
-        { label: 'Personal Projects - 9%', value: 9, color: '#FFAFA3' },
-        { label: 'Extracurriculars - 8%', value: 8, color: '#FFD966' },
-        { label: 'Test Scores - 55%', value: 55, color: '#85E0A3' }
+        { label: `Academics - ${academics}%`, value: academics, color: '#80CAFF' },
+        { label: `Personal Projects - ${projects}%`, value: projects, color: '#FFAFA3' },
+        { label: `Extracurriculars - ${extracurriculars}%`, value: extracurriculars, color: '#FFD966' },
+        { label: `Test Scores - ${testScores}%`, value: testScores, color: '#85E0A3' }
       ]
     };
   };
 
-  const asuData = calculateAverageStudentData();
+  const universityStudentData = calculateUniversityStudentData();
   const youData = calculateUserData();
 
   // Get university name for display
-  const universityName = universityData?.name || 'ASU';
+  const universityName = universityData?.name || 'this university';
 
   const drawDonutChart = (canvas: HTMLCanvasElement, data: { segments: Array<{ label: string; value: number; color: string }> }) => {
     if (!canvas) return;
@@ -155,13 +174,13 @@ const ReadinessRingSection = ({ userProfile, universityData, studentProfiles = [
 
   useEffect(() => {
     if (canvasRef1.current) {
-      drawDonutChart(canvasRef1.current, asuData);
+      drawDonutChart(canvasRef1.current, universityStudentData);
     }
     if (canvasRef2.current) {
       drawDonutChart(canvasRef2.current, youData);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [userProfile, universityData, studentProfiles]);
 
   const Label = ({ text, position }: { text: string; position: string }) => (
     <div
@@ -193,13 +212,13 @@ const ReadinessRingSection = ({ userProfile, universityData, studentProfiles = [
               className="w-full h-full"
             ></canvas>
 
-            {/* Labels for ASU Student */}
-            <Label text="Academics - 38%" position="top-20 right-4" />
-            <Label text="Personal Projects - 18%" position="bottom-10 right-2" />
-            <Label text="Extracurriculars - 15%" position="bottom-12 left-1" />
-            <Label text="Test Scores - 35%" position="top-14 left-2" />
+            {/* Labels for University Student */}
+            <Label text={universityStudentData.segments[0].label} position="top-20 right-4" />
+            <Label text={universityStudentData.segments[1].label} position="bottom-10 right-2" />
+            <Label text={universityStudentData.segments[2].label} position="bottom-12 left-1" />
+            <Label text={universityStudentData.segments[3].label} position="top-14 left-2" />
           </div>
-          <h3 className="text-xl font-bold text-light-p dark:text-dark-text">Average {universityName} Student</h3>
+          <h3 className="text-xl font-bold text-light-p dark:text-dark-text">{universityName} Student</h3>
         </div>
 
         {/* VS Text */}
@@ -218,10 +237,10 @@ const ReadinessRingSection = ({ userProfile, universityData, studentProfiles = [
             ></canvas>
 
             {/* Labels for You */}
-            <Label text="Personal Projects - 9%" position="bottom-28 -right-20" />
-            <Label text="Academics - 32%" position="right-4 top-40" />
-            <Label text="Extracurriculars - 8%" position="bottom-10 right-16" />
-            <Label text="Test Scores - 55%" position="top-12 left-1" />
+            <Label text={youData.segments[1].label} position="bottom-28 -right-20" />
+            <Label text={youData.segments[0].label} position="right-4 top-40" />
+            <Label text={youData.segments[2].label} position="bottom-10 right-16" />
+            <Label text={youData.segments[3].label} position="top-12 left-1" />
           </div>
           <h3 className="text-xl font-bold text-light-p dark:text-dark-text">You</h3>
         </div>
@@ -230,9 +249,9 @@ const ReadinessRingSection = ({ userProfile, universityData, studentProfiles = [
       {/* Mobile View - Show text summary instead of charts */}
       <div className="lg:hidden space-y-6">
         <div className="bg-light-bg dark:bg-dark-tertiary border-2 border-black p-4" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-          <h3 className="text-lg font-bold text-light-text dark:text-dark-text mb-4">Average {universityName} Student</h3>
+          <h3 className="text-lg font-bold text-light-text dark:text-dark-text mb-4">{universityName} Student</h3>
           <div className="space-y-2">
-            {asuData.segments.map((segment, index) => (
+            {universityStudentData.segments.map((segment, index) => (
               <div key={index} className="flex items-center gap-3">
                 <div className="w-4 h-4 border border-black" style={{ backgroundColor: segment.color }}></div>
                 <span className="text-sm text-light-p dark:text-dark-text">{segment.label}</span>

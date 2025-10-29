@@ -22,6 +22,7 @@ interface StudentProfile {
   bio: string;
   profileImage: string;
   backgroundImage: string;
+  universityImage: string; // Add university image field
   badges: string[];
   admissions: Array<{ id: string; src: string; name: string }>;
   stats: {
@@ -60,6 +61,7 @@ const fallbackProfile: StudentProfile = {
   bio: "Hey there! I'm Rebecca, a final-year Psychology student at the University of Bath. I'm passionate about understanding how people think, learn, and connect, which is why I've spent the last three years diving into research projects, volunteering with local schools, and leading our campus Mental Health Awareness Society. My long term goal? To combine psychology and technology to build better tools for learning and wellbeing.",
   profileImage: "/profile-pic-1.jpg",
   backgroundImage: "/student-profile/uni-bg-for-student-profile.png",
+  universityImage: "/student-profile/uni-bg-for-student-profile.png", // Default university image
   badges: ["International Student", "Low Income", "Recruited Athlete"],
   admissions: [
     { id: 'mit', src: '/mit.png', name: 'MIT' },
@@ -189,6 +191,7 @@ function StudentProfile() {
           bio: apiProfile.bio || fallbackProfile.bio,
           profileImage: apiProfile.imageUrl || apiProfile.profileImage || fallbackProfile.profileImage, // Use imageUrl from Firebase Storage first
           backgroundImage: apiProfile.backgroundImage || fallbackProfile.backgroundImage,
+          universityImage: apiProfile.universityImage || fallbackProfile.universityImage, // Use university image from API
           badges: apiProfile.badges || fallbackProfile.badges,
           admissions: apiProfile.admissions || fallbackProfile.admissions,
           stats: apiProfile.stats || fallbackProfile.stats,
@@ -253,6 +256,7 @@ function StudentProfile() {
           bio: apiProfile.bio || apiProfile.discoveryInfo?.description || fallbackProfile.bio,
           profileImage: apiProfile.imageUrl || apiProfile.profileImage || fallbackProfile.profileImage, // Use imageUrl from Firebase Storage first
           backgroundImage: apiProfile.backgroundImage || fallbackProfile.backgroundImage,
+          universityImage: apiProfile.universityImage || fallbackProfile.universityImage, // Use university image from API
           badges: apiProfile.badges || fallbackProfile.badges,
           admissions: apiProfile.admissions || fallbackProfile.admissions,
           stats: {
@@ -347,6 +351,7 @@ function StudentProfile() {
           bio: apiProfile.bio || apiProfile.discoveryInfo?.description || fallbackProfile.bio,
           profileImage: apiProfile.profileImage || fallbackProfile.profileImage,
           backgroundImage: fallbackProfile.backgroundImage, // Use fallback for now
+          universityImage: apiProfile.universityImage || fallbackProfile.universityImage, // Use university image from API
           badges: apiProfile.badges || fallbackProfile.badges,
           admissions: fallbackProfile.admissions, // Use fallback for now
           stats: {
@@ -463,7 +468,7 @@ function StudentProfile() {
               <div className="mb-8 flex justify-center">
                 <div className="w-full h-[374px] overflow-hidden">
                   <Image
-                    src="/student-profile/uni-bg-for-student-profile.png"
+                    src={profile.universityImage || "/student-profile/uni-bg-for-student-profile.png"}
                     alt={profile.university}
                     width={1286}
                     height={374}

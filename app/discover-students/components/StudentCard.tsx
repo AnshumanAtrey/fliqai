@@ -83,9 +83,7 @@ export function StudentCard({ student, onStudentClick }: StudentCardProps) {
 
         {/* Background Info */}
         <div className="mb-4">
-          <p className="text-light-text dark:text-dark-text font-outfit text-sm font-bold mb-1">
-            Background: <span className="font-normal">{student.background}</span>
-          </p>
+
           <p className="text-light-text dark:text-dark-text font-outfit text-sm font-bold mb-1">
             Academic Interests: <span className="font-normal">{student.interests}</span>
           </p>
@@ -225,9 +223,7 @@ export function StudentCard({ student, onStudentClick }: StudentCardProps) {
           {/* Right Side: Background + Academic Info + Test Scores */}
           <div className="flex-shrink-0 w-80">
             <div className="space-y-2">
-              <p className="text-light-text dark:text-dark-text font-outfit text-sm">
-                <span className="font-bold">Background:</span> {student.background}
-              </p>
+
               <p className="text-light-text dark:text-dark-text font-outfit text-sm">
                 <span className="font-bold">Academic Interests:</span> {student.interests}
               </p>

@@ -3,12 +3,11 @@ import React, { useEffect, useRef } from 'react';
 
 interface EssayStyleSectionProps {
   essayData?: {
-    narrative?: number;
-    reflection?: number;
-    impact?: number;
-    academics?: number;
-    voice?: number;
-  };
+    label: string;
+    value: number;
+    color: string;
+  }[];
+  isAnalyzing?: boolean;
 }
 
 interface ChartDataItem {
@@ -17,28 +16,25 @@ interface ChartDataItem {
   color: string;
 }
 
-export const EssayStyleSection = ({ essayData }: EssayStyleSectionProps) => {
+export const EssayStyleSection = ({ essayData, isAnalyzing }: EssayStyleSectionProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
 
+  // Debug logging
+  console.log('EssayStyleSection - essayData:', essayData);
+  console.log('EssayStyleSection - isAnalyzing:', isAnalyzing);
+
   // Check if we have any data
-  const hasData = essayData && Object.values(essayData).some(val => val > 0);
+  const hasData = essayData && essayData.length > 0 && essayData.some(item => item.value > 0);
+  console.log('EssayStyleSection - hasData:', hasData);
 
-  const data = essayData || {
-    narrative: 0,
-    reflection: 0,
-    impact: 0,
-    academics: 0,
-    voice: 0
-  };
-
-  // Convert data to chart format
-  const chartData: ChartDataItem[] = [
-    { title: "Narrative Reflection", value: data.narrative || 0, color: "#FF9269" },
-    { title: "Reflection", value: data.reflection || 0, color: "#FFB399" },
-    { title: "Impact", value: data.impact || 0, color: "#FFC9B9" },
-    { title: "Academics", value: data.academics || 0, color: "#FFDDD9" },
-    { title: "Voice/Style", value: data.voice || 0, color: "#FFF3ED" }
-  ];
+  // Convert data to chart format - use the segments directly
+  const chartData: ChartDataItem[] = essayData ? essayData.map(segment => ({
+    title: segment.label,
+    value: segment.value,
+    color: segment.color
+  })) : [];
+  
+  console.log('EssayStyleSection - chartData:', chartData);
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -85,7 +81,7 @@ export const EssayStyleSection = ({ essayData }: EssayStyleSectionProps) => {
       currentAngle += sliceAngle;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, [essayData]);
 
   // Create donut slice path
   const createDonutSlice = (
@@ -207,13 +203,13 @@ export const EssayStyleSection = ({ essayData }: EssayStyleSectionProps) => {
         // Placeholder when no data - Match other sections
         <div className="flex justify-center items-center w-full h-24 sm:h-32 mt-6 bg-light-secondary dark:bg-dark-tertiary border border-black dark:border-dark-text">
           <span className="font-['Outfit'] text-sm sm:text-base text-light-p dark:text-dark-text text-center px-4">
-            Submit your essay to see essay style
+            {isAnalyzing ? 'Analyzing essay style...' : 'Submit your essay to see essay style'}
           </span>
         </div>
       ) : (
         <>
           {/* Responsive Donut Chart - Made bigger and removed legend */}
-          <div className="flex items-center justify-center w-full mt-6 mb-6">
+          <div className="flex items-center justify-center w-full mt-6 p-6 sm:p-8 bg-light-secondary dark:bg-dark-tertiary border border-black dark:border-dark-text">
             <div className="w-full aspect-square">
               <svg 
                 ref={svgRef}

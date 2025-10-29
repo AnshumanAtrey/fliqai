@@ -37,30 +37,51 @@ class AuthManagerImpl implements AuthManager {
     if (this.initialized) return;
 
     try {
-      // Load Firebase configuration from backend
-      const configResponse = await backendAPI.loadConfiguration();
+      let firebaseConfig: Record<string, unknown> | null = null;
 
-      if (configResponse?.success && configResponse?.config?.firebase) {
-        const firebaseConfig = configResponse.config.firebase;
+      // Try to load Firebase configuration from backend first
+      try {
+        const configResponse = await backendAPI.loadConfiguration();
+        if (configResponse?.success && configResponse?.config?.firebase) {
+          firebaseConfig = configResponse.config.firebase as Record<string, unknown>;
+        }
+      } catch (error) {
+        console.warn('Failed to load Firebase config from backend, using local environment variables:', error);
+      }
 
-        // Ensure firebase config is a proper object with string keys
-        if (typeof firebaseConfig === 'object' && firebaseConfig !== null && !Array.isArray(firebaseConfig)) {
-          this.firebaseConfig = firebaseConfig as Record<string, unknown>;
+      // Fallback to local environment variables if backend config failed
+      if (!firebaseConfig) {
+        firebaseConfig = {
+          apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+          authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+          messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+          appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+          measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+        };
+      }
 
-          // Validate required Firebase config fields
-          const requiredFields = ['apiKey', 'authDomain', 'projectId'];
-          const missingFields = requiredFields.filter(field => !this.firebaseConfig![field]);
+      // Ensure firebase config is a proper object with string keys
+      if (typeof firebaseConfig === 'object' && firebaseConfig !== null && !Array.isArray(firebaseConfig)) {
+        this.firebaseConfig = firebaseConfig;
 
-          if (missingFields.length > 0) {
-            throw new Error(`Missing Firebase configuration fields: ${missingFields.join(', ')}`);
-          }
+        // Validate required Firebase config fields
+        const requiredFields = ['apiKey', 'authDomain', 'projectId'];
+        const missingFields = requiredFields.filter(field => !this.firebaseConfig![field]);
 
-          // Initialize Firebase with backend config
-          if (!getApps().length) {
-            initializeApp(this.firebaseConfig);
-          }
-        } else {
-          throw new Error('Invalid Firebase configuration format received from backend');
+        if (missingFields.length > 0) {
+          console.error('❌ Failed to initialize auth: Error: Missing Firebase configuration fields:', missingFields.join(', '));
+          console.error('Environment variables check:');
+          console.error('NEXT_PUBLIC_FIREBASE_API_KEY:', process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? 'Set' : 'Missing');
+          console.error('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN:', process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ? 'Set' : 'Missing');
+          console.error('NEXT_PUBLIC_FIREBASE_PROJECT_ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ? 'Set' : 'Missing');
+          throw new Error(`Missing Firebase configuration fields: ${missingFields.join(', ')}`);
+        }
+
+        // Initialize Firebase with config
+        if (!getApps().length) {
+          initializeApp(this.firebaseConfig);
         }
 
         this.auth = getAuth();
@@ -92,7 +113,7 @@ class AuthManagerImpl implements AuthManager {
           this.notifyAuthStateListeners(this.currentUser);
         });
       } else {
-        throw new Error('Failed to load Firebase configuration from backend');
+        throw new Error('Invalid Firebase configuration format');
       }
 
       this.initialized = true;

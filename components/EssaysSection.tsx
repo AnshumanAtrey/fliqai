@@ -106,24 +106,34 @@ const EssaysSection: React.FC<EssaysSectionProps> = ({ essays: propEssays, stude
     }
   ];
 
-  // Ensure we always have exactly 6 essays
+  // Ensure we always have exactly 6 essays with content
   const essays = (() => {
     const backendEssays = propEssays || [];
     const totalNeeded = 6;
     
-    // If we have 6 or more from backend, use first 6
-    if (backendEssays.length >= totalNeeded) {
-      return backendEssays.slice(0, totalNeeded);
+    // Filter backend essays to only include those with actual content
+    const validBackendEssays = backendEssays.filter(essay => 
+      essay.content && essay.content.trim().length > 0
+    );
+    
+    console.log(`📝 Essays Debug - Backend: ${backendEssays.length}, Valid: ${validBackendEssays.length}, Student: ${studentName}`);
+    
+    // If we have 6 or more valid backend essays, use first 6
+    if (validBackendEssays.length >= totalNeeded) {
+      console.log(`✅ Using ${validBackendEssays.length} backend essays for ${studentName}`);
+      return validBackendEssays.slice(0, totalNeeded);
     }
     
-    // If we have some from backend but less than 6, fill with fallback
-    if (backendEssays.length > 0) {
-      const needed = totalNeeded - backendEssays.length;
+    // If we have some valid backend essays but less than 6, fill with fallback
+    if (validBackendEssays.length > 0) {
+      const needed = totalNeeded - validBackendEssays.length;
       const fallbacksToUse = fallbackEssays.slice(0, needed);
-      return [...backendEssays, ...fallbacksToUse];
+      console.log(`🔄 Using ${validBackendEssays.length} backend + ${needed} fallback essays for ${studentName}`);
+      return [...validBackendEssays, ...fallbacksToUse];
     }
     
-    // If no backend essays, use all fallback
+    // If no valid backend essays (empty content or no essays), use all fallback
+    console.log(`🎯 Using all fallback essays for ${studentName} (no valid backend content)`);
     return fallbackEssays;
   })();
 
@@ -195,7 +205,7 @@ const EssaysSection: React.FC<EssaysSectionProps> = ({ essays: propEssays, stude
             {/* Header */}
             <div className="sticky top-0 bg-white dark:bg-dark-bg border-b-2 border-black p-6 flex justify-between items-start z-10">
               <div>
-                <h2 className="text-2xl font-bold text-black dark:text-white mb-4">{selectedEssay.title}</h2>
+                <h2 className="text-2xl font-bold text-black dark:text-white mb-4">{selectedEssay?.title || 'Untitled Essay'}</h2>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-black">
                     <Image 
@@ -226,7 +236,7 @@ const EssaysSection: React.FC<EssaysSectionProps> = ({ essays: propEssays, stude
             {/* Content */}
             <div className="p-6">
               {/* Submitted For Section */}
-              {selectedEssay.submittedFor && (
+              {selectedEssay?.submittedFor && (
                 <div className="mb-6 pb-6 border-b-2 border-gray-200">
                   <p className="text-base font-medium text-black dark:text-white">
                     {selectedEssay.submittedFor}
@@ -236,13 +246,15 @@ const EssaysSection: React.FC<EssaysSectionProps> = ({ essays: propEssays, stude
               
               {/* Essay Content */}
               <div className="prose prose-lg max-w-none text-black dark:text-white">
-                {selectedEssay.content.split('\n').map((paragraph, index) => (
+                {selectedEssay?.content?.split('\n').map((paragraph, index) => (
                   paragraph.trim() && (
                     <p key={index} className="mb-4 leading-relaxed">
                       {paragraph}
                     </p>
                   )
-                ))}
+                )) || (
+                  <p className="text-gray-500 italic">No essay content available.</p>
+                )}
               </div>
             </div>
           </div>

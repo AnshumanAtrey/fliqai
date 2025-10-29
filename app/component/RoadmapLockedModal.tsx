@@ -7,23 +7,35 @@ interface RoadmapLockedModalProps {
     isUnlocking: boolean;
     userCredits?: number;
     universityName?: string;
+    redirectUrl?: string;
 }
 
 export const RoadmapLockedModal: React.FC<RoadmapLockedModalProps> = ({
     onUnlock,
     isUnlocking,
     userCredits = 0,
-    universityName = "this university"
+    universityName = "this university",
+    redirectUrl
 }) => {
     const router = useRouter();
     const hasEnoughCredits = userCredits >= 10; // Roadmap costs 10 credits
 
     return (
-        <div className="flex items-center justify-center py-8">
+        <div className="absolute inset-0 z-10 flex items-center justify-center p-4">
             <div
-                className="bg-white dark:bg-dark-secondary border-2 border-black p-6 max-w-sm w-full relative"
-                style={{ boxShadow: '4px 4px 0 0 #000' }}
+                className="bg-white dark:bg-dark-secondary border-2 border-black p-6 max-w-sm w-full relative transform transition-all duration-300 scale-100"
+                style={{ boxShadow: '8px 8px 0 0 #000' }}
             >
+                {/* Close Button */}
+                <button
+                    onClick={() => router.back()}
+                    className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black transition-colors"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                </button>
+
                 {/* Lock Icon */}
                 <div className="flex justify-center mb-4">
                     <div className="w-12 h-12 border-2 border-black rounded-full flex items-center justify-center bg-white">
@@ -108,6 +120,18 @@ export const RoadmapLockedModal: React.FC<RoadmapLockedModalProps> = ({
                     >
                         {isUnlocking ? 'Unlocking...' : hasEnoughCredits ? 'Unlock Roadmap' : 'Buy More Credits'}
                     </button>
+
+                    {redirectUrl && (
+                        <a
+                            href={redirectUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full px-4 py-2.5 bg-[#FF9169] text-white border-2 border-black font-semibold text-sm hover:bg-[#ff7b4d] transition-colors text-center inline-block"
+                            style={{ boxShadow: '2px 2px 0 0 #000' }}
+                        >
+                            Guide me in
+                        </a>
+                    )}
 
                     <button
                         onClick={() => router.back()}

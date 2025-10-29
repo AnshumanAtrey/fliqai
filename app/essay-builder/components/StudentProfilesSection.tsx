@@ -19,27 +19,27 @@ const hardcodedStudents: Student[] = [
     name: "Rebecca Reaves",
     degree: "BSc Business Administration",
     university: "University of Bath",
-    essays: "12 Essays",
-    profileImage: "/essay/1.png",
-    colleges: ["/logo1.png", "/logo2.jpg", "/logo3.png", "/college.png"]
+    essays: "6 Essays",
+    profileImage: "/student1.png",
+    colleges: ["/mit.png", "/harvard.png", "/stanford.png", "/yale.png"]
   },
   {
     id: 2,
     name: "Alex Hawkins",
     degree: "BSc Computer Science",
     university: "Harvard University",
-    essays: "15 Essays",
-    profileImage: "/essay/2.png",
-    colleges: ["/logo2.jpg", "/logo1.png", "/logo3.png", "/college.png"]
+    essays: "6 Essays",
+    profileImage: "/student2.png",
+    colleges: ["/princeton.png", "/columbia.png", "/brown.png", "/cornell.png"]
   },
   {
     id: 3,
     name: "Jordan Hughes",
     degree: "BSc Civil Engineering",
     university: "University of Oxford",
-    essays: "12 Essays",
-    profileImage: "/essay/3.png",
-    colleges: ["/logo3.png", "/logo1.png", "/logo2.jpg", "/college.png"]
+    essays: "6 Essays",
+    profileImage: "/student3.png",
+    colleges: ["/upenn.png", "/dartmouth.png", "/caltech.png", "/uchicago.png"]
   }
 ];
 
@@ -59,6 +59,10 @@ const StudentCard: React.FC<StudentCardProps> = ({ student }) => {
             height={128}
             className="w-full h-full object-cover"
             src={student.profileImage}
+            onError={(e) => {
+              // Fallback to default profile image if Firebase image fails to load
+              e.currentTarget.src = "/profile.png";
+            }}
           />
         </div>
       </div>
@@ -82,6 +86,10 @@ const StudentCard: React.FC<StudentCardProps> = ({ student }) => {
               height={32}
               className="w-8 h-8 object-contain"
               src={college}
+              onError={(e) => {
+                // Fallback to default college logo if specific logo fails to load
+                e.currentTarget.src = "/college.png";
+              }}
             />
           ))}
           <span className="font-outfit text-sm text-light-p dark:text-dark-text ml-2">
