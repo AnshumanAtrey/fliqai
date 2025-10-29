@@ -48,6 +48,9 @@ interface University {
   ranking?: string;
   acceptanceRate?: string;
   description?: string;
+  // New fields from backend
+  matchReasons?: string[];
+  admissionChance?: string;
   image?: string;
   quote?: string;
   author?: string;
@@ -514,6 +517,7 @@ function BrowseUniversities() {
         college_name: string;
         country: string;
         location: string;
+        matchPercentage?: number;
         match_percentage: number;
         overall_match: number;
         category_scores: { academics: number; finances: number; location: number; culture: number };
@@ -525,26 +529,39 @@ function BrowseUniversities() {
         quote?: string;
         author?: string;
         authorImage?: string;
-      }) => ({
-        id: uni.id,
-        country: uni.country as 'US' | 'UK',
-        name: uni.name || uni.college_name,
-        location: uni.location,
-        ranking: uni.qs_ranking || uni.ranking || '#1 in Innovation',
-        image: uni.image || '/college_profile.png',
-        description: uni.description || 'A world-class institution.',
-        quote: uni.quote || 'An amazing educational experience.',
-        author: uni.author || 'Student, Class of 2024',
-        authorImage: uni.authorImage || '/Ellipse 2.png',
-        overall_match: uni.match_percentage || uni.overall_match,
-        category_scores: uni.category_scores,
-        chartData: uni.chartData || [
-          uni.category_scores.academics,
-          uni.category_scores.finances,
-          uni.category_scores.location,
-          uni.category_scores.culture
-        ]
-      })).filter((uni: University) => uni.name);
+        matchReasons?: string[];
+        admissionChance?: string;
+      }) => {
+        console.log(`🏫 Processing university: ${uni.name}`, {
+          description: uni.description?.substring(0, 100) + '...',
+          ranking: uni.ranking,
+          hasDescription: !!uni.description,
+          hasRanking: !!uni.ranking
+        });
+        
+        return {
+          id: uni.id,
+          country: uni.country as 'US' | 'UK',
+          name: uni.name || uni.college_name,
+          location: uni.location,
+          ranking: uni.ranking || uni.qs_ranking || '#1 in Innovation', // Use backend calculated ranking first
+          image: uni.image || '/college_profile.png',
+          description: uni.description || 'A world-class institution.', // Use backend description
+          quote: uni.quote || uni.description || 'An amazing educational experience.',
+          author: uni.author || 'Student, Class of 2024',
+          authorImage: uni.authorImage || '/Ellipse 2.png',
+          overall_match: uni.matchPercentage || uni.match_percentage || uni.overall_match,
+          category_scores: uni.category_scores,
+          chartData: uni.chartData || [
+            uni.category_scores.academics,
+            uni.category_scores.finances,
+            uni.category_scores.location,
+            uni.category_scores.culture
+          ],
+          matchReasons: uni.matchReasons || [],
+          admissionChance: uni.admissionChance || 'Unknown'
+        };
+      }).filter((uni: University) => uni.name);
 
       console.log(`✅ Successfully loaded ${validUniversities.length} universities with consistent match %`);
 
